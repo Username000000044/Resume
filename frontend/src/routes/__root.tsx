@@ -6,12 +6,15 @@ import "../styles.css";
 
 export const Route = createRootRoute({
 	component: RootComponent,
+	errorComponent: ({ error }) => <div>{error.message}</div>,
 });
 
 function RootComponent() {
 	return (
 		<>
-			<Outlet />
+			<div className="h-screen w-full bg-[url('/assets/textured-paper.webp')] bg-cover bg-fixed">
+				<Outlet />
+			</div>
 			<TanStackDevtools
 				config={{
 					position: "bottom-right",

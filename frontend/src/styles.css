@@ -36,8 +36,8 @@ body {
   --border: oklch(0.413 0.0053 17.37);
   --input: oklch(0.413 0.0053 17.37 / 50%);
   --ring: oklch(0.413 0.0053 17.37 / 50%);
-  --radius: 0.625rem;
-  --shadow-color: oklch(0 0 0);
+  --radius: 0.25rem;
+  --shadow: oklch(0 0 0);
   --spacing: 0.24rem;
 
   --font-sans: "Inter", ui-sans-serif, sans-serif, system-ui;

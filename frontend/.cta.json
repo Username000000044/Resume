@@ -1,5 +1,5 @@
 {
-  "projectName": "resume",
+  "projectName": "frontend",
   "mode": "file-router",
   "typescript": true,
   "packageManager": "pnpm",
@@ -7,7 +7,7 @@
   "tailwind": true,
   "addOnOptions": {},
   "envVarValues": {},
-  "git": true,
+  "git": false,
   "install": true,
   "routerOnly": true,
   "version": 1,
