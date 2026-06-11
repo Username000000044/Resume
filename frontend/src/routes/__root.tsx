@@ -1,6 +1,4 @@
-import { TanStackDevtools } from "@tanstack/react-devtools";
 import { createRootRoute, Outlet } from "@tanstack/react-router";
-import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 
 import "../styles.css";
 
@@ -15,7 +13,7 @@ function RootComponent() {
 			<div className="h-screen w-full bg-[url('/assets/textured-paper.webp')] bg-cover bg-fixed">
 				<Outlet />
 			</div>
-			<TanStackDevtools
+			{/* <TanStackDevtools
 				config={{
 					position: "bottom-right",
 				}}
@@ -25,7 +23,7 @@ function RootComponent() {
 						render: <TanStackRouterDevtoolsPanel />,
 					},
 				]}
-			/>
+			/> */}
 		</>
 	);
 }
