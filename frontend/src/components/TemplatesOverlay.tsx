@@ -1,6 +1,5 @@
-import { type ReactElement, useEffect, useState } from "react";
+import { type ReactElement, useState } from "react";
 import { useMediaQuery } from "#/hooks/useMediaQuery";
-import type { TemplateData } from "#/types/template-data";
 import { TemplatesOverlayMobile } from "./TemplatesDrawerMobile";
 import { TemplatesOverlayDesktop } from "./TemplatesOverlayDesktop";
 
@@ -11,15 +10,10 @@ interface ComponentProps {
 export const TemplatesOverlay = ({ trigger }: ComponentProps) => {
 	const [open, setOpen] = useState(false);
 	const isDesktop = useMediaQuery("(min-width: 1024px)"); // Tailwind lg media query
-	const [templates, setTemplates] = useState<TemplateData[]>([]);
+	
 
-	useEffect(() => {
-		const templateFiles = import.meta.glob<TemplateData>("../data/*.json", {
-			eager: true,
-		});
-		const combinedData: TemplateData[] = Object.values(templateFiles);
-		setTemplates(combinedData);
-	}, []);
+
+	const templates: string[] = []
 
 	if (isDesktop)
 		return (

@@ -1,0 +1,8 @@
+{
+  "_init": {
+    "framework": "hono",
+    "features": [
+      "database"
+    ]
+  }
+}

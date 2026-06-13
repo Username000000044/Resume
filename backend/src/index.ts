@@ -1,8 +1,10 @@
 import { Hono } from 'hono'
-import templates from './router/templates/ats'
+import atsRoute from './router/templates/ats'
 
 const app = new Hono()
 
-app.route('/templates/ats', templates);
+app.route('/templates/ats', atsRoute)
 
 export default app
+
+
