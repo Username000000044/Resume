@@ -1,10 +1,14 @@
-import { Hono } from 'hono'
-import atsRoute from './router/templates/ats'
+import { Hono } from "hono";
+import { trpcServer } from "@hono/trpc-server";
+import { appRouter } from "./appRouter";
 
-const app = new Hono()
+const app = new Hono();
 
-app.route('/templates/ats', atsRoute)
+app.use(
+  "/trpc/*",
+  trpcServer({
+    router: appRouter,
+  }),
+);
 
-export default app
-
-
+export default app;
