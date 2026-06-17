@@ -6,15 +6,7 @@
 		"useIgnoreFile": false
 	},
 	"files": {
-		"ignoreUnknown": false,
-		"includes": [
-			"**/src/**/*",
-			"**/.vscode/**/*",
-			"**/index.html",
-			"**/vite.config.ts",
-			"!**/src/routeTree.gen.ts",
-			"!**/src/styles.css"
-		]
+		"ignoreUnknown": false
 	},
 	"formatter": {
 		"enabled": true,
@@ -33,4 +25,3 @@
 		}
 	}
 }
-

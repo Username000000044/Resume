@@ -1,0 +1,11 @@
+{
+	"scripts": {
+		"dev": "pnpm --filter frontend --filter backend dev",
+		"format": "biome format",
+		"lint": "biome lint",
+		"check": "biome check"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.4.5"
+	}
+}
