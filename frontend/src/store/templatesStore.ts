@@ -12,7 +12,6 @@ interface SelectedTemplateState {
 export const useSelectedTemplateStore = create<SelectedTemplateState>()(
 	(set) => ({
 		selectedTemplate: undefined,
-		setSelectedTemplate: (template: templateType) =>
-			set({ selectedTemplate: template }),
+		setSelectedTemplate: (template) => set({ selectedTemplate: template }),
 	}),
 );
