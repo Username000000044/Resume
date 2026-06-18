@@ -5,19 +5,17 @@ import { Funnel, Search } from "lucide-react";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "./ui/input-group";
 import clsx from "clsx";
 import { useSelectedTemplateStore } from "#/store/templatesStore";
-import { useStore } from "zustand";
+import type { KeyboardEventHandler } from "react";
 
 interface GalleryProps {
   data: inferRouterOutputs<AppRouter>["templatesList"];
 }
 
 export const TemplatesOverlayGallery = ({ data }: GalleryProps) => {
-  const selectedTemplate = useStore(
-    useSelectedTemplateStore,
+  const selectedTemplate = useSelectedTemplateStore(
     (state) => state.selectedTemplate,
   );
-  const setSelectedTemplate = useStore(
-    useSelectedTemplateStore,
+  const setSelectedTemplate = useSelectedTemplateStore(
     (state) => state.setSelectedTemplate,
   );
 
@@ -35,7 +33,7 @@ export const TemplatesOverlayGallery = ({ data }: GalleryProps) => {
         </InputGroup>
       </div>
 
-      <div className="grid grid-cols-4 mt-12 gap-6">
+      <div className="grid md:grid-cols-2 2xl:grid-cols-4 mt-12 gap-6">
         {data.map((template) => (
           <button
             type="button"

@@ -1,16 +1,14 @@
 import { Book } from "lucide-react";
 import { Button } from "./ui/button";
-import { useStore } from "zustand";
 import { useSelectedTemplateStore } from "#/store/templatesStore";
 
 export const TemplatesOverlaySelection = () => {
-  const selectedTemplate = useStore(
-    useSelectedTemplateStore,
+  const selectedTemplate = useSelectedTemplateStore(
     (state) => state.selectedTemplate,
   );
 
   return (
-    <div className="flex flex-col gap-8 justify-center bg-popover p-12 rounded-r-4xl shadow-md w-150">
+    <div className="flex flex-col gap-8 justify-center bg-popover p-12 rounded-r-4xl shadow-md max-w-100">
       <div>
         <h3 className="text-4xl font-bold text-primary text-nowrap truncate">
           {selectedTemplate?.name}

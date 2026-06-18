@@ -1,4 +1,4 @@
-import { useState, type ReactElement } from "react";
+import { useEffect, useState, type ReactElement } from "react";
 import { useMediaQuery } from "#/hooks/useMediaQuery";
 import { useQuery } from "@tanstack/react-query";
 import { trpc } from "#/utils/trpc";
@@ -13,25 +13,32 @@ import {
 } from "./ui/empty";
 import { Shredder } from "lucide-react";
 import { TemplatesOverlaySelection } from "./TemplatesOverlaySelection";
-import { useStore } from "zustand";
 import { useSelectedTemplateStore } from "#/store/templatesStore";
 
 export const TemplatesOverlay = ({ trigger }: { trigger: ReactElement }) => {
   const { data } = useQuery(trpc.templatesList.queryOptions());
-
   const [open, setOpen] = useState(false);
-  const isDesktop = useMediaQuery("(min-width: 1024px)"); // Tailwind lg media query
-
-  const selectedTemplate = useStore(
-    useSelectedTemplateStore,
+  const selectedTemplate = useSelectedTemplateStore(
     (state) => state.selectedTemplate,
   );
+  const setSelectedTemplate = useSelectedTemplateStore(
+    (state) => state.setSelectedTemplate,
+  );
+
+  const isDesktop = useMediaQuery("(min-width: 1024px)"); // Tailwind lg media query
+
+  useEffect(() => {
+    // Set a default template once data loads if none is selected yet
+    if (data && data.length > 0 && !selectedTemplate) {
+      setSelectedTemplate(data[0]);
+    }
+  }, [data, selectedTemplate, setSelectedTemplate]);
 
   if (!data) {
     return (
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger render={trigger} />
-        <DialogContent>
+        <DialogContent showCloseButton={false}>
           <Empty className="h-full bg-muted">
             <EmptyHeader>
               <EmptyMedia variant="icon">
@@ -62,7 +69,6 @@ export const TemplatesOverlay = ({ trigger }: { trigger: ReactElement }) => {
             <TemplatesOverlayGallery data={data} />
           </div>
 
-          {/* Sidebar Only Appears if Template is Clicked */}
           <TemplatesOverlaySelection />
         </DialogContent>
       </Dialog>
