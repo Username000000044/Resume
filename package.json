@@ -6,6 +6,6 @@
 		"check": "biome check"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.4.5"
+		"@biomejs/biome": "2.5.1"
 	}
 }

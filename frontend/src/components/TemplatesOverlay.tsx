@@ -3,7 +3,7 @@ import { useMediaQuery } from "#/hooks/useMediaQuery";
 import { useQuery } from "@tanstack/react-query";
 import { trpc } from "#/utils/trpc";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
-import { TemplatesOverlayGallery } from "./TemplatesOverlayGallery";
+import { TemplatesGallery } from "./TemplatesGallery";
 import {
   Empty,
   EmptyDescription,
@@ -11,17 +11,31 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "./ui/empty";
-import { Shredder } from "lucide-react";
-import { TemplatesOverlaySelection } from "./TemplatesOverlaySelection";
-import { useSelectedTemplateStore } from "#/store/templatesStore";
+import { Funnel, Search, Shredder } from "lucide-react";
+import { TemplatesSelection } from "./TemplatesSelection";
+import { useTemplateStore } from "#/store/templatesStore";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "./ui/drawer";
+import { Button } from "./ui/button";
+import { TemplatesCarousel } from "./TemplatesCarousel";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { InputGroup, InputGroupInput, InputGroupAddon } from "./ui/input-group";
+import { useSelectTemplateRedirect } from "#/hooks/useSelectTemplateRedirect";
 
 export const TemplatesOverlay = ({ trigger }: { trigger: ReactElement }) => {
   const { data } = useQuery(trpc.templatesList.queryOptions());
+
+  const { redirect } = useSelectTemplateRedirect();
+
   const [open, setOpen] = useState(false);
-  const selectedTemplate = useSelectedTemplateStore(
-    (state) => state.selectedTemplate,
-  );
-  const setSelectedTemplate = useSelectedTemplateStore(
+  const selectedTemplate = useTemplateStore((state) => state.selectedTemplate);
+  const setSelectedTemplate = useTemplateStore(
     (state) => state.setSelectedTemplate,
   );
 
@@ -62,19 +76,67 @@ export const TemplatesOverlay = ({ trigger }: { trigger: ReactElement }) => {
         <DialogTrigger render={trigger} />
         <DialogContent
           showCloseButton={false}
-          className="bg-transparent shadow-none p-0 ring-0 flex min-w-2/3"
+          className="bg-transparent shadow-none p-0 ring-0 flex gap-0 min-w-2/3 max-h-2/3"
         >
-          <div className="bg-popover p-12 w-full rounded-l-4xl shadow-md">
-            <h2 className="text-5xl font-bold text-primary">Select Template</h2>
-            <TemplatesOverlayGallery data={data} />
-          </div>
+          <Card className="p-10 rounded-r-none">
+            <CardHeader>
+              <CardTitle className="text-5xl font-bold text-primary">
+                Select Template
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col flex-1 min-h-0">
+              {/* Filters */}
+              <div className="flex gap-4">
+                <Button variant="outline">
+                  <Funnel /> Filters
+                </Button>
+                <InputGroup className="h-full max-w-xs">
+                  <InputGroupInput placeholder="Search..." />
+                  <InputGroupAddon>
+                    <Search />
+                  </InputGroupAddon>
+                </InputGroup>
+              </div>
 
-          <TemplatesOverlaySelection />
+              {/* Templates  */}
+              <TemplatesGallery data={data} />
+            </CardContent>
+          </Card>
+
+          {/* Templates Selection */}
+          <TemplatesSelection />
         </DialogContent>
       </Dialog>
     );
 
-  // return (
-  //   <TemplatesOverlayMobile />
-  // );
+  return (
+    <Drawer open={open} onOpenChange={setOpen}>
+      <DrawerTrigger asChild>{trigger}</DrawerTrigger>
+      <DrawerContent className="py-12 before:border-none before:inset-0">
+        <DrawerHeader>
+          <DrawerTitle className="text-4xl font-bold">
+            {selectedTemplate?.name}
+          </DrawerTitle>
+          <DrawerDescription>
+            by{" "}
+            <span className="underline">
+              {selectedTemplate?.ownerId || "Resume"}
+            </span>
+          </DrawerDescription>
+        </DrawerHeader>
+
+        <div className="mt-8 mb-12">
+          <TemplatesCarousel data={data} />
+        </div>
+
+        <Button
+          className="mx-auto w-3/4 cursor-pointer"
+          size="lg"
+          onClick={() => redirect(selectedTemplate?.id)}
+        >
+          Customize this template
+        </Button>
+      </DrawerContent>
+    </Drawer>
+  );
 };
