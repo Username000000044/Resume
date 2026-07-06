@@ -1,9 +1,11 @@
+CREATE TYPE "input_type" AS ENUM('button', 'checkbox', 'color', 'date', 'email', 'file', 'image', 'month', 'number', 'radio', 'range', 'search', 'tel', 'text', 'time', 'url', 'week');--> statement-breakpoint
+CREATE TYPE "template_type" AS ENUM('ats', 'standard');--> statement-breakpoint
 CREATE TABLE "fields" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"sections_id" uuid NOT NULL,
 	"name" varchar(50) NOT NULL,
 	"label" varchar(50) NOT NULL,
-	"type" varchar(30) NOT NULL,
+	"type" "input_type" NOT NULL,
 	"placeholder" text,
 	"required" varchar(5) DEFAULT 'false' NOT NULL,
 	"order" integer NOT NULL

@@ -24,9 +24,6 @@ export const appRouter = router({
 		const { input } = opts; //id input
 
 		const template = await db.query.templatesTable.findFirst({
-			where: {
-				RAW: (template, { eq }) => eq(template.id, input),
-			},
 			with: {
 				sections: {
 					orderBy: (sections, { asc }) => [asc(sections.order)],
@@ -36,6 +33,9 @@ export const appRouter = router({
 						},
 					},
 				},
+			},
+			where: {
+				RAW: (template, { eq }) => eq(template.id, input),
 			},
 		});
 

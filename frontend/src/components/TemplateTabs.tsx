@@ -10,6 +10,11 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { trpc } from "#/utils/trpc";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { Field, FieldLabel, FieldLegend, FieldTitle } from "./ui/field";
+import { Input } from "./ui/input";
+import clsx from "clsx";
+import { Button } from "./ui/button";
+import { Plus } from "lucide-react";
 
 export const TemplateTabs = () => {
   const { templateId } = useParams({ from: "/create/$templateId" });
@@ -36,16 +41,45 @@ export const TemplateTabs = () => {
       {data.sections.map((section) => (
         <TabsContent value={section.title} key={section.id}>
           <Card>
-            <CardHeader>
-              <CardTitle>{section.title}</CardTitle>
-              <CardDescription>Card Description</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p>Card Content</p>
+            <CardContent className="grid grid-cols-4 gap-2">
+              {section.fields.map((field) => (
+                <Field
+                  key={field.id}
+                  className={clsx("col-span-full gap-0", {
+                    "col-span-2": field.type === "date",
+                  })}
+                >
+                  <FieldLabel className="font-normal">{field.name}</FieldLabel>
+                  <Input
+                    type={field.type}
+                    placeholder={field.placeholder || undefined}
+                  ></Input>
+                </Field>
+              ))}
+
+              {/* Bullets  */}
+              <Button
+                variant="outline"
+                size="xs"
+                className="col-span-full w-25 mt-6 mb-2"
+              >
+                <Plus /> Add Bullet
+              </Button>
+              {/* <Field className="gap-0 col-span-3">
+                <div className="flex justify-between">
+                  <FieldLabel className="font-normal">Bullet 1</FieldLabel>
+                  <Button variant="link" className="font-normal p-0 text-xs">
+                    + Sub Bullet
+                  </Button>
+                </div>
+                <Input type="text"></Input>
+              </Field>
+
+              <Field className="gap-0 col-span-2">
+                <FieldLabel className="font-normal">Sub Bullet</FieldLabel>
+                <Input type="text"></Input>
+              </Field> */}
             </CardContent>
-            <CardFooter>
-              <p>Card Footer</p>
-            </CardFooter>
           </Card>
         </TabsContent>
       ))}

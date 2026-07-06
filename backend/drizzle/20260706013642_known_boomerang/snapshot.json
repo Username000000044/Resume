@@ -1,11 +1,44 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "1988b69f-aeb8-4ecd-b0ff-567f0a0ededf",
+  "id": "967dac09-5ee2-4b6b-ad1a-86e4088a8a9b",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
   "ddl": [
+    {
+      "values": [
+        "button",
+        "checkbox",
+        "color",
+        "date",
+        "email",
+        "file",
+        "image",
+        "month",
+        "number",
+        "radio",
+        "range",
+        "search",
+        "tel",
+        "text",
+        "time",
+        "url",
+        "week"
+      ],
+      "name": "input_type",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "values": [
+        "ats",
+        "standard"
+      ],
+      "name": "template_type",
+      "entityType": "enums",
+      "schema": "public"
+    },
     {
       "isRlsEnabled": false,
       "name": "fields",
@@ -77,8 +110,8 @@
       "table": "fields"
     },
     {
-      "type": "varchar(30)",
-      "typeSchema": null,
+      "type": "input_type",
+      "typeSchema": "public",
       "notNull": true,
       "dimensions": 0,
       "default": null,

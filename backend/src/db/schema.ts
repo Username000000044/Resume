@@ -34,12 +34,31 @@ interface TemplateConfig {
 	};
 }
 
-const typeEnum = pgEnum("template_type", ["ats", "standard"]);
+export const templateTypeEnum = pgEnum("template_type", ["ats", "standard"]);
+export const inputTypeEnum = pgEnum("input_type", [
+	"button",
+	"checkbox",
+	"color",
+	"date",
+	"email",
+	"file",
+	"image",
+	"month",
+	"number",
+	"radio",
+	"range",
+	"search",
+	"tel",
+	"text",
+	"time",
+	"url",
+	"week",
+]);
 
 export const templatesTable = pgTable("templates", {
 	id: uuid().defaultRandom().primaryKey(),
 	name: varchar({ length: 50 }).notNull(),
-	type: typeEnum().notNull(),
+	type: templateTypeEnum().notNull(),
 	thumbnail: text().notNull(),
 	ownerId: uuid("owner_id"), // Null means template is a global, built-in.
 	keywords: text().array().notNull(),
@@ -67,7 +86,7 @@ export const fieldsTable = pgTable("fields", {
 		.notNull(),
 	name: varchar({ length: 50 }).notNull(),
 	label: varchar({ length: 50 }).notNull(),
-	type: varchar({ length: 30 }).notNull(),
+	type: inputTypeEnum().notNull(),
 	placeholder: text(),
 	required: varchar({ length: 5 }).notNull().default("false"),
 	order: integer().notNull(),

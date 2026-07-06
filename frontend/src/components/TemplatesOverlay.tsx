@@ -30,7 +30,6 @@ import { useSelectTemplateRedirect } from "#/hooks/useSelectTemplateRedirect";
 
 export const TemplatesOverlay = ({ trigger }: { trigger: ReactElement }) => {
   const { data } = useQuery(trpc.templatesList.queryOptions());
-
   const { redirect } = useSelectTemplateRedirect();
 
   const [open, setOpen] = useState(false);
@@ -44,7 +43,7 @@ export const TemplatesOverlay = ({ trigger }: { trigger: ReactElement }) => {
   useEffect(() => {
     // Set a default template once data loads if none is selected yet
     if (data && data.length > 0 && !selectedTemplate) {
-      setSelectedTemplate(data[0]);
+      return setSelectedTemplate(data[0]);
     }
   }, [data, selectedTemplate, setSelectedTemplate]);
 
