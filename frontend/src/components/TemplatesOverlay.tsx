@@ -13,7 +13,7 @@ import {
 } from "./ui/empty";
 import { Funnel, Search, Shredder } from "lucide-react";
 import { TemplatesSelection } from "./TemplatesSelection";
-import { useTemplateStore } from "#/store/templatesStore";
+import { useSelectedTemplateStore } from "#/store/useSelectedTemplateStore";
 import {
   Drawer,
   DrawerContent,
@@ -33,8 +33,10 @@ export const TemplatesOverlay = ({ trigger }: { trigger: ReactElement }) => {
   const { redirect } = useSelectTemplateRedirect();
 
   const [open, setOpen] = useState(false);
-  const selectedTemplate = useTemplateStore((state) => state.selectedTemplate);
-  const setSelectedTemplate = useTemplateStore(
+  const selectedTemplate = useSelectedTemplateStore(
+    (state) => state.selectedTemplate,
+  );
+  const setSelectedTemplate = useSelectedTemplateStore(
     (state) => state.setSelectedTemplate,
   );
 

@@ -1,11 +1,12 @@
 import { Book } from "lucide-react";
 import { Button } from "./ui/button";
-import { useTemplateStore } from "#/store/templatesStore";
+import { useSelectedTemplateStore } from "#/store/useSelectedTemplateStore";
 import { useSelectTemplateRedirect } from "#/hooks/useSelectTemplateRedirect";
-import { notFound } from "@tanstack/react-router";
 
 export const TemplatesSelection = () => {
-  const selectedTemplate = useTemplateStore((state) => state.selectedTemplate);
+  const selectedTemplate = useSelectedTemplateStore(
+    (state) => state.selectedTemplate,
+  );
 
   const { redirect } = useSelectTemplateRedirect();
 
@@ -24,7 +25,7 @@ export const TemplatesSelection = () => {
           <Book size={18} />
         </div>
         <p>
-          by <span className="underline">{selectedTemplate?.author}</span>
+          by <span className="underline">{selectedTemplate?.ownerId}</span>
         </p>
       </div>
 

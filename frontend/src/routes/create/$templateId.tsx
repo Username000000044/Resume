@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { LiveTemplate } from "#/components/LiveTemplate";
-import { TemplateTabs } from "#/components/TemplateTabs";
+import { LiveTemplate } from "#/components/editor/LiveTemplate";
+import { EditorTabs } from "#/components/editor/EditorTabs";
 
 export const Route = createFileRoute("/create/$templateId")({
   component: RouteComponent,
@@ -16,7 +16,7 @@ function RouteComponent() {
           Resume Editor
         </h1>
 
-        <TemplateTabs />
+        <EditorTabs />
       </div>
 
       {/* Live Resume */}

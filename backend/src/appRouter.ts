@@ -20,7 +20,7 @@ export const appRouter = router({
 		});
 		return templates;
 	}),
-	templatesById: publicProcedure.input(z.string()).query(async (opts) => {
+	templateById: publicProcedure.input(z.string()).query(async (opts) => {
 		const { input } = opts; //id input
 
 		const template = await db.query.templatesTable.findFirst({
