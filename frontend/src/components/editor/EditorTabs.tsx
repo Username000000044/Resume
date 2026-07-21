@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/suspicious/noArrayIndexKey: <explanation> */
 import { notFound, useParams } from "@tanstack/react-router";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -24,17 +25,14 @@ export const EditorTabs = () => {
     trpc.templateById.queryOptions(templateId),
   );
 
-  const {
-    initializeSections,
-    addMainBullet,
-    sections: storageSections,
-  } = useResumeStore(
-    useShallow((state) => ({
-      sections: state.sections,
-      addMainBullet: state.addMainBullet,
-      initializeSections: state.initializeSections,
-    })),
-  );
+  const { initializeSections, addMainBullet, mainSectionsStorage } =
+    useResumeStore(
+      useShallow((state) => ({
+        mainSectionsStorage: state.mainSections,
+        addMainBullet: state.addMainBullet,
+        initializeSections: state.initializeSections,
+      })),
+    );
 
   useEffect(() => {
     // Persist zustand store name set
@@ -86,58 +84,73 @@ export const EditorTabs = () => {
       </TabsList>
       {template.sections.map((section) => (
         <TabsContent value={section.title} key={section.id}>
-          <Card>
-            <CardContent>
-              {/* Fields */}
-              <FieldGroup className="grid grid-cols-4 gap-3">
-                {section.fields.map((field) => (
-                  <FieldInput key={field.id} field={field} section={section} />
-                ))}
-              </FieldGroup>
-
-              {/* Bullets */}
-              <Button
-                variant="outline"
-                size="xs"
-                className="col-span-full w-25 my-8"
-                onClick={() => addMainBullet(section.id)}
-                disabled={
-                  storageSections[section.id].bullets.length >= MAX_BULLET_COUNT
-                }
-              >
-                <Plus /> Add Bullet
-              </Button>
-
-              {storageSections[section.id].bullets.map((mainBullet, idx) => (
-                <FieldGroup
-                  key={mainBullet.id}
-                  className="grid grid-cols-6 gap-3"
-                >
-                  <div className="col-span-5">
-                    <BulletItem
+          {/* Map main sections to expose sections */}
+          {mainSectionsStorage[section.id].map((_, subSectionIndex) => (
+            <Card key={`${section.id}-${subSectionIndex}`}>
+              <CardContent>
+                {/* Section Fields */}
+                <FieldGroup className="grid grid-cols-4 gap-3">
+                  {section.fields.map((field) => (
+                    <FieldInput
+                      key={field.id}
+                      field={field}
                       section={section}
-                      mainBullet={mainBullet}
-                      index={idx}
+                      subSectionIndex={subSectionIndex}
                     />
-                  </div>
-
-                  {/* Sub Bullets */}
-
-                  <FieldGroup className="col-start-2 col-span-4 gap-3">
-                    {mainBullet.subBullets.map((subBullet, idx) => (
-                      <SubBulletItem
-                        section={section}
-                        mainBullet={mainBullet}
-                        subBullet={subBullet}
-                        index={idx}
-                        key={subBullet.id}
-                      />
-                    ))}
-                  </FieldGroup>
+                  ))}
                 </FieldGroup>
-              ))}
-            </CardContent>
-          </Card>
+
+                {/* Bullets */}
+                <Button
+                  variant="outline"
+                  size="xs"
+                  className="col-span-full w-25 my-8"
+                  onClick={() => addMainBullet(section.id, subSectionIndex)}
+                  disabled={
+                    mainSectionsStorage[section.id][subSectionIndex].bullets
+                      .length >= MAX_BULLET_COUNT
+                  }
+                >
+                  <Plus /> Add Bullet
+                </Button>
+
+                {mainSectionsStorage[section.id][subSectionIndex].bullets.map(
+                  (mainBullet, mainBulletIndex) => (
+                    <FieldGroup
+                      key={mainBullet.id}
+                      className="grid grid-cols-6 gap-3"
+                    >
+                      <div className="col-span-5">
+                        <BulletItem
+                          section={section}
+                          mainBullet={mainBullet}
+                          subSectionIndex={subSectionIndex}
+                          bulletIndex={mainBulletIndex}
+                        />
+                      </div>
+
+                      {/* Sub Bullets */}
+
+                      <FieldGroup className="col-start-2 col-span-4 gap-3">
+                        {mainBullet.subBullets.map(
+                          (subBullet, subBulletIndex) => (
+                            <SubBulletItem
+                              section={section}
+                              mainBullet={mainBullet}
+                              subBullet={subBullet}
+                              subSectionIndex={subSectionIndex}
+                              subBulletIndex={subBulletIndex}
+                              key={subBullet.id}
+                            />
+                          ),
+                        )}
+                      </FieldGroup>
+                    </FieldGroup>
+                  ),
+                )}
+              </CardContent>
+            </Card>
+          ))}
 
           <div className="flex justify-center mt-10">
             <Button

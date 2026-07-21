@@ -21,14 +21,20 @@ type SectionType = TemplateType["sections"][number];
 interface FieldInputProps {
   mainBullet: MainBullet;
   section: SectionType;
-  index: number;
+  bulletIndex: number;
+  subSectionIndex: number;
 }
 
-export const BulletItem = ({ mainBullet, section, index }: FieldInputProps) => {
-  const { sections, updateMainBullet, removeMainBullet, addSubBullet } =
+export const BulletItem = ({
+  mainBullet,
+  section,
+  subSectionIndex,
+  bulletIndex,
+}: FieldInputProps) => {
+  const { sectionGroup, updateMainBullet, removeMainBullet, addSubBullet } =
     useResumeStore(
       useShallow((store) => ({
-        sections: store.sections,
+        sectionGroup: store.sectionGroup,
         updateMainBullet: store.updateMainBullet,
         removeMainBullet: store.removeMainBullet,
         addSubBullet: store.addSubBullet,
@@ -36,16 +42,16 @@ export const BulletItem = ({ mainBullet, section, index }: FieldInputProps) => {
     );
 
   const [localValue, setLocalValue] = useState(
-    sections[section.id].bullets[index].text || "",
+    sectionGroup[section.id][subSectionIndex].bullets[bulletIndex].text || "",
   );
 
   const debouncedSave = useMemo(
     () =>
       debounce((value) => {
         console.log("Saving to localstorage:", value);
-        updateMainBullet(section.id, mainBullet.id, value);
+        updateMainBullet(section.id, subSectionIndex, mainBullet.id, value);
       }, 500), // 500ms debounce
-    [section.id, mainBullet.id, updateMainBullet],
+    [section.id, mainBullet.id, subSectionIndex, updateMainBullet],
   );
 
   // Cleanup debouced fn if componet unmounts
@@ -62,12 +68,16 @@ export const BulletItem = ({ mainBullet, section, index }: FieldInputProps) => {
   return (
     <Field className="gap-0">
       <div className="flex justify-between">
-        <FieldLabel className="font-normal">Bullet {index + 1}</FieldLabel>
+        <FieldLabel className="font-normal">
+          Bullet {bulletIndex + 1}
+        </FieldLabel>
         <Button
           variant="link"
           size="xs"
           className="font-normal"
-          onClick={() => addSubBullet(section.id, mainBullet.id)}
+          onClick={() =>
+            addSubBullet(section.id, subSectionIndex, mainBullet.id)
+          }
           disabled={mainBullet.subBullets.length >= MAX_SUB_BULLET_COUNT}
         >
           + Sub Bullet
@@ -86,8 +96,10 @@ export const BulletItem = ({ mainBullet, section, index }: FieldInputProps) => {
             type="button"
             variant="ghost_destructive"
             size="icon-xs"
-            onClick={() => removeMainBullet(section.id, mainBullet.id)}
-            aria-label={`Remove main-bullet ${index + 1}`}
+            onClick={() =>
+              removeMainBullet(section.id, subSectionIndex, mainBullet.id)
+            }
+            aria-label={`Remove main-bullet ${bulletIndex + 1}`}
           >
             <X />
           </InputGroupButton>

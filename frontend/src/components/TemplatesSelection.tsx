@@ -1,6 +1,6 @@
 import { Book } from "lucide-react";
 import { Button } from "./ui/button";
-import { useSelectedTemplateStore } from "#/store/useSelectedTemplateStore";
+import { useSelectedTemplateStore } from "#/store/useTemplateStore";
 import { useSelectTemplateRedirect } from "#/hooks/useSelectTemplateRedirect";
 
 export const TemplatesSelection = () => {

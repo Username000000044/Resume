@@ -13,7 +13,6 @@ import {
 } from "./ui/empty";
 import { Funnel, Search, Shredder } from "lucide-react";
 import { TemplatesSelection } from "./TemplatesSelection";
-import { useSelectedTemplateStore } from "#/store/useSelectedTemplateStore";
 import {
   Drawer,
   DrawerContent,
@@ -27,17 +26,19 @@ import { TemplatesCarousel } from "./TemplatesCarousel";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { InputGroup, InputGroupInput, InputGroupAddon } from "./ui/input-group";
 import { useSelectTemplateRedirect } from "#/hooks/useSelectTemplateRedirect";
+import { useTemplateStore } from "#/store/useTemplateStore";
+import { useShallow } from "zustand/react/shallow";
 
 export const TemplatesOverlay = ({ trigger }: { trigger: ReactElement }) => {
   const { data } = useQuery(trpc.templatesList.queryOptions());
   const { redirect } = useSelectTemplateRedirect();
 
   const [open, setOpen] = useState(false);
-  const selectedTemplate = useSelectedTemplateStore(
-    (state) => state.selectedTemplate,
-  );
-  const setSelectedTemplate = useSelectedTemplateStore(
-    (state) => state.setSelectedTemplate,
+  const { selectedTemplate, setSelectedTemplate } = useTemplateStore(
+    useShallow((state) => ({
+      selectedTemplate: state.selectedTemplate,
+      setSelectedTemplate: state.setSelectedTemplate,
+    })),
   );
 
   const isDesktop = useMediaQuery("(min-width: 1024px)"); // Tailwind lg media query

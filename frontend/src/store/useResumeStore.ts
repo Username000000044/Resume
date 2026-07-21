@@ -14,7 +14,7 @@ export interface SubBullet {
 }
 
 interface SectionData {
-	fields: Record<string, any>; // uuid : value (34dfe2343f234(name) : "Bobby")
+	fields: Record<string, string>; // uuid : value (34dfe2343f234(name) : "Bobby")
 	bullets: MainBullet[];
 }
 
@@ -24,20 +24,44 @@ interface SectionInitialization {
 }
 
 interface ResumeStoreState {
-	sections: Record<string, SectionData>; // section id : data
+	mainSections: Record<string, SectionData[]>; // mainSection id : [{data}, {data}]
 	initializeSections: (sections: SectionInitialization[]) => void;
-	updateField: (sectionId: string, fieldKey: string, value: string) => void;
-	addMainBullet: (sectionId: string) => void;
-	removeMainBullet: (sectionId: string, bulletId: string) => void;
-	updateMainBullet: (sectionId: string, bulletId: string, text: string) => void;
-	addSubBullet: (sectionId: string, parentBulletId: string) => void;
+
+	// addSubSection: (mainSectionId: string) => void;
+	// removeSubSection: (mainSectionId: string, subSectionIndex: string) => void;
+
+	updateField: (
+		mainSectionId: string,
+		sectionIdx: number,
+		fieldId: string,
+		value: string,
+	) => void;
+	addMainBullet: (sectionId: string, sectionIdx: number) => void;
+	removeMainBullet: (
+		mainSectionId: string,
+		sectionIdx: number,
+		bulletId: string,
+	) => void;
+	updateMainBullet: (
+		mainSectionId: string,
+		sectionIdx: number,
+		bulletId: string,
+		text: string,
+	) => void;
+	addSubBullet: (
+		mainSectionId: string,
+		sectionIdx: number,
+		parentBulletId: string,
+	) => void;
 	removeSubBullet: (
-		sectionId: string,
+		mainSectionId: string,
+		sectionIdx: number,
 		parentBulletId: string,
 		subBulletId: string,
 	) => void;
 	updateSubBullet: (
-		sectionId: string,
+		mainSectionId: string,
+		sectionIdx: number,
 		parentBulletId: string,
 		subBulletId: string,
 		text: string,
@@ -47,58 +71,61 @@ interface ResumeStoreState {
 export const useResumeStore = create<ResumeStoreState>()(
 	persist(
 		immer((set) => ({
-			sections: {},
+			mainSections: {},
 			initializeSections: (incommingSections) =>
 				set((state) => {
 					incommingSections.forEach(({ id, fieldIds }) => {
 						// Create section object if doesn't exist
-						if (!state.sections[id]) {
-							state.sections[id] = { fields: {}, bullets: [] };
+						if (!state.mainSections[id]) {
+							state.mainSections[id] = [{ fields: {}, bullets: [] }];
 						}
 
 						// Pre-populate field key with empty string
-						fieldIds.forEach((fieldId) => {
-							if (state.sections[id].fields[fieldId] === undefined) {
-								state.sections[id].fields[fieldId] = "";
-							}
+						state.mainSections[id].forEach((_, idx) => {
+							fieldIds.forEach((fieldId) => {
+								if (state.mainSections[id][idx].fields[fieldId] === undefined) {
+									state.mainSections[id][idx].fields[fieldId] = "";
+								}
+							});
 						});
 					});
 				}),
 
-			updateField: (sectionId, fieldId, value) =>
+			updateField: (sectionGroupId, sectionIdx, fieldId, value) =>
 				set((state) => {
-					state.sections[sectionId].fields[fieldId] = value;
+					state.mainSections[sectionGroupId][sectionIdx].fields[fieldId] =
+						value;
 				}),
 
-			addMainBullet: (sectionId, text = "") =>
+			addMainBullet: (sectionGroupId, sectionIdx, text = "") =>
 				set((state) => {
-					state.sections[sectionId].bullets.push({
+					state.mainSections[sectionGroupId][sectionIdx].bullets.push({
 						id: crypto.randomUUID(),
 						text,
 						subBullets: [],
 					});
 				}),
 
-			removeMainBullet: (sectionId, bulletId) =>
+			removeMainBullet: (sectionGroupId, sectionIdx, bulletId) =>
 				set((state) => {
-					const section = state.sections[sectionId];
+					const section = state.mainSections[sectionGroupId][sectionIdx];
 					if (section) {
 						section.bullets = section.bullets.filter((b) => b.id !== bulletId);
 					}
 				}),
 
-			updateMainBullet: (sectionId, bulletId, text) =>
+			updateMainBullet: (sectionGroupId, sectionIdx, bulletId, text) =>
 				set((state) => {
-					const bullet = state.sections[sectionId].bullets.find(
-						(b) => b.id === bulletId,
-					);
+					const bullet = state.mainSections[sectionGroupId][
+						sectionIdx
+					].bullets.find((b) => b.id === bulletId);
 					if (bullet) bullet.text = text;
 				}),
-			addSubBullet: (sectionId, parentBulletId, text = "") =>
+			addSubBullet: (sectionGroupId, sectionIdx, parentBulletId, text = "") =>
 				set((state) => {
-					const parent = state.sections[sectionId].bullets.find(
-						(b) => b.id === parentBulletId,
-					);
+					const parent = state.mainSections[sectionGroupId][
+						sectionIdx
+					].bullets.find((b) => b.id === parentBulletId);
 					if (parent) {
 						parent.subBullets.push({
 							id: crypto.randomUUID(),
@@ -107,22 +134,33 @@ export const useResumeStore = create<ResumeStoreState>()(
 					}
 				}),
 
-			removeSubBullet: (sectionId, parentBulletId, subBulletId) =>
+			removeSubBullet: (
+				sectionGroupId,
+				sectionIdx,
+				parentBulletId,
+				subBulletId,
+			) =>
 				set((state) => {
-					const parent = state.sections[sectionId].bullets.find(
-						(b) => b.id === parentBulletId,
-					);
+					const parent = state.mainSections[sectionGroupId][
+						sectionIdx
+					].bullets.find((b) => b.id === parentBulletId);
 					if (parent) {
 						parent.subBullets = parent.subBullets.filter(
 							(sb) => sb.id !== subBulletId,
 						);
 					}
 				}),
-			updateSubBullet: (sectionId, parentBulletId, subBulletId, text) =>
+			updateSubBullet: (
+				sectionGroupId,
+				sectionIdx,
+				parentBulletId,
+				subBulletId,
+				text,
+			) =>
 				set((state) => {
-					const parent = state.sections[sectionId].bullets.find(
-						(b) => b.id === parentBulletId,
-					);
+					const parent = state.mainSections[sectionGroupId][
+						sectionIdx
+					].bullets.find((b) => b.id === parentBulletId);
 					const sub = parent?.subBullets.find((sb) => sb.id === subBulletId);
 					if (sub) sub.text = text;
 				}),

@@ -24,14 +24,16 @@ interface FieldInputProps {
   section: SectionType;
   mainBullet: MainBullet;
   subBullet: SubBullet;
-  index: number;
+  subBulletIndex: number;
+  subSectionIndex: number;
 }
 
 export const SubBulletItem = ({
   section,
   mainBullet,
   subBullet,
-  index,
+  subSectionIndex,
+  subBulletIndex,
 }: FieldInputProps) => {
   const { removeSubBullet, updateSubBullet } = useResumeStore(
     useShallow((store) => ({
@@ -41,7 +43,7 @@ export const SubBulletItem = ({
   );
 
   const [localValue, setLocalValue] = useState(
-    mainBullet.subBullets[index].text || "",
+    mainBullet.subBullets[subBulletIndex].text || "",
   );
 
   const debouncedSave = useMemo(
@@ -49,9 +51,15 @@ export const SubBulletItem = ({
       debounce((value) => {
         console.log("Saving to localstorage:", value);
 
-        updateSubBullet(section.id, mainBullet.id, subBullet.id, value);
+        updateSubBullet(
+          section.id,
+          subSectionIndex,
+          mainBullet.id,
+          subBullet.id,
+          value,
+        );
       }, 500), // 500ms debounce
-    [section.id, mainBullet.id, subBullet.id, updateSubBullet],
+    [section.id, mainBullet.id, subBullet.id, subSectionIndex, updateSubBullet],
   );
 
   // Cleanup debouced fn if componet unmounts
@@ -82,9 +90,14 @@ export const SubBulletItem = ({
             variant="ghost_destructive"
             size="icon-xs"
             onClick={() =>
-              removeSubBullet(section.id, mainBullet.id, subBullet.id)
+              removeSubBullet(
+                section.id,
+                subSectionIndex,
+                mainBullet.id,
+                subBullet.id,
+              )
             }
-            aria-label={`Remove sub-bullet ${index + 1}`}
+            aria-label={`Remove sub-bullet ${subBulletIndex + 1}`}
           >
             <X />
           </InputGroupButton>

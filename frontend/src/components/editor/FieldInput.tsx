@@ -14,23 +14,28 @@ type FieldType = TemplateType["sections"][number]["fields"][number];
 interface FieldInputProps {
   field: FieldType;
   section: SectionType;
+  subSectionIndex: number;
 }
 
-export const FieldInput = ({ field, section }: FieldInputProps) => {
+export const FieldInput = ({
+  field,
+  section,
+  subSectionIndex,
+}: FieldInputProps) => {
   const updateField = useResumeStore((store) => store.updateField);
-  const sections = useResumeStore((store) => store.sections);
+  const sectionGroup = useResumeStore((store) => store.sectionGroup);
 
   const [localValue, setLocalValue] = useState(
-    sections[section.id].fields[field.id] || "",
+    sectionGroup[section.id][subSectionIndex].fields[field.id] || "",
   );
 
   const debouncedSave = useMemo(
     () =>
       debounce((value) => {
         console.log("Saving to localstorage:", value);
-        updateField(section.id, field.id, value);
+        updateField(section.id, subSectionIndex, field.id, value);
       }, 500), // 500ms debounce
-    [section.id, field.id, updateField],
+    [section.id, field.id, subSectionIndex, updateField],
   );
 
   // Cleanup debouced fn if componet unmounts

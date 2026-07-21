@@ -11,7 +11,7 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { WheelGesturesPlugin } from "embla-carousel-wheel-gestures";
 import _ from "lodash";
-import { useSelectedTemplateStore } from "#/store/useSelectedTemplateStore";
+import { useSelectedTemplateStore } from "#/store/useTemplateStore";
 
 const TWEEN_FACTOR_BASE = 0.3;
 

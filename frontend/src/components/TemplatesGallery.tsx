@@ -1,7 +1,7 @@
 import type { inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "../../../backend/src/appRouter";
 import clsx from "clsx";
-import { useSelectedTemplateStore } from "#/store/useSelectedTemplateStore";
+import { useSelectedTemplateStore } from "#/store/useTemplateStore";
 
 interface GalleryProps {
   data: inferRouterOutputs<AppRouter>["templatesList"];
