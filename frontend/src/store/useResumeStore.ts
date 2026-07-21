@@ -24,10 +24,10 @@ interface SectionInitialization {
 }
 
 interface ResumeStoreState {
-	mainSections: Record<string, SectionData[]>; // mainSection id : [{data}, {data}]
+	mainSections: Record<string, SectionData[]>; // mainSection id : [{subSection}, {subSection}]
 	initializeSections: (sections: SectionInitialization[]) => void;
 
-	// addSubSection: (mainSectionId: string) => void;
+	addSubSection: (mainSectionId: string) => void;
 	// removeSubSection: (mainSectionId: string, subSectionIndex: string) => void;
 
 	updateField: (
@@ -91,39 +91,51 @@ export const useResumeStore = create<ResumeStoreState>()(
 					});
 				}),
 
-			updateField: (sectionGroupId, sectionIdx, fieldId, value) =>
+			addSubSection: (mainSectionId) =>
 				set((state) => {
-					state.mainSections[sectionGroupId][sectionIdx].fields[fieldId] =
-						value;
+					const mainSection = state.mainSections[mainSectionId];
+					if (mainSection) {
+						mainSection.push({
+							fields: { ...mainSection[0].fields },
+							bullets: [...mainSection[0].bullets],
+						});
+					}
 				}),
 
-			addMainBullet: (sectionGroupId, sectionIdx, text = "") =>
+			// removeSubSection: (mainSectionId, subSectionIndex) => set((state) => {}),
+
+			updateField: (mainSectionId, sectionIdx, fieldId, value) =>
 				set((state) => {
-					state.mainSections[sectionGroupId][sectionIdx].bullets.push({
+					state.mainSections[mainSectionId][sectionIdx].fields[fieldId] = value;
+				}),
+
+			addMainBullet: (mainSectionId, sectionIdx, text = "") =>
+				set((state) => {
+					state.mainSections[mainSectionId][sectionIdx].bullets.push({
 						id: crypto.randomUUID(),
 						text,
 						subBullets: [],
 					});
 				}),
 
-			removeMainBullet: (sectionGroupId, sectionIdx, bulletId) =>
+			removeMainBullet: (mainSectionId, sectionIdx, bulletId) =>
 				set((state) => {
-					const section = state.mainSections[sectionGroupId][sectionIdx];
+					const section = state.mainSections[mainSectionId][sectionIdx];
 					if (section) {
 						section.bullets = section.bullets.filter((b) => b.id !== bulletId);
 					}
 				}),
 
-			updateMainBullet: (sectionGroupId, sectionIdx, bulletId, text) =>
+			updateMainBullet: (mainSectionId, sectionIdx, bulletId, text) =>
 				set((state) => {
-					const bullet = state.mainSections[sectionGroupId][
+					const bullet = state.mainSections[mainSectionId][
 						sectionIdx
 					].bullets.find((b) => b.id === bulletId);
 					if (bullet) bullet.text = text;
 				}),
-			addSubBullet: (sectionGroupId, sectionIdx, parentBulletId, text = "") =>
+			addSubBullet: (mainSectionId, sectionIdx, parentBulletId, text = "") =>
 				set((state) => {
-					const parent = state.mainSections[sectionGroupId][
+					const parent = state.mainSections[mainSectionId][
 						sectionIdx
 					].bullets.find((b) => b.id === parentBulletId);
 					if (parent) {
@@ -135,13 +147,13 @@ export const useResumeStore = create<ResumeStoreState>()(
 				}),
 
 			removeSubBullet: (
-				sectionGroupId,
+				mainSectionId,
 				sectionIdx,
 				parentBulletId,
 				subBulletId,
 			) =>
 				set((state) => {
-					const parent = state.mainSections[sectionGroupId][
+					const parent = state.mainSections[mainSectionId][
 						sectionIdx
 					].bullets.find((b) => b.id === parentBulletId);
 					if (parent) {
@@ -151,14 +163,14 @@ export const useResumeStore = create<ResumeStoreState>()(
 					}
 				}),
 			updateSubBullet: (
-				sectionGroupId,
+				mainSectionId,
 				sectionIdx,
 				parentBulletId,
 				subBulletId,
 				text,
 			) =>
 				set((state) => {
-					const parent = state.mainSections[sectionGroupId][
+					const parent = state.mainSections[mainSectionId][
 						sectionIdx
 					].bullets.find((b) => b.id === parentBulletId);
 					const sub = parent?.subBullets.find((sb) => sb.id === subBulletId);

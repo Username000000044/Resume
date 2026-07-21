@@ -25,14 +25,19 @@ export const EditorTabs = () => {
     trpc.templateById.queryOptions(templateId),
   );
 
-  const { initializeSections, addMainBullet, mainSectionsStorage } =
-    useResumeStore(
-      useShallow((state) => ({
-        mainSectionsStorage: state.mainSections,
-        addMainBullet: state.addMainBullet,
-        initializeSections: state.initializeSections,
-      })),
-    );
+  const {
+    initializeSections,
+    addMainBullet,
+    addSubSection,
+    mainSectionsStorage,
+  } = useResumeStore(
+    useShallow((state) => ({
+      mainSectionsStorage: state.mainSections,
+      addMainBullet: state.addMainBullet,
+      addSubSection: state.addSubSection,
+      initializeSections: state.initializeSections,
+    })),
+  );
 
   useEffect(() => {
     // Persist zustand store name set
@@ -83,7 +88,11 @@ export const EditorTabs = () => {
         ))}
       </TabsList>
       {template.sections.map((section) => (
-        <TabsContent value={section.title} key={section.id}>
+        <TabsContent
+          value={section.title}
+          key={section.id}
+          className="flex flex-col gap-4"
+        >
           {/* Map main sections to expose sections */}
           {mainSectionsStorage[section.id].map((_, subSectionIndex) => (
             <Card key={`${section.id}-${subSectionIndex}`}>
@@ -152,11 +161,13 @@ export const EditorTabs = () => {
             </Card>
           ))}
 
+          {/* Add Section */}
           <div className="flex justify-center mt-10">
             <Button
               size="icon-lg"
               variant="outline"
               className="border-none shadow-sm ring-1 ring-foreground/5 cursor-pointer"
+              onClick={() => addSubSection(section.id)}
             >
               <Plus />
             </Button>

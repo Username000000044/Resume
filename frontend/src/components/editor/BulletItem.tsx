@@ -34,7 +34,7 @@ export const BulletItem = ({
   const { sectionGroup, updateMainBullet, removeMainBullet, addSubBullet } =
     useResumeStore(
       useShallow((store) => ({
-        sectionGroup: store.sectionGroup,
+        sectionGroup: store.mainSections,
         updateMainBullet: store.updateMainBullet,
         removeMainBullet: store.removeMainBullet,
         addSubBullet: store.addSubBullet,

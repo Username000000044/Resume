@@ -23,7 +23,7 @@ export const FieldInput = ({
   subSectionIndex,
 }: FieldInputProps) => {
   const updateField = useResumeStore((store) => store.updateField);
-  const sectionGroup = useResumeStore((store) => store.sectionGroup);
+  const sectionGroup = useResumeStore((store) => store.mainSections);
 
   const [localValue, setLocalValue] = useState(
     sectionGroup[section.id][subSectionIndex].fields[field.id] || "",
