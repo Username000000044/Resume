@@ -13,7 +13,9 @@ import { Button } from "../ui/button";
 import { Plus } from "lucide-react";
 import { BulletItem } from "./BulletItem";
 import { SubBulletItem } from "./SubBulletItem";
+import { cn } from "#/lib/utils";
 
+const MAX_SUB_SECTION_COUNT = 4;
 const MAX_BULLET_COUNT = 5;
 export const MAX_SUB_BULLET_COUNT = 5;
 
@@ -113,7 +115,11 @@ export const EditorTabs = () => {
                 <Button
                   variant="outline"
                   size="xs"
-                  className="col-span-full w-25 my-8"
+                  className={cn("col-span-full w-25 mt-8", {
+                    "mb-8":
+                      mainSectionsStorage[section.id][subSectionIndex].bullets
+                        .length > 0,
+                  })}
                   onClick={() => addMainBullet(section.id, subSectionIndex)}
                   disabled={
                     mainSectionsStorage[section.id][subSectionIndex].bullets
@@ -168,6 +174,9 @@ export const EditorTabs = () => {
               variant="outline"
               className="border-none shadow-sm ring-1 ring-foreground/5 cursor-pointer"
               onClick={() => addSubSection(section.id)}
+              disabled={
+                mainSectionsStorage[section.id].length >= MAX_SUB_SECTION_COUNT
+              }
             >
               <Plus />
             </Button>

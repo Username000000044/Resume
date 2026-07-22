@@ -1,17 +1,15 @@
 import type { inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "../../../backend/src/appRouter";
 import clsx from "clsx";
-import { useSelectedTemplateStore } from "#/store/useTemplateStore";
+import { useTemplateStore } from "#/store/useTemplateStore";
 
 interface GalleryProps {
   data: inferRouterOutputs<AppRouter>["templatesList"];
 }
 
 export const TemplatesGallery = ({ data }: GalleryProps) => {
-  const selectedTemplate = useSelectedTemplateStore(
-    (state) => state.selectedTemplate,
-  );
-  const setSelectedTemplate = useSelectedTemplateStore(
+  const selectedTemplate = useTemplateStore((state) => state.selectedTemplate);
+  const setSelectedTemplate = useTemplateStore(
     (state) => state.setSelectedTemplate,
   );
 

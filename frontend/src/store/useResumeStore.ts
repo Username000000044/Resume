@@ -28,7 +28,7 @@ interface ResumeStoreState {
 	initializeSections: (sections: SectionInitialization[]) => void;
 
 	addSubSection: (mainSectionId: string) => void;
-	// removeSubSection: (mainSectionId: string, subSectionIndex: string) => void;
+	removeSubSection: (mainSectionId: string, subSectionIndex: number) => void;
 
 	updateField: (
 		mainSectionId: string,
@@ -102,7 +102,15 @@ export const useResumeStore = create<ResumeStoreState>()(
 					}
 				}),
 
-			// removeSubSection: (mainSectionId, subSectionIndex) => set((state) => {}),
+			removeSubSection: (mainSectionId, subSectionIndex) =>
+				set((state) => {
+					const mainSection = state.mainSections[mainSectionId];
+					const subSection = mainSection[subSectionIndex];
+
+					if (subSection) {
+						mainSection.filter((_, idx) => idx !== subSectionIndex);
+					}
+				}),
 
 			updateField: (mainSectionId, sectionIdx, fieldId, value) =>
 				set((state) => {

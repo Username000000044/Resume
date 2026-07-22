@@ -11,7 +11,7 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { WheelGesturesPlugin } from "embla-carousel-wheel-gestures";
 import _ from "lodash";
-import { useSelectedTemplateStore } from "#/store/useTemplateStore";
+import { useTemplateStore } from "#/store/useTemplateStore";
 
 const TWEEN_FACTOR_BASE = 0.3;
 
@@ -27,7 +27,7 @@ export const TemplatesCarousel = ({ data }: CarouselProps) => {
   const tweenFactor = useRef(0);
   const tweenNodes = useRef<HTMLElement[]>([]);
 
-  const setSelectedTemplate = useSelectedTemplateStore(
+  const setSelectedTemplate = useTemplateStore(
     (state) => state.setSelectedTemplate,
   );
 
