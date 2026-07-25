@@ -107,8 +107,8 @@ export const useResumeStore = create<ResumeStoreState>()(
 					const mainSection = state.mainSections[mainSectionId];
 					const subSection = mainSection[subSectionIndex];
 
-					if (subSection) {
-						mainSection.filter((_, idx) => idx !== subSectionIndex);
+					if (subSection && subSectionIndex !== 0) {
+						mainSection.splice(subSectionIndex, 1);
 					}
 				}),
 

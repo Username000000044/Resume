@@ -6,11 +6,17 @@ import { trpc } from "#/utils/trpc";
 import { useEffect, useState } from "react";
 import { useResumeStore } from "#/store/useResumeStore";
 import { useShallow } from "zustand/react/shallow";
-import { Card, CardContent } from "../ui/card";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+} from "../ui/card";
 import { Field, FieldGroup } from "../ui/field";
 import { FieldInput } from "./FieldInput";
 import { Button } from "../ui/button";
-import { Plus } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { BulletItem } from "./BulletItem";
 import { SubBulletItem } from "./SubBulletItem";
 import { cn } from "#/lib/utils";
@@ -31,12 +37,14 @@ export const EditorTabs = () => {
     initializeSections,
     addMainBullet,
     addSubSection,
+    removeSubSection,
     mainSectionsStorage,
   } = useResumeStore(
     useShallow((state) => ({
       mainSectionsStorage: state.mainSections,
       addMainBullet: state.addMainBullet,
       addSubSection: state.addSubSection,
+      removeSubSection: state.removeSubSection,
       initializeSections: state.initializeSections,
     })),
   );
@@ -97,7 +105,7 @@ export const EditorTabs = () => {
         >
           {/* Map main sections to expose sections */}
           {mainSectionsStorage[section.id].map((_, subSectionIndex) => (
-            <Card key={`${section.id}-${subSectionIndex}`}>
+            <Card key={`${section.id}-${subSectionIndex}`} className="gap-0">
               <CardContent>
                 {/* Section Fields */}
                 <FieldGroup className="grid grid-cols-4 gap-3">
@@ -149,14 +157,15 @@ export const EditorTabs = () => {
                       <FieldGroup className="col-start-2 col-span-4 gap-3">
                         {mainBullet.subBullets.map(
                           (subBullet, subBulletIndex) => (
-                            <SubBulletItem
-                              section={section}
-                              mainBullet={mainBullet}
-                              subBullet={subBullet}
-                              subSectionIndex={subSectionIndex}
-                              subBulletIndex={subBulletIndex}
-                              key={subBullet.id}
-                            />
+                            <FieldGroup key={subBullet.id}>
+                              <SubBulletItem
+                                section={section}
+                                mainBullet={mainBullet}
+                                subBullet={subBullet}
+                                subSectionIndex={subSectionIndex}
+                                subBulletIndex={subBulletIndex}
+                              />
+                            </FieldGroup>
                           ),
                         )}
                       </FieldGroup>
@@ -168,7 +177,7 @@ export const EditorTabs = () => {
           ))}
 
           {/* Add Section */}
-          <div className="flex justify-center mt-10">
+          <div className="flex justify-center mt-4f">
             <Button
               size="icon-lg"
               variant="outline"

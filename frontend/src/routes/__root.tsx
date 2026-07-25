@@ -13,7 +13,7 @@ function RootComponent() {
   return (
     <>
       <QueryClientProvider client={queryClient}>
-        <div className="h-screen w-full bg-[url('/assets/textured-paper.webp')] bg-cover bg-fixed">
+        <div className="min-h-screen w-full bg-[url('/assets/textured-paper.webp')] bg-cover bg-fixed bg-no-repeat bg-top bg-[#ffffff]">
           <Outlet />
         </div>
 
