@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { persist } from "zustand/middleware";
+import { move } from "@dnd-kit/helpers";
 
 export interface MainBullet {
 	id: string;
@@ -13,9 +14,11 @@ export interface SubBullet {
 	text: string;
 }
 
-interface SectionData {
+export interface SubSectionData {
+	id: string;
 	fields: Record<string, string>; // uuid : value (34dfe2343f234(name) : "Bobby")
 	bullets: MainBullet[];
+	order: number;
 }
 
 interface SectionInitialization {
@@ -24,11 +27,12 @@ interface SectionInitialization {
 }
 
 interface ResumeStoreState {
-	mainSections: Record<string, SectionData[]>; // mainSection id : [{subSection}, {subSection}]
+	mainSections: Record<string, SubSectionData[]>; // mainSection id : [{subSection}, {subSection}]
 	initializeSections: (sections: SectionInitialization[]) => void;
 
 	addSubSection: (mainSectionId: string) => void;
 	removeSubSection: (mainSectionId: string, subSectionIndex: number) => void;
+	reorderSubSections: (mainSectionId: string, event: any) => void;
 
 	updateField: (
 		mainSectionId: string,
@@ -77,14 +81,18 @@ export const useResumeStore = create<ResumeStoreState>()(
 					incommingSections.forEach(({ id, fieldIds }) => {
 						// Create section object if doesn't exist
 						if (!state.mainSections[id]) {
-							state.mainSections[id] = [{ fields: {}, bullets: [] }];
+							state.mainSections[id] = [
+								{ id: crypto.randomUUID(), fields: {}, bullets: [], order: 0 },
+							];
 						}
 
-						// Pre-populate field key with empty string
+						// Pre-populate field key with empty string and order
 						state.mainSections[id].forEach((_, idx) => {
 							fieldIds.forEach((fieldId) => {
-								if (state.mainSections[id][idx].fields[fieldId] === undefined) {
-									state.mainSections[id][idx].fields[fieldId] = "";
+								const subSection = state.mainSections[id][idx];
+
+								if (subSection.fields[fieldId] === undefined) {
+									subSection.fields[fieldId] = "";
 								}
 							});
 						});
@@ -96,8 +104,10 @@ export const useResumeStore = create<ResumeStoreState>()(
 					const mainSection = state.mainSections[mainSectionId];
 					if (mainSection) {
 						mainSection.push({
+							id: crypto.randomUUID(),
 							fields: { ...mainSection[0].fields },
 							bullets: [...mainSection[0].bullets],
+							order: mainSection.length,
 						});
 					}
 				}),
@@ -110,6 +120,20 @@ export const useResumeStore = create<ResumeStoreState>()(
 					if (subSection && subSectionIndex !== 0) {
 						mainSection.splice(subSectionIndex, 1);
 					}
+				}),
+
+			reorderSubSections: (mainSectionId, event) =>
+				set((state) => {
+					const orderedSubSections = move(
+						state.mainSections[mainSectionId],
+						event,
+					);
+
+					state.mainSections[mainSectionId] = orderedSubSections;
+
+					state.mainSections[mainSectionId].forEach((subSection, idx) => {
+						subSection.order = idx;
+					});
 				}),
 
 			updateField: (mainSectionId, sectionIdx, fieldId, value) =>

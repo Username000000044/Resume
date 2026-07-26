@@ -1,4 +1,3 @@
-/** biome-ignore-all lint/suspicious/noArrayIndexKey: <explanation> */
 import { notFound, useParams } from "@tanstack/react-router";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -6,48 +5,37 @@ import { trpc } from "#/utils/trpc";
 import { useEffect, useState } from "react";
 import { useResumeStore } from "#/store/useResumeStore";
 import { useShallow } from "zustand/react/shallow";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardHeader,
-} from "../ui/card";
-import { Field, FieldGroup } from "../ui/field";
-import { FieldInput } from "./FieldInput";
+import { DragDropProvider } from "@dnd-kit/react";
 import { Button } from "../ui/button";
-import { Plus, X } from "lucide-react";
-import { BulletItem } from "./BulletItem";
-import { SubBulletItem } from "./SubBulletItem";
-import { cn } from "#/lib/utils";
+import { Plus } from "lucide-react";
+import { SortableSubSectionItem } from "./SortableSubSectionItem";
 
-const MAX_SUB_SECTION_COUNT = 4;
-const MAX_BULLET_COUNT = 5;
+export const MAX_BULLET_COUNT = 5;
 export const MAX_SUB_BULLET_COUNT = 5;
+const MAX_SUB_SECTION_COUNT = 4;
 
 export const EditorTabs = () => {
-  const [isPayloadReady, setIsPayloadReady] = useState(false);
-
-  const { templateId } = useParams({ from: "/create/$templateId" });
-  const { data: template, error } = useSuspenseQuery(
-    trpc.templateById.queryOptions(templateId),
-  );
-
   const {
     initializeSections,
-    addMainBullet,
     addSubSection,
-    removeSubSection,
+    reorderSubSections,
     mainSectionsStorage,
   } = useResumeStore(
     useShallow((state) => ({
       mainSectionsStorage: state.mainSections,
       addMainBullet: state.addMainBullet,
       addSubSection: state.addSubSection,
-      removeSubSection: state.removeSubSection,
+      reorderSubSections: state.reorderSubSections,
       initializeSections: state.initializeSections,
     })),
   );
+
+  const { templateId } = useParams({ from: "/create/$templateId" });
+  const { data: template, error } = useSuspenseQuery(
+    trpc.templateById.queryOptions(templateId),
+  );
+
+  const [isPayloadReady, setIsPayloadReady] = useState(false);
 
   useEffect(() => {
     // Persist zustand store name set
@@ -103,93 +91,44 @@ export const EditorTabs = () => {
           key={section.id}
           className="flex flex-col gap-4"
         >
-          {/* Map main sections to expose sections */}
-          {mainSectionsStorage[section.id].map((_, subSectionIndex) => (
-            <Card key={`${section.id}-${subSectionIndex}`} className="gap-0">
-              <CardContent>
-                {/* Section Fields */}
-                <FieldGroup className="grid grid-cols-4 gap-3">
-                  {section.fields.map((field) => (
-                    <FieldInput
-                      key={field.id}
-                      field={field}
-                      section={section}
-                      subSectionIndex={subSectionIndex}
-                    />
-                  ))}
-                </FieldGroup>
-
-                {/* Bullets */}
-                <Button
-                  variant="outline"
-                  size="xs"
-                  className={cn("col-span-full w-25 mt-8", {
-                    "mb-8":
-                      mainSectionsStorage[section.id][subSectionIndex].bullets
-                        .length > 0,
-                  })}
-                  onClick={() => addMainBullet(section.id, subSectionIndex)}
-                  disabled={
-                    mainSectionsStorage[section.id][subSectionIndex].bullets
-                      .length >= MAX_BULLET_COUNT
-                  }
-                >
-                  <Plus /> Add Bullet
-                </Button>
-
-                {mainSectionsStorage[section.id][subSectionIndex].bullets.map(
-                  (mainBullet, mainBulletIndex) => (
-                    <FieldGroup
-                      key={mainBullet.id}
-                      className="grid grid-cols-6 gap-3"
-                    >
-                      <div className="col-span-5">
-                        <BulletItem
-                          section={section}
-                          mainBullet={mainBullet}
-                          subSectionIndex={subSectionIndex}
-                          bulletIndex={mainBulletIndex}
-                        />
-                      </div>
-
-                      {/* Sub Bullets */}
-
-                      <FieldGroup className="col-start-2 col-span-4 gap-3">
-                        {mainBullet.subBullets.map(
-                          (subBullet, subBulletIndex) => (
-                            <FieldGroup key={subBullet.id}>
-                              <SubBulletItem
-                                section={section}
-                                mainBullet={mainBullet}
-                                subBullet={subBullet}
-                                subSectionIndex={subSectionIndex}
-                                subBulletIndex={subBulletIndex}
-                              />
-                            </FieldGroup>
-                          ),
-                        )}
-                      </FieldGroup>
-                    </FieldGroup>
-                  ),
-                )}
-              </CardContent>
-            </Card>
-          ))}
+          {/* Enable Cards to Be Dragable */}
+          <DragDropProvider
+            onDragEnd={(event) => {
+              reorderSubSections(section.id, event);
+            }}
+          >
+            {/* Map main sections to expose sections*/}
+            <ul className="flex flex-col gap-4">
+              {mainSectionsStorage[section.id].map(
+                (subSection, subSectionIndex) => (
+                  <SortableSubSectionItem
+                    key={subSection.id}
+                    section={section}
+                    subSection={subSection}
+                    subSectionIndex={subSectionIndex}
+                  />
+                ),
+              )}
+            </ul>
+          </DragDropProvider>
 
           {/* Add Section */}
-          <div className="flex justify-center mt-4f">
-            <Button
-              size="icon-lg"
-              variant="outline"
-              className="border-none shadow-sm ring-1 ring-foreground/5 cursor-pointer"
-              onClick={() => addSubSection(section.id)}
-              disabled={
-                mainSectionsStorage[section.id].length >= MAX_SUB_SECTION_COUNT
-              }
-            >
-              <Plus />
-            </Button>
-          </div>
+          {section.manyInstances && (
+            <div className="flex justify-center mt-4f">
+              <Button
+                size="icon-lg"
+                variant="outline"
+                className="border-none shadow-sm ring-1 ring-foreground/5 cursor-pointer"
+                onClick={() => addSubSection(section.id)}
+                disabled={
+                  mainSectionsStorage[section.id].length >=
+                  MAX_SUB_SECTION_COUNT
+                }
+              >
+                <Plus />
+              </Button>
+            </div>
+          )}
         </TabsContent>
       ))}
     </Tabs>

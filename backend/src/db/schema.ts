@@ -7,6 +7,7 @@ import {
 	uuid,
 	jsonb,
 	integer,
+	boolean,
 } from "drizzle-orm/pg-core";
 
 type Alignment = "center" | "left" | "right";
@@ -75,6 +76,7 @@ export const sectionsTable = pgTable("sections", {
 		.notNull(),
 	title: varchar({ length: 100 }).notNull(),
 	order: integer().notNull(),
+	manyInstances: boolean("many_instances").notNull(), // False: Ensures only one instance of sectionsTable in UI
 });
 
 export const fieldsTable = pgTable("fields", {
