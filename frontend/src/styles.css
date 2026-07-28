@@ -128,6 +128,8 @@ body {
 
 .container {
 	max-width: 90rem;
-	margin: auto;
-	padding: 2rem 4rem;
+	margin: 0 auto;
+	display: flex;
+	@apply justify-center md:justify-start;
+	@apply md:px-[4rem] md:py-[2rem];
 }

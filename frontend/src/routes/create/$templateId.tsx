@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { LiveTemplate } from "#/components/editor/LiveTemplate";
 import { EditorTabs } from "#/components/editor/EditorTabs";
 
 export const Route = createFileRoute("/create/$templateId")({
@@ -9,10 +8,10 @@ export const Route = createFileRoute("/create/$templateId")({
 
 function RouteComponent() {
   return (
-    <div className="container flex justify-between gap-10">
+    <div className="container">
       {/* Information Form */}
       <div className="pt-16">
-        <h1 className="text-4xl text-primary font-bold tracking-wide pb-8">
+        <h1 className="text-4xl text-primary font-bold tracking-wide flex justify-center md:justify-start pb-8">
           Resume Editor
         </h1>
 

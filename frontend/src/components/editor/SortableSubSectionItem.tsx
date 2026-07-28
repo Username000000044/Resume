@@ -13,6 +13,7 @@ import { BulletItem } from "./BulletItem";
 import { SubBulletItem } from "./SubBulletItem";
 import { useRef, useState, type RefObject } from "react";
 import { useSortable } from "@dnd-kit/react/sortable";
+import { RestrictToVerticalAxis } from "@dnd-kit/abstract/modifiers";
 
 type SectionType =
   inferRouterOutputs<AppRouter>["templatesList"][number]["sections"][number];
@@ -44,13 +45,40 @@ export const SortableSubSectionItem = ({
     index: subSectionIndex,
     element,
     handle: handleRef,
+    modifiers: [RestrictToVerticalAxis],
   });
 
   return (
     <li ref={setElement} className="relative">
+      {/* Section Actions */}
+      {section.manyInstances && (
+        <div className="absolute top-1/2 -translate-y-1/2 -left-8 md:-left-10">
+          <div className="flex flex-col *:text-muted-foreground *:cursor-pointer *:hover:bg-transparent">
+            <Button
+              size="icon-sm"
+              variant="ghost"
+              ref={handleRef}
+              disabled={mainSectionsStorage[section.id].length === 1}
+            >
+              <GripHorizontal />
+            </Button>
+            <Button
+              size="icon-sm"
+              variant="ghost_destructive"
+              onClick={() => removeSubSection(section.id, subSectionIndex)}
+              disabled={
+                mainSectionsStorage[section.id][subSectionIndex].order === 0
+              }
+            >
+              <Trash2 />
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Section Content */}
       <Card
-        className={cn("gap-0", {
+        className={cn("gap-0 w-full", {
           "shadow-2xl": isDragging,
         })}
       >
@@ -68,22 +96,24 @@ export const SortableSubSectionItem = ({
           </FieldGroup>
 
           {/* Bullets */}
-          <Button
-            variant="outline"
-            size="xs"
-            className={cn("col-span-full w-25 mt-8", {
-              "mb-8":
+          {section.manyInstances && (
+            <Button
+              variant="outline"
+              size="xs"
+              className={cn("col-span-full w-25 mt-8", {
+                "mb-8":
+                  mainSectionsStorage[section.id][subSectionIndex].bullets
+                    .length > 0,
+              })}
+              onClick={() => addMainBullet(section.id, subSectionIndex)}
+              disabled={
                 mainSectionsStorage[section.id][subSectionIndex].bullets
-                  .length > 0,
-            })}
-            onClick={() => addMainBullet(section.id, subSectionIndex)}
-            disabled={
-              mainSectionsStorage[section.id][subSectionIndex].bullets.length >=
-              MAX_BULLET_COUNT
-            }
-          >
-            <Plus /> Add Bullet
-          </Button>
+                  .length >= MAX_BULLET_COUNT
+              }
+            >
+              <Plus /> Add Bullet
+            </Button>
+          )}
 
           {mainSectionsStorage[section.id][subSectionIndex].bullets.map(
             (mainBullet, mainBulletIndex) => (
@@ -101,7 +131,6 @@ export const SortableSubSectionItem = ({
                 </div>
 
                 {/* Sub Bullets */}
-
                 <FieldGroup className="col-start-2 col-span-4 gap-3 mb-3">
                   {mainBullet.subBullets.map((subBullet, subBulletIndex) => (
                     <SubBulletItem
@@ -119,30 +148,6 @@ export const SortableSubSectionItem = ({
           )}
         </CardContent>
       </Card>
-
-      {/* Section Actions */}
-      <div className="absolute top-1/2 -translate-y-1/2 -left-12">
-        <div className="flex flex-col items-center *:text-muted-foreground *:cursor-pointer *:hover:bg-transparent">
-          <Button
-            size="icon-lg"
-            variant="ghost"
-            ref={handleRef}
-            disabled={mainSectionsStorage[section.id].length === 1}
-          >
-            <GripHorizontal />
-          </Button>
-          <Button
-            size="icon-lg"
-            variant="ghost_destructive"
-            onClick={() => removeSubSection(section.id, subSectionIndex)}
-            disabled={
-              mainSectionsStorage[section.id][subSectionIndex].order === 0
-            }
-          >
-            <Trash2 />
-          </Button>
-        </div>
-      </div>
     </li>
   );
 };

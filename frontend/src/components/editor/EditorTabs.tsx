@@ -71,8 +71,8 @@ export const EditorTabs = () => {
   if (!isPayloadReady) return <div>Loading template configurations...</div>;
 
   return (
-    <Tabs defaultValue="account" className="w-100 gap-0">
-      <TabsList className="bg-transparent gap-4 px-2 py-0">
+    <Tabs defaultValue="account" className="w-80 md:w-100 gap-0">
+      <TabsList className="bg-transparent gap-4 mx-auto md:m-0 md:mx-4 py-0">
         {/* Tabs */}
         {template.sections.map((section) => (
           <TabsTrigger
@@ -114,7 +114,7 @@ export const EditorTabs = () => {
 
           {/* Add Section */}
           {section.manyInstances && (
-            <div className="flex justify-center mt-4f">
+            <div className="flex justify-center mt-4">
               <Button
                 size="icon-lg"
                 variant="outline"
