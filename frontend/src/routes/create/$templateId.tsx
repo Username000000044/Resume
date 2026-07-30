@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { EditorTabs } from "#/components/editor/EditorTabs";
+import { LiveTemplate } from "#/components/editor/LiveTemplate";
 
 export const Route = createFileRoute("/create/$templateId")({
   component: RouteComponent,
@@ -8,21 +9,22 @@ export const Route = createFileRoute("/create/$templateId")({
 
 function RouteComponent() {
   return (
-    <div className="container">
-      {/* Information Form */}
-      <div className="pt-16">
-        <h1 className="text-4xl text-primary font-bold tracking-wide flex justify-center md:justify-start pb-8">
-          Resume Editor
-        </h1>
+    <div className="mx-auto max-w-[80rem] grid md:px-16 md:py-8">
+      <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-10 justify-center md:justify-start">
+        {/* Information Form */}
+        <div className=" w-[calc(100%-7rem)] md:w-min justify-self-center md:justify-items-start">
+          <h1 className="text-4xl mt-16 text-primary font-bold tracking-wide flex justify-center md:justify-start pb-8">
+            Resume Editor
+          </h1>
 
-        <EditorTabs />
+          <EditorTabs />
+        </div>
+
+        {/* Live Resume */}
+        <div className="sticky top-0 max-h-screen flex items-center">
+          <LiveTemplate />
+        </div>
       </div>
-
-      {/* Live Resume */}
-      {/* <div className="fixed top-0 left-0 w-full min-h-screen flex justify-center items-center pointer-events-none bg-red-200">
-        <div className="pointer-events-auto bg-red-500" />
-      </div> */}
-      {/* <LiveTemplate /> */}
     </div>
   );
 }

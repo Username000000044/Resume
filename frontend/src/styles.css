@@ -125,11 +125,3 @@ body {
 		@apply font-sans;
 	}
 }
-
-.container {
-	max-width: 90rem;
-	margin: 0 auto;
-	display: flex;
-	@apply justify-center md:justify-start;
-	@apply md:px-[4rem] md:py-[2rem];
-}

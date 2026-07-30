@@ -9,6 +9,7 @@ import { DragDropProvider } from "@dnd-kit/react";
 import { Button } from "../ui/button";
 import { Plus } from "lucide-react";
 import { SortableSubSectionItem } from "./SortableSubSectionItem";
+import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 
 export const MAX_BULLET_COUNT = 5;
 export const MAX_SUB_BULLET_COUNT = 5;
@@ -71,20 +72,22 @@ export const EditorTabs = () => {
   if (!isPayloadReady) return <div>Loading template configurations...</div>;
 
   return (
-    <Tabs defaultValue="account" className="w-80 md:w-100 gap-0">
-      <TabsList className="bg-transparent gap-4 mx-auto md:m-0 md:mx-4 py-0">
-        {/* Tabs */}
-        {template.sections.map((section) => (
-          <TabsTrigger
-            className="cursor-pointer px-3 rounded-b-none font-normal data-active:bg-primary data-active:text-primary-foreground data-active:hover:text-primary-foreground"
-            value={section.title}
-            key={section.id}
-          >
-            {section.title.charAt(0).toUpperCase() +
-              section.title.slice(1).toLowerCase()}
-          </TabsTrigger>
-        ))}
-      </TabsList>
+    <Tabs defaultValue="account" className="md:w-100 gap-0">
+      <ScrollArea className="px-4 ">
+        <TabsList className="bg-transparent py-0 overflow-y-hidden md:gap-4">
+          {/* Tabs */}
+          {template.sections.map((section) => (
+            <TabsTrigger
+              className="cursor-pointer px-3 rounded-b-none font-normal data-active:bg-primary data-active:text-primary-foreground data-active:hover:text-primary-foreground"
+              value={section.title}
+              key={section.id}
+            >
+              {section.title.charAt(0).toUpperCase() +
+                section.title.slice(1).toLowerCase()}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </ScrollArea>
       {template.sections.map((section) => (
         <TabsContent
           value={section.title}

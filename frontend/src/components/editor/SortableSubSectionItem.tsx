@@ -52,7 +52,7 @@ export const SortableSubSectionItem = ({
     <li ref={setElement} className="relative">
       {/* Section Actions */}
       {section.manyInstances && (
-        <div className="absolute top-1/2 -translate-y-1/2 -left-8 md:-left-10">
+        <div className="absolute top-1/2 -translate-y-1/2 -left-10">
           <div className="flex flex-col *:text-muted-foreground *:cursor-pointer *:hover:bg-transparent">
             <Button
               size="icon-sm"

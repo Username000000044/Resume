@@ -105,8 +105,8 @@ export const useResumeStore = create<ResumeStoreState>()(
 					if (mainSection) {
 						mainSection.push({
 							id: crypto.randomUUID(),
-							fields: { ...mainSection[0].fields },
-							bullets: [...mainSection[0].bullets],
+							fields: {},
+							bullets: [],
 							order: mainSection.length,
 						});
 					}
