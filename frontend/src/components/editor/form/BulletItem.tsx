@@ -1,19 +1,19 @@
-import { Plus, X } from "lucide-react";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
-} from "../ui/input-group";
+import { X } from "lucide-react";
 import type { inferRouterOutputs } from "@trpc/server";
-import type { AppRouter } from "../../../../backend/src/appRouter";
 import { useResumeStore, type MainBullet } from "#/store/useResumeStore";
-import { useEffect, useMemo, useState, type ChangeEvent } from "react";
+import { useEffect, useMemo, type ChangeEvent } from "react";
 import { debounce } from "lodash";
 import { useShallow } from "zustand/react/shallow";
-import { Field, FieldGroup, FieldLabel } from "../ui/field";
-import { Button } from "../ui/button";
 import { MAX_SUB_BULLET_COUNT } from "./EditorTabs";
+import {
+  InputGroup,
+  InputGroupInput,
+  InputGroupAddon,
+  InputGroupButton,
+} from "#/components/ui/input-group";
+import type { AppRouter } from "../../../../../backend/src/appRouter";
+import { Field, FieldLabel } from "#/components/ui/field";
+import { Button } from "#/components/ui/button";
 
 type TemplateType = inferRouterOutputs<AppRouter>["templateById"];
 type SectionType = TemplateType["sections"][number];
@@ -31,24 +31,29 @@ export const BulletItem = ({
   subSectionIndex,
   bulletIndex,
 }: FieldInputProps) => {
-  const { sectionGroup, updateMainBullet, removeMainBullet, addSubBullet } =
-    useResumeStore(
-      useShallow((store) => ({
-        sectionGroup: store.mainSections,
-        updateMainBullet: store.updateMainBullet,
-        removeMainBullet: store.removeMainBullet,
-        addSubBullet: store.addSubBullet,
-      })),
-    );
-
-  const [localValue, setLocalValue] = useState(
-    sectionGroup[section.id][subSectionIndex].bullets[bulletIndex].text || "",
+  const {
+    liveMainSections,
+    updateLiveMainBullet,
+    updateMainBullet,
+    removeMainBullet,
+    addSubBullet,
+  } = useResumeStore(
+    useShallow((store) => ({
+      liveMainSections: store.liveMainSections,
+      updateMainBullet: store.updateMainBullet,
+      updateLiveMainBullet: store.updateLiveMainBullet,
+      removeMainBullet: store.removeMainBullet,
+      addSubBullet: store.addSubBullet,
+    })),
   );
+
+  const liveValue =
+    liveMainSections[section.id][subSectionIndex].bullets[bulletIndex].text ||
+    "";
 
   const debouncedSave = useMemo(
     () =>
       debounce((value) => {
-        console.log("Saving to localstorage:", value);
         updateMainBullet(section.id, subSectionIndex, mainBullet.id, value);
       }, 500), // 500ms debounce
     [section.id, mainBullet.id, subSectionIndex, updateMainBullet],
@@ -61,7 +66,7 @@ export const BulletItem = ({
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setLocalValue(value); // Fast
+    updateLiveMainBullet(section.id, subSectionIndex, mainBullet.id, value); // Fast
     debouncedSave(value); // Waits for user to stop typing before saving
   };
 
@@ -86,7 +91,7 @@ export const BulletItem = ({
       <InputGroup>
         <InputGroupInput
           name={mainBullet.id}
-          value={localValue}
+          value={liveValue}
           type="text"
           onChange={handleChange}
           onBlur={() => debouncedSave.flush()}

@@ -2,7 +2,6 @@ import z from "zod";
 import { publicProcedure, router } from "./trpc";
 import { db } from "../drizzle";
 import { TRPCError } from "@trpc/server";
-import { eq } from "drizzle-orm";
 
 export const appRouter = router({
 	templatesList: publicProcedure.query(async () => {
@@ -22,6 +21,15 @@ export const appRouter = router({
 	}),
 	templateById: publicProcedure.input(z.string()).query(async (opts) => {
 		const { input } = opts; //id input
+
+		const uuidValidation = z.uuid().safeParse(input);
+
+		if (!uuidValidation.success) {
+			throw new TRPCError({
+				code: "BAD_REQUEST",
+				message: `Invalid template ID format: ${input}`,
+			});
+		}
 
 		const template = await db.query.templatesTable.findFirst({
 			with: {

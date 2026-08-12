@@ -15,7 +15,8 @@ CREATE TABLE "sections" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"template_id" uuid NOT NULL,
 	"title" varchar(100) NOT NULL,
-	"order" integer NOT NULL
+	"order" integer NOT NULL,
+	"many_instances" boolean NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "templates" (

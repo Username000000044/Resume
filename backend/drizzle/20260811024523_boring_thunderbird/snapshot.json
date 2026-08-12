@@ -1,7 +1,7 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "967dac09-5ee2-4b6b-ad1a-86e4088a8a9b",
+  "id": "991354c6-e935-49ad-8832-972100a0a6ba",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
@@ -209,6 +209,19 @@
       "generated": null,
       "identity": null,
       "name": "order",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "sections"
+    },
+    {
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "many_instances",
       "entityType": "columns",
       "schema": "public",
       "table": "sections"

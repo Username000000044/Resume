@@ -10,29 +10,46 @@ import {
 	boolean,
 } from "drizzle-orm/pg-core";
 
-type Alignment = "center" | "left" | "right";
+interface SpacingConfig {
+	page_margin: number; // (in)
+	section_gap: number; // sapce between sections (pt)
+	content_gap: number; // space between fields/bullets (pt)
+	line_height: number; // individual character height (pt)
+}
+
+interface TypographyConfig {
+	font_family: string;
+	font_url: string;
+	font_size_base: number; // 11pt (stored as num) so it can be multiplied by scale curve.
+	scale_curve: "editorial" | "balanced" | "minimal";
+}
+
+interface ColorPalette {
+	primary: string;
+	secondary: string;
+	accent: string;
+	text_main: string;
+	text_muted: string;
+	divider: string;
+}
 
 interface TemplateConfig {
 	alignment: {
-		header: Alignment;
-		titles: Alignment;
-		body: Alignment;
+		header: "center" | "left" | "right";
+		titles: "center" | "left" | "right";
+		body: "center" | "left" | "right";
 	};
 	decorations: {
 		section_divider: boolean;
-		date_style: Alignment;
+		divider_style: "solid" | "dashed" | "thick";
+		bullet_style: "disc" | "circle" | "square" | "none";
+		sub_bullet_style: "disc" | "circle" | "square" | "none";
 	};
 	theme: {
-		typography: {
-			font_family: string;
-			font_size_base: string; //11pt
-		};
-		colors: {
-			primary: string;
-			secondary: string;
-			accent: string;
-		};
+		typography: TypographyConfig;
+		colors: ColorPalette;
 	};
+	spacing: SpacingConfig;
 }
 
 export const templateTypeEnum = pgEnum("template_type", ["ats", "standard"]);

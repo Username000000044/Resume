@@ -1,19 +1,19 @@
 import type { inferRouterOutputs } from "@trpc/server";
-import type { AppRouter } from "../../../../backend/src/appRouter";
 import { useResumeStore, type SubSectionData } from "#/store/useResumeStore";
-import { Card, CardContent } from "../ui/card";
-import { FieldGroup } from "../ui/field";
-import { FieldInput } from "./FieldInput";
-import { Button } from "../ui/button";
 import { cn } from "#/lib/utils";
 import { useShallow } from "zustand/react/shallow";
 import { MAX_BULLET_COUNT } from "./EditorTabs";
 import { GripHorizontal, Plus, Trash2 } from "lucide-react";
 import { BulletItem } from "./BulletItem";
 import { SubBulletItem } from "./SubBulletItem";
-import { useRef, useState, type RefObject } from "react";
+import { useRef, useState } from "react";
 import { useSortable } from "@dnd-kit/react/sortable";
 import { RestrictToVerticalAxis } from "@dnd-kit/abstract/modifiers";
+import type { AppRouter } from "../../../../../backend/src/appRouter";
+import { Button } from "#/components/ui/button";
+import { Card, CardContent } from "#/components/ui/card";
+import { FieldGroup } from "#/components/ui/field";
+import { FieldInput } from "./FieldInput";
 
 type SectionType =
   inferRouterOutputs<AppRouter>["templatesList"][number]["sections"][number];
@@ -32,7 +32,7 @@ export const SortableSubSectionItem = ({
   const { addMainBullet, removeSubSection, mainSectionsStorage } =
     useResumeStore(
       useShallow((state) => ({
-        mainSectionsStorage: state.mainSections,
+        mainSectionsStorage: state.persistantMainSections,
         addMainBullet: state.addMainBullet,
         removeSubSection: state.removeSubSection,
       })),
@@ -51,30 +51,32 @@ export const SortableSubSectionItem = ({
   return (
     <li ref={setElement} className="relative">
       {/* Section Actions */}
-      {section.manyInstances && (
-        <div className="absolute top-1/2 -translate-y-1/2 -left-10">
-          <div className="flex flex-col *:text-muted-foreground *:cursor-pointer *:hover:bg-transparent">
-            <Button
-              size="icon-sm"
-              variant="ghost"
-              ref={handleRef}
-              disabled={mainSectionsStorage[section.id].length === 1}
-            >
-              <GripHorizontal />
-            </Button>
-            <Button
-              size="icon-sm"
-              variant="ghost_destructive"
-              onClick={() => removeSubSection(section.id, subSectionIndex)}
-              disabled={
-                mainSectionsStorage[section.id][subSectionIndex].order === 0
-              }
-            >
-              <Trash2 />
-            </Button>
-          </div>
+      <div
+        className={cn("absolute top-1/2 -translate-y-1/2 -left-[35px]", {
+          hidden: !section.manyInstances,
+        })}
+      >
+        <div className="flex flex-col *:text-muted-foreground *:cursor-pointer *:hover:bg-transparent">
+          <Button
+            size="icon-sm"
+            variant="ghost"
+            ref={handleRef}
+            disabled={mainSectionsStorage[section.id].length === 1}
+          >
+            <GripHorizontal />
+          </Button>
+          <Button
+            size="icon-sm"
+            variant="ghost_destructive"
+            onClick={() => removeSubSection(section.id, subSectionIndex)}
+            disabled={
+              mainSectionsStorage[section.id][subSectionIndex].order === 0
+            }
+          >
+            <Trash2 />
+          </Button>
         </div>
-      )}
+      </div>
 
       {/* Section Content */}
       <Card
@@ -100,7 +102,11 @@ export const SortableSubSectionItem = ({
             <Button
               variant="outline"
               size="xs"
-              className={cn("col-span-full w-25 mt-8", {
+              className={cn("col-span-full w-25", {
+                "mt-8":
+                  Object.keys(
+                    mainSectionsStorage[section.id][subSectionIndex].fields,
+                  ).length !== 0,
                 "mb-8":
                   mainSectionsStorage[section.id][subSectionIndex].bullets
                     .length > 0,
@@ -136,8 +142,9 @@ export const SortableSubSectionItem = ({
                     <SubBulletItem
                       key={subBullet.id}
                       section={section}
-                      mainBullet={mainBullet}
                       subBullet={subBullet}
+                      mainBullet={mainBullet}
+                      mainBulletIndex={mainBulletIndex}
                       subSectionIndex={subSectionIndex}
                       subBulletIndex={subBulletIndex}
                     />

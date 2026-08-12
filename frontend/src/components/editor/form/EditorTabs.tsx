@@ -1,82 +1,39 @@
-import { notFound, useParams } from "@tanstack/react-router";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { trpc } from "#/utils/trpc";
-import { useEffect, useState } from "react";
 import { useResumeStore } from "#/store/useResumeStore";
 import { useShallow } from "zustand/react/shallow";
 import { DragDropProvider } from "@dnd-kit/react";
-import { Button } from "../ui/button";
 import { Plus } from "lucide-react";
 import { SortableSubSectionItem } from "./SortableSubSectionItem";
-import { ScrollArea, ScrollBar } from "../ui/scroll-area";
+import type { inferRouterOutputs } from "@trpc/server";
+import type { AppRouter } from "../../../../../backend/src/appRouter";
+import { ScrollArea } from "#/components/ui/scroll-area";
+import { Button } from "#/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
 
 export const MAX_BULLET_COUNT = 5;
 export const MAX_SUB_BULLET_COUNT = 5;
 const MAX_SUB_SECTION_COUNT = 4;
 
-export const EditorTabs = () => {
-  const {
-    initializeSections,
-    addSubSection,
-    reorderSubSections,
-    mainSectionsStorage,
-  } = useResumeStore(
-    useShallow((state) => ({
-      mainSectionsStorage: state.mainSections,
-      addMainBullet: state.addMainBullet,
-      addSubSection: state.addSubSection,
-      reorderSubSections: state.reorderSubSections,
-      initializeSections: state.initializeSections,
-    })),
-  );
+interface templateData {
+  templateData: inferRouterOutputs<AppRouter>["templateById"];
+}
 
-  const { templateId } = useParams({ from: "/create/$templateId" });
-  const { data: template, error } = useSuspenseQuery(
-    trpc.templateById.queryOptions(templateId),
-  );
-
-  const [isPayloadReady, setIsPayloadReady] = useState(false);
-
-  useEffect(() => {
-    // Persist zustand store name set
-    const persistName = useResumeStore.persist.getOptions().name;
-    if (template && persistName !== `template-${templateId}`) {
-      // Remove default name
-      if (persistName) {
-        localStorage.removeItem(persistName);
-      }
-
-      // Add dynamic name
-      useResumeStore.persist.setOptions({
-        name: `template-${templateId}`,
-      });
-
-      // Immediately pull local data for sections, field, and bullets
-      useResumeStore.persist.rehydrate();
-    }
-
-    // Populate zustand store with sections, field, and bullets
-    if (template.sections) {
-      const syncPayload = template.sections.map((s) => ({
-        id: s.id,
-        fieldIds: s.fields.map((f) => f.id),
-      }));
-
-      initializeSections(syncPayload);
-      setIsPayloadReady(true);
-    }
-  }, [template, templateId, initializeSections]);
-
-  if (error) notFound();
-  if (!isPayloadReady) return <div>Loading template configurations...</div>;
+export const EditorTabs = ({ templateData }: templateData) => {
+  const { addSubSection, reorderSubSections, persistantMainSectionsStorage } =
+    useResumeStore(
+      useShallow((state) => ({
+        persistantMainSectionsStorage: state.persistantMainSections,
+        addMainBullet: state.addMainBullet,
+        addSubSection: state.addSubSection,
+        reorderSubSections: state.reorderSubSections,
+      })),
+    );
 
   return (
-    <Tabs defaultValue="account" className="md:w-100 gap-0">
-      <ScrollArea className="px-4 ">
+    <Tabs defaultValue="account" className="w-[calc(100%-90px)] gap-0">
+      <ScrollArea className="mx-auto px-4 md:m-0">
         <TabsList className="bg-transparent py-0 overflow-y-hidden md:gap-4">
           {/* Tabs */}
-          {template.sections.map((section) => (
+          {templateData.sections.map((section) => (
             <TabsTrigger
               className="cursor-pointer px-3 rounded-b-none font-normal data-active:bg-primary data-active:text-primary-foreground data-active:hover:text-primary-foreground"
               value={section.title}
@@ -87,8 +44,9 @@ export const EditorTabs = () => {
             </TabsTrigger>
           ))}
         </TabsList>
+        {/* <ScrollBar orientation="horizontal" className="px-4 !h-[6px]" /> */}
       </ScrollArea>
-      {template.sections.map((section) => (
+      {templateData.sections.map((section) => (
         <TabsContent
           value={section.title}
           key={section.id}
@@ -102,7 +60,7 @@ export const EditorTabs = () => {
           >
             {/* Map main sections to expose sections*/}
             <ul className="flex flex-col gap-4">
-              {mainSectionsStorage[section.id].map(
+              {persistantMainSectionsStorage[section.id].map(
                 (subSection, subSectionIndex) => (
                   <SortableSubSectionItem
                     key={subSection.id}
@@ -124,7 +82,7 @@ export const EditorTabs = () => {
                 className="border-none shadow-sm ring-1 ring-foreground/5 cursor-pointer"
                 onClick={() => addSubSection(section.id)}
                 disabled={
-                  mainSectionsStorage[section.id].length >=
+                  persistantMainSectionsStorage[section.id].length >=
                   MAX_SUB_SECTION_COUNT
                 }
               >

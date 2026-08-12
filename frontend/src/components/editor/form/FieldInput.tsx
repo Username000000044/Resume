@@ -1,11 +1,12 @@
 import { debounce } from "lodash";
 import { cn } from "#/lib/utils";
 import type { inferRouterOutputs } from "@trpc/server";
-import { Field, FieldLabel } from "../ui/field";
-import { Input } from "../ui/input";
-import type { AppRouter } from "../../../../backend/src/appRouter";
 import { useResumeStore } from "#/store/useResumeStore";
-import { useEffect, useMemo, useState, type ChangeEvent } from "react";
+import { useEffect, useMemo, type ChangeEvent } from "react";
+import { useShallow } from "zustand/react/shallow";
+import type { AppRouter } from "../../../../../backend/src/appRouter";
+import { Field, FieldLabel } from "#/components/ui/field";
+import { Input } from "#/components/ui/input";
 
 type TemplateType = inferRouterOutputs<AppRouter>["templateById"];
 type SectionType = TemplateType["sections"][number];
@@ -22,17 +23,20 @@ export const FieldInput = ({
   section,
   subSectionIndex,
 }: FieldInputProps) => {
-  const updateField = useResumeStore((store) => store.updateField);
-  const sectionGroup = useResumeStore((store) => store.mainSections);
-
-  const [localValue, setLocalValue] = useState(
-    sectionGroup[section.id][subSectionIndex].fields[field.id] || "",
+  const { liveMainSections, updateLiveField, updateField } = useResumeStore(
+    useShallow((store) => ({
+      liveMainSections: store.liveMainSections,
+      updateLiveField: store.updateLiveField,
+      updateField: store.updateField,
+    })),
   );
+
+  const liveValue =
+    liveMainSections[section.id][subSectionIndex].fields[field.id] || "";
 
   const debouncedSave = useMemo(
     () =>
       debounce((value) => {
-        console.log("Saving to localstorage:", value);
         updateField(section.id, subSectionIndex, field.id, value);
       }, 500), // 500ms debounce
     [section.id, field.id, subSectionIndex, updateField],
@@ -45,7 +49,7 @@ export const FieldInput = ({
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setLocalValue(value); // Fast
+    updateLiveField(section.id, subSectionIndex, field.id, value); // Fast
     debouncedSave(value); // Waits for user to stop typing before saving
   };
 
@@ -64,7 +68,7 @@ export const FieldInput = ({
         name={field.name}
         placeholder={field?.placeholder || ""}
         type={field.type}
-        value={localValue}
+        value={liveValue}
         onChange={handleChange}
         onBlur={() => debouncedSave.flush()}
       />
