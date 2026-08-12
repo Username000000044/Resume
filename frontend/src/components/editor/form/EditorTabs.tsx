@@ -46,7 +46,7 @@ export const EditorTabs = ({ templateData }: templateData) => {
         </TabsList>
         {/* <ScrollBar orientation="horizontal" className="px-4 !h-[6px]" /> */}
       </ScrollArea>
-      {templateData.sections.map((section) => (
+      {templateData.sections.map((section, sectionIndex) => (
         <TabsContent
           value={section.title}
           key={section.id}
@@ -65,8 +65,10 @@ export const EditorTabs = ({ templateData }: templateData) => {
                   <SortableSubSectionItem
                     key={subSection.id}
                     section={section}
+                    sectionIndex={sectionIndex}
                     subSection={subSection}
                     subSectionIndex={subSectionIndex}
+                    templateData={templateData}
                   />
                 ),
               )}

@@ -15,19 +15,23 @@ import { Card, CardContent } from "#/components/ui/card";
 import { FieldGroup } from "#/components/ui/field";
 import { FieldInput } from "./FieldInput";
 
-type SectionType =
-  inferRouterOutputs<AppRouter>["templatesList"][number]["sections"][number];
+type TemplateType = inferRouterOutputs<AppRouter>["templatesList"][number];
+type SectionType = TemplateType["sections"][number];
 
 interface SectionCardTypes {
   section: SectionType;
+  sectionIndex: number;
   subSection: SubSectionData;
   subSectionIndex: number;
+  templateData: TemplateType;
 }
 
 export const SortableSubSectionItem = ({
   section,
+  sectionIndex,
   subSection,
   subSectionIndex,
+  templateData,
 }: SectionCardTypes) => {
   const { addMainBullet, removeSubSection, mainSectionsStorage } =
     useResumeStore(
@@ -103,10 +107,7 @@ export const SortableSubSectionItem = ({
               variant="outline"
               size="xs"
               className={cn("col-span-full w-25", {
-                "mt-8":
-                  Object.keys(
-                    mainSectionsStorage[section.id][subSectionIndex].fields,
-                  ).length !== 0,
+                "mt-8": templateData.sections[sectionIndex].fields.length >= 1,
                 "mb-8":
                   mainSectionsStorage[section.id][subSectionIndex].bullets
                     .length > 0,
