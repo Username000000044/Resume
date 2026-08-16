@@ -8,13 +8,15 @@ import {
 	jsonb,
 	integer,
 	boolean,
+	uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 interface SpacingConfig {
 	page_margin: number; // (in)
-	section_gap: number; // sapce between sections (pt)
-	content_gap: number; // space between fields/bullets (pt)
-	line_height: number; // individual character height (pt)
+	section_gap: number; // space between sections
+	instance_gap: number; // sapce between section instances (pt) (eg. job1, job2)
+	divider_gap: number; // space on the top + bottom of dividers (pt)
+	line_height: number; // individual character height (pt) multiplied by scale curve.
 }
 
 interface TypographyConfig {
@@ -106,7 +108,7 @@ export const fieldsTable = pgTable("fields", {
 	name: varchar({ length: 50 }).notNull(),
 	label: varchar({ length: 50 }).notNull(),
 	type: inputTypeEnum().notNull(),
+	row: integer().notNull(),
+	rowIndex: integer().notNull(),
 	placeholder: text(),
-	required: varchar({ length: 5 }).notNull().default("false"),
-	order: integer().notNull(),
 });

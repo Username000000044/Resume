@@ -6,9 +6,9 @@ CREATE TABLE "fields" (
 	"name" varchar(50) NOT NULL,
 	"label" varchar(50) NOT NULL,
 	"type" "input_type" NOT NULL,
-	"placeholder" text,
-	"required" varchar(5) DEFAULT 'false' NOT NULL,
-	"order" integer NOT NULL
+	"row" integer NOT NULL,
+	"rowIndex" integer NOT NULL,
+	"placeholder" text
 );
 --> statement-breakpoint
 CREATE TABLE "sections" (

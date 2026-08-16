@@ -1,7 +1,7 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "991354c6-e935-49ad-8832-972100a0a6ba",
+  "id": "45a89e72-0733-4871-a523-f3e73dc93a3b",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
@@ -123,27 +123,14 @@
       "table": "fields"
     },
     {
-      "type": "text",
+      "type": "integer",
       "typeSchema": null,
-      "notNull": false,
+      "notNull": true,
       "dimensions": 0,
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "placeholder",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "fields"
-    },
-    {
-      "type": "varchar(5)",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": "'false'",
-      "generated": null,
-      "identity": null,
-      "name": "required",
+      "name": "row",
       "entityType": "columns",
       "schema": "public",
       "table": "fields"
@@ -156,7 +143,20 @@
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "order",
+      "name": "rowIndex",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "fields"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "placeholder",
       "entityType": "columns",
       "schema": "public",
       "table": "fields"

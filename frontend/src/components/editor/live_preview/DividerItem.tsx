@@ -13,16 +13,11 @@ export const DividerItem = ({ templateData }: DividerItemProps) => {
 
   return (
     <hr
-      className={cn("border-[var(--divider-color)]", {
+      className={cn("border-[var(--divider-color)] my-[var(--divider-gap)]", {
         "border-solid": dividerStyle === "solid",
         "border-dashed": dividerStyle === "dashed",
         "border-solid border-[1.2pt]": dividerStyle === "thick",
       })}
-      style={
-        {
-          "--divider-color": templateData.default_config.theme.colors.divider,
-        } as React.CSSProperties
-      }
     />
   );
 };

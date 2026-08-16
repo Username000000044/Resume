@@ -91,14 +91,21 @@ export const SortableSubSectionItem = ({
         <CardContent>
           {/* Section Fields */}
           <FieldGroup className="grid grid-cols-4 gap-3">
-            {section.fields.map((field) => (
-              <FieldInput
-                key={field.id}
-                field={field}
-                section={section}
-                subSectionIndex={subSectionIndex}
-              />
-            ))}
+            {section.fields
+              .sort((a, b) => {
+                if (a.row === b.row) {
+                  return a.rowIndex - b.rowIndex;
+                }
+                return a.row - b.row;
+              })
+              .map((field) => (
+                <FieldInput
+                  key={field.id}
+                  field={field}
+                  section={section}
+                  subSectionIndex={subSectionIndex}
+                />
+              ))}
           </FieldGroup>
 
           {/* Bullets */}

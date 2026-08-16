@@ -53,7 +53,7 @@ export const FieldInput = ({
     debouncedSave(value); // Waits for user to stop typing before saving
   };
 
-  const colsTwo: FieldType["type"][] = ["date", "tel", "email"];
+  const colsTwo: FieldType["type"][] = ["date", "tel", "email", "color"];
 
   return (
     <Field
@@ -63,7 +63,7 @@ export const FieldInput = ({
           field.name.toLowerCase().includes("name"),
       })}
     >
-      <FieldLabel className="font-normal">{field.name}</FieldLabel>
+      <FieldLabel className="font-normal">{field.label}</FieldLabel>
       <Input
         name={field.name}
         placeholder={field?.placeholder || ""}
