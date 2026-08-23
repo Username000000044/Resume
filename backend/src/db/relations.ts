@@ -17,5 +17,15 @@ export const relations = defineRelations(schema, (r) => ({
 			from: r.fieldsTable.sectionsId,
 			to: r.sectionsTable.id,
 		}),
+		alignment: r.one.fieldAlignmentsTable({
+			from: r.fieldsTable.id,
+			to: r.fieldAlignmentsTable.fieldId,
+		}),
+	},
+	fieldAlignmentsTable: {
+		field: r.one.fieldsTable({
+			from: r.fieldAlignmentsTable.fieldId,
+			to: r.fieldsTable.id,
+		}),
 	},
 }));

@@ -1,10 +1,9 @@
-import type { inferRouterOutputs } from "@trpc/server";
-import type { AppRouter } from "../../../backend/src/appRouter";
 import clsx from "clsx";
 import { useTemplateStore } from "#/store/useTemplateStore";
+import type { TemplateListType } from "#/types/Template";
 
 interface GalleryProps {
-  data: inferRouterOutputs<AppRouter>["templatesList"];
+  data: TemplateListType;
 }
 
 export const TemplatesGallery = ({ data }: GalleryProps) => {

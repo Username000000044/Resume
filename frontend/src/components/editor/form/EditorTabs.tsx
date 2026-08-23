@@ -3,21 +3,20 @@ import { useShallow } from "zustand/react/shallow";
 import { DragDropProvider } from "@dnd-kit/react";
 import { Plus } from "lucide-react";
 import { SortableSubSectionItem } from "./SortableSubSectionItem";
-import type { inferRouterOutputs } from "@trpc/server";
-import type { AppRouter } from "../../../../../backend/src/appRouter";
 import { ScrollArea } from "#/components/ui/scroll-area";
 import { Button } from "#/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
+import type { TemplateType } from "#/types/Template";
 
 export const MAX_BULLET_COUNT = 5;
 export const MAX_SUB_BULLET_COUNT = 5;
 const MAX_SUB_SECTION_COUNT = 4;
 
-interface templateData {
-  templateData: inferRouterOutputs<AppRouter>["templateById"];
+interface EditorTabsProps {
+  templateData: TemplateType;
 }
 
-export const EditorTabs = ({ templateData }: templateData) => {
+export const EditorTabs = ({ templateData }: EditorTabsProps) => {
   const { addSubSection, reorderSubSections, persistantMainSectionsStorage } =
     useResumeStore(
       useShallow((state) => ({

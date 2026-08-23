@@ -1,16 +1,11 @@
 import { debounce } from "lodash";
 import { cn } from "#/lib/utils";
-import type { inferRouterOutputs } from "@trpc/server";
 import { useResumeStore } from "#/store/useResumeStore";
 import { useEffect, useMemo, type ChangeEvent } from "react";
 import { useShallow } from "zustand/react/shallow";
-import type { AppRouter } from "../../../../../backend/src/appRouter";
 import { Field, FieldLabel } from "#/components/ui/field";
 import { Input } from "#/components/ui/input";
-
-type TemplateType = inferRouterOutputs<AppRouter>["templateById"];
-type SectionType = TemplateType["sections"][number];
-type FieldType = TemplateType["sections"][number]["fields"][number];
+import type { FieldType, SectionType } from "#/types/Template";
 
 interface FieldInputProps {
   field: FieldType;
@@ -60,12 +55,12 @@ export const FieldInput = ({
       className={cn("col-span-full gap-0", {
         "col-span-2":
           colsTwo.includes(field.type) ||
-          field.name.toLowerCase().includes("name"),
+          field.label.toLowerCase().includes("name"),
       })}
     >
       <FieldLabel className="font-normal">{field.label}</FieldLabel>
       <Input
-        name={field.name}
+        name={field.label.toLowerCase().replaceAll(" ", "")}
         placeholder={field?.placeholder || ""}
         type={field.type}
         value={liveValue}

@@ -1,8 +1,5 @@
-import type { inferRouterOutputs } from "@trpc/server";
-import type { AppRouter } from "../../../../../backend/src/appRouter";
 import { cn } from "#/lib/utils";
-
-type TemplateType = inferRouterOutputs<AppRouter>["templateById"];
+import type { TemplateType } from "#/types/Template";
 
 interface DividerItemProps {
   templateData: TemplateType;

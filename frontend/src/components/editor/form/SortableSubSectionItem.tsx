@@ -9,14 +9,11 @@ import { SubBulletItem } from "./SubBulletItem";
 import { useRef, useState } from "react";
 import { useSortable } from "@dnd-kit/react/sortable";
 import { RestrictToVerticalAxis } from "@dnd-kit/abstract/modifiers";
-import type { AppRouter } from "../../../../../backend/src/appRouter";
 import { Button } from "#/components/ui/button";
 import { Card, CardContent } from "#/components/ui/card";
 import { FieldGroup } from "#/components/ui/field";
-import { FieldInput } from "./FieldInput";
-
-type TemplateType = inferRouterOutputs<AppRouter>["templatesList"][number];
-type SectionType = TemplateType["sections"][number];
+import { FieldInput } from "./FieldItem";
+import type { SectionType, TemplateType } from "#/types/Template";
 
 interface SectionCardTypes {
   section: SectionType;
@@ -93,10 +90,14 @@ export const SortableSubSectionItem = ({
           <FieldGroup className="grid grid-cols-4 gap-3">
             {section.fields
               .sort((a, b) => {
-                if (a.row === b.row) {
-                  return a.rowIndex - b.rowIndex;
-                }
-                return a.row - b.row;
+                const alignA = a.alignment;
+                const alignB = b.alignment;
+
+                if (!alignA || !alignB) return 0;
+
+                return alignA.rowIndex === alignB.rowIndex
+                  ? alignA.itemOrder - alignB.itemOrder
+                  : alignA.rowIndex - alignB.rowIndex;
               })
               .map((field) => (
                 <FieldInput
@@ -109,25 +110,23 @@ export const SortableSubSectionItem = ({
           </FieldGroup>
 
           {/* Bullets */}
-          {section.manyInstances && (
-            <Button
-              variant="outline"
-              size="xs"
-              className={cn("col-span-full w-25", {
-                "mt-8": templateData.sections[sectionIndex].fields.length >= 1,
-                "mb-8":
-                  mainSectionsStorage[section.id][subSectionIndex].bullets
-                    .length > 0,
-              })}
-              onClick={() => addMainBullet(section.id, subSectionIndex)}
-              disabled={
+          <Button
+            variant="outline"
+            size="xs"
+            className={cn("col-span-full w-25", {
+              "mt-8": templateData.sections[sectionIndex].fields.length >= 1,
+              "mb-8":
                 mainSectionsStorage[section.id][subSectionIndex].bullets
-                  .length >= MAX_BULLET_COUNT
-              }
-            >
-              <Plus /> Add Bullet
-            </Button>
-          )}
+                  .length > 0,
+            })}
+            onClick={() => addMainBullet(section.id, subSectionIndex)}
+            disabled={
+              mainSectionsStorage[section.id][subSectionIndex].bullets.length >=
+              MAX_BULLET_COUNT
+            }
+          >
+            <Plus /> Add Bullet
+          </Button>
 
           {mainSectionsStorage[section.id][subSectionIndex].bullets.map(
             (mainBullet, mainBulletIndex) => (

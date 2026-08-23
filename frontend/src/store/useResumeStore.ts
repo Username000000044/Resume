@@ -2,7 +2,6 @@ import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { persist } from "zustand/middleware";
 import { move } from "@dnd-kit/helpers";
-import { set } from "lodash";
 
 export interface MainBullet {
 	id: string;

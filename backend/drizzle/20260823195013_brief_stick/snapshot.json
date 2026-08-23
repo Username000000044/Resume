@@ -1,11 +1,35 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "45a89e72-0733-4871-a523-f3e73dc93a3b",
+  "id": "ea08d91f-0496-4821-b665-ae9f5d7f23d3",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
   "ddl": [
+    {
+      "values": [
+        "left",
+        "center",
+        "right"
+      ],
+      "name": "field_position",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "values": [
+        "header",
+        "secondary_header",
+        "section_title",
+        "entity_title",
+        "role_title",
+        "metadata",
+        "body"
+      ],
+      "name": "render_role",
+      "entityType": "enums",
+      "schema": "public"
+    },
     {
       "values": [
         "button",
@@ -26,7 +50,7 @@
         "url",
         "week"
       ],
-      "name": "input_type",
+      "name": "field_type",
       "entityType": "enums",
       "schema": "public"
     },
@@ -37,6 +61,12 @@
       ],
       "name": "template_type",
       "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "field_alignments",
+      "entityType": "tables",
       "schema": "public"
     },
     {
@@ -56,6 +86,71 @@
       "name": "templates",
       "entityType": "tables",
       "schema": "public"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "gen_random_uuid()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "field_alignments"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "field_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "field_alignments"
+    },
+    {
+      "type": "field_position",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "field_position",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "field_alignments"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "row_index",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "field_alignments"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "item_order",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "field_alignments"
     },
     {
       "type": "uuid",
@@ -110,7 +205,20 @@
       "table": "fields"
     },
     {
-      "type": "input_type",
+      "type": "render_role",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "render_role",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "fields"
+    },
+    {
+      "type": "field_type",
       "typeSchema": "public",
       "notNull": true,
       "dimensions": 0,
@@ -118,32 +226,6 @@
       "generated": null,
       "identity": null,
       "name": "type",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "fields"
-    },
-    {
-      "type": "integer",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "row",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "fields"
-    },
-    {
-      "type": "integer",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "rowIndex",
       "entityType": "columns",
       "schema": "public",
       "table": "fields"
@@ -214,6 +296,19 @@
       "table": "sections"
     },
     {
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "default_config",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "sections"
+    },
+    {
       "type": "boolean",
       "typeSchema": null,
       "notNull": true,
@@ -260,7 +355,7 @@
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "type",
+      "name": "template_type",
       "entityType": "columns",
       "schema": "public",
       "table": "templates"
@@ -333,6 +428,23 @@
     {
       "nameExplicit": false,
       "columns": [
+        "field_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "fields",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "field_alignments_field_id_fields_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "field_alignments"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
         "sections_id"
       ],
       "schemaTo": "public",
@@ -369,6 +481,16 @@
         "id"
       ],
       "nameExplicit": false,
+      "name": "field_alignments_pkey",
+      "schema": "public",
+      "table": "field_alignments",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
       "name": "fields_pkey",
       "schema": "public",
       "table": "fields",
@@ -393,6 +515,28 @@
       "schema": "public",
       "table": "templates",
       "entityType": "pks"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "field_id"
+      ],
+      "nullsNotDistinct": false,
+      "name": "field_alignments_field_id_key",
+      "schema": "public",
+      "table": "field_alignments",
+      "entityType": "uniques"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "order"
+      ],
+      "nullsNotDistinct": false,
+      "name": "sections_order_key",
+      "schema": "public",
+      "table": "sections",
+      "entityType": "uniques"
     }
   ],
   "renames": []

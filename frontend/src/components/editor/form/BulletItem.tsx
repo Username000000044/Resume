@@ -14,9 +14,7 @@ import {
 import type { AppRouter } from "../../../../../backend/src/appRouter";
 import { Field, FieldLabel } from "#/components/ui/field";
 import { Button } from "#/components/ui/button";
-
-type TemplateType = inferRouterOutputs<AppRouter>["templateById"];
-type SectionType = TemplateType["sections"][number];
+import type { SectionType } from "#/types/Template";
 
 interface FieldInputProps {
   mainBullet: MainBullet;

@@ -16,9 +16,7 @@ import {
   InputGroupAddon,
   InputGroupButton,
 } from "#/components/ui/input-group";
-
-type TemplateType = inferRouterOutputs<AppRouter>["templateById"];
-type SectionType = TemplateType["sections"][number];
+import type { SectionType } from "#/types/Template";
 
 interface FieldInputProps {
   section: SectionType;

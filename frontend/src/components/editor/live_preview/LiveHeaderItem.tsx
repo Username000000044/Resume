@@ -1,10 +1,7 @@
 import type { inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "../../../../../backend/src/appRouter";
 import { useResumeStore } from "#/store/useResumeStore";
-import { SCALE_CURVES, TEXT_ALIGNMENT } from "./LiveTemplate";
-
-type TemplateType = inferRouterOutputs<AppRouter>["templateById"];
-type SectionType = TemplateType["sections"][number];
+import type { SectionType, TemplateType } from "#/types/Template";
 
 interface HeaderItemProps {
   templateData: TemplateType;

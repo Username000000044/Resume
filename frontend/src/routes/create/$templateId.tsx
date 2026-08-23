@@ -60,7 +60,7 @@ function RouteComponent() {
   return (
     <div className="pt-12 lg:py-18">
       <div className="grid lg:grid-cols-[auto_auto] gap-10 max-w-min mx-auto">
-        <div className="flex flex-col items-center xl:items-start w-full">
+        <div className="flex flex-col items-center 2xl:items-start w-full">
           <h1 className="text-4xl pb-8 text-primary font-bold tracking-wide">
             Resume Editor
           </h1>

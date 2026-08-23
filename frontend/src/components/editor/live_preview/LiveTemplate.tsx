@@ -1,6 +1,4 @@
 import { useResumeStore } from "#/store/useResumeStore";
-import type { inferRouterOutputs } from "@trpc/server";
-import type { AppRouter } from "../../../../../backend/src/appRouter";
 import {
   Empty,
   EmptyHeader,
@@ -8,11 +6,11 @@ import {
   EmptyDescription,
 } from "../../ui/empty";
 import { LivePaper } from "../../Paper";
-import { SortableSectionItem } from "./SortableSectionItem";
-import { HeaderItem } from "./HeaderItem";
+import { SortableSectionItem } from "./LiveSortableSectionItem";
+import type { TemplateType } from "#/types/Template";
 
-interface templateData {
-  templateData: inferRouterOutputs<AppRouter>["templateById"];
+interface LiveTemplateProps {
+  templateData: TemplateType;
 }
 
 export const SCALE_CURVES = {
@@ -21,13 +19,13 @@ export const SCALE_CURVES = {
   minimal: { h3: 1.05, h2: 1.15, h1: 1.5, line_height: 1.34 },
 } as const;
 
-export const TEXT_ALIGNMENT = {
+export const ALIGNMENT_MAP = {
   left: "text-left",
   center: "text-center",
   right: "text-right",
 } as const;
 
-export const LiveTemplate = ({ templateData }: templateData) => {
+export const LiveTemplate = ({ templateData }: LiveTemplateProps) => {
   const liveSections = useResumeStore((store) => store.liveMainSections);
 
   if (!liveSections) return <div>Loading template live preview...</div>;
@@ -106,7 +104,7 @@ export const LiveTemplate = ({ templateData }: templateData) => {
       >
         {/* Header */}
         {/* {templateData.sections
-          .filter((dbSection) => dbSection.order === 1)
+          .filter((dbSection) => dbSection.order === 0)
           .map((dbSection) => (
             <HeaderItem
               templateData={templateData}
@@ -118,7 +116,7 @@ export const LiveTemplate = ({ templateData }: templateData) => {
         {/* Sections */}
         <div className="flex flex-col gap-[var(--section-gap)]">
           {templateData.sections
-            .filter((dbSection) => dbSection.order !== 1)
+            .filter((dbSection) => dbSection.order !== 0)
             .map((dbSection) => (
               <SortableSectionItem
                 templateData={templateData}

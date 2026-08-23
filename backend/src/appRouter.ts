@@ -11,7 +11,9 @@ export const appRouter = router({
 					orderBy: (sections, { asc }) => [asc(sections.order)],
 					with: {
 						fields: {
-							orderBy: (fields, { asc }) => [asc(fields.row)],
+							with: {
+								alignment: true,
+							},
 						},
 					},
 				},
@@ -37,7 +39,9 @@ export const appRouter = router({
 					orderBy: (sections, { asc }) => [asc(sections.order)],
 					with: {
 						fields: {
-							orderBy: (fields, { asc }) => [asc(fields.row)],
+							with: {
+								alignment: true,
+							},
 						},
 					},
 				},
