@@ -1,15 +1,20 @@
 import { useResumeStore } from "#/store/useResumeStore";
-import { ALIGNMENT_MAP } from "./LiveTemplate";
+import { ALIGNMENT_MAP, SCALE_CURVES } from "./LiveTemplate";
 import { DividerItem } from "./DividerItem";
-import { FieldItem } from "./LiveFieldItem";
+import { LiveFieldItem } from "./LiveFieldItem";
 import type { FieldType, SectionType, TemplateType } from "#/types/Template";
+import {
+  constructLayoutMatrix,
+  getFieldProperties,
+} from "#/utils/live-preview";
+import { cn } from "#/lib/utils";
 
 interface SectionItemProps {
   templateData: TemplateType;
   dbSection: SectionType;
 }
 
-export const SortableSectionItem = ({
+export const LiveSortableSectionItem = ({
   dbSection,
   templateData,
 }: SectionItemProps) => {
@@ -20,9 +25,11 @@ export const SortableSectionItem = ({
     ALIGNMENT_MAP[dbSection.default_config.alignment.title];
 
   return (
-    <section className={`text-(length:--font_size_base) text-wrap`}>
+    <section className={`text-(length:--font-size-base) text-wrap`}>
       {/* Section Title */}
-      <h2 className={`text-(length:--h2-size) font-bold ${titleAlignment}`}>
+      <h2
+        className={`text-(length:--section-title-size) text-[var(--section-title-color)] font-[var(--section-title-weight)]  ${titleAlignment}`}
+      >
         {dbSection.title}
       </h2>
 
@@ -31,23 +38,14 @@ export const SortableSectionItem = ({
       )}
 
       {/* Sub Sections */}
-      <div className="flex flex-col gap-[var(--instance-gap)]">
+      <div
+        className={cn("flex flex-col", {
+          "gap-[var(--instance-gap)]":
+            dbSection.default_config.spacing.instance_gap,
+        })}
+      >
         {liveSections[dbSection.id].map((liveSubSection) => {
           const matrix = constructLayoutMatrix(dbSection.fields);
-
-          // Exposes Field Template Data
-          const getFieldProperties = (field: FieldType) => {
-            const fieldRole = field.renderRole;
-            const fieldWeight =
-              templateData.default_config.theme.typography.font_weight[
-                fieldRole
-              ];
-            // const fieldColor = templateData.default_config.theme.colors.
-            const FieldElement =
-              templateData.default_config.elements[fieldRole] ?? "p";
-
-            return { fieldRole, fieldWeight, FieldElement };
-          };
 
           // Formats Input Field Value
           const formatFieldValue = (field: FieldType) => {
@@ -62,6 +60,7 @@ export const SortableSectionItem = ({
             if (field.name.includes("location") && value) {
               // Previous and current element are in the same position + previous item exists
               if (
+                previousFieldInRow &&
                 previousFieldInRow.alignment?.position ===
                   field.alignment?.position &&
                 liveSubSection.fields[previousFieldInRow.id]
@@ -108,10 +107,10 @@ export const SortableSectionItem = ({
                       .filter((field) => field.alignment?.position === "left")
                       .map((field) => {
                         return (
-                          <FieldItem
+                          <LiveFieldItem
                             key={field.id}
                             value={formatFieldValue(field)}
-                            properties={getFieldProperties(field)}
+                            properties={getFieldProperties(field, templateData)}
                           />
                         );
                       })}
@@ -123,10 +122,10 @@ export const SortableSectionItem = ({
                       .filter((field) => field.alignment?.position === "center")
                       .map((field) => {
                         return (
-                          <FieldItem
+                          <LiveFieldItem
                             key={field.id}
                             value={formatFieldValue(field)}
-                            properties={getFieldProperties(field)}
+                            properties={getFieldProperties(field, templateData)}
                           />
                         );
                       })}
@@ -138,10 +137,10 @@ export const SortableSectionItem = ({
                       .filter((field) => field.alignment?.position === "right")
                       .map((field) => {
                         return (
-                          <FieldItem
+                          <LiveFieldItem
                             key={field.id}
                             value={formatFieldValue(field)}
-                            properties={getFieldProperties(field)}
+                            properties={getFieldProperties(field, templateData)}
                           />
                         );
                       })}
@@ -150,13 +149,13 @@ export const SortableSectionItem = ({
               ))}
 
               {/* Section Bullets */}
-              <ul className="list-[var(--bullet-style)] list-inside pl-8">
+              <ul className="list-[var(--bullet-style)] text-[var(--bullet-color)] font-[var(--bullet-weight)] pl-[var(--bullet-indentation)] list-inside">
                 {liveSubSection.bullets.map((bullet) => (
                   <li key={bullet.id}>
                     {bullet.text}
 
                     {/* Bullet's Sub Bullets */}
-                    <ul className="list-[var(--sub-bullet-style)] list-inside pl-8">
+                    <ul className="list-[var(--sub-bullet-style)] pl-[var(--bullet-indentation)] list-inside">
                       {bullet.subBullets.map((subBullet) => (
                         <li key={subBullet.id}>{subBullet.text}</li>
                       ))}
@@ -179,29 +178,4 @@ const formatDate = (unformattedDate: Date) => {
   const year = unformattedDate.getFullYear();
 
   return `${month}\u00A0${year}`;
-};
-
-const constructLayoutMatrix = (fields: FieldType[]) => {
-  const matrix: FieldType[][] = [];
-
-  for (const field of fields) {
-    // Fallback for missing layout metadata
-    const rowIndex = field.alignment?.rowIndex ?? 0;
-
-    // Ensure nested row array exists
-    if (!matrix[rowIndex]) {
-      matrix[rowIndex] = [];
-    }
-
-    matrix[rowIndex].push(field);
-  }
-
-  // Remove empty gaps and sort row by interOrder horizontally
-  return matrix
-    .filter(Boolean)
-    .map((row) =>
-      row.sort(
-        (a, b) => (a.alignment?.itemOrder ?? 0) - (b.alignment?.itemOrder ?? 0),
-      ),
-    );
 };

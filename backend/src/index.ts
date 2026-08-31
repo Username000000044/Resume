@@ -8,7 +8,8 @@ const app = new Hono();
 app.use(
 	"/trpc/*",
 	cors({
-		origin: "http://localhost:3000", // Replace with your frontend URL
+		origin: ["http://localhost:3000"], // Replace with your frontend URL
+		credentials: true,
 		allowMethods: ["GET", "POST", "OPTIONS"],
 		allowHeaders: ["Content-Type", "Authorization"],
 		exposeHeaders: ["Content-Length"],

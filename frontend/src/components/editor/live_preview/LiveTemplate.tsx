@@ -6,17 +6,42 @@ import {
   EmptyDescription,
 } from "../../ui/empty";
 import { LivePaper } from "../../Paper";
-import { SortableSectionItem } from "./LiveSortableSectionItem";
+import { LiveSortableSectionItem } from "./LiveSortableSectionItem";
 import type { TemplateType } from "#/types/Template";
+import { LiveHeaderItem } from "./LiveHeaderItem";
 
 interface LiveTemplateProps {
   templateData: TemplateType;
 }
 
 export const SCALE_CURVES = {
-  editorial: { h3: 1.25, h2: 1.6, h1: 2.5, line_height: 1.45 },
-  balanced: { h3: 1.15, h2: 1.35, h1: 2.0, line_height: 1.4 },
-  minimal: { h3: 1.05, h2: 1.15, h1: 1.5, line_height: 1.34 },
+  editorial: {
+    h1: 2.5,
+    h2: 1.6,
+    h3: 1.25,
+    h4: 1.05,
+    p: 1,
+    span: 1,
+    line_height: 1.45,
+  },
+  balanced: {
+    h1: 2.0,
+    h2: 1.35,
+    h3: 1.15,
+    h4: 1.0,
+    p: 1,
+    span: 1,
+    line_height: 1.4,
+  },
+  minimal: {
+    h1: 1.5,
+    h2: 1.15,
+    h3: 1.05,
+    h4: 0.95,
+    p: 1,
+    span: 1,
+    line_height: 1.34,
+  },
 } as const;
 
 export const ALIGNMENT_MAP = {
@@ -77,20 +102,19 @@ export const LiveTemplate = ({ templateData }: LiveTemplateProps) => {
   return (
     <div className="flex flex-col gap-8 w-full">
       <LivePaper
-        className="flex flex-col text-(length:--font_size_base) gap-[var(--section-gap)] leading-[var(--line-height)] !p-[var(--page-margin)]"
+        className="flex flex-col text-(length:--font-size-base) leading-[var(--line-f)] !p-[var(--page-margin)]"
         style={
           {
             // Typography
-            "--font_size_base": `${font_size_base}pt`,
-            "--h1-size": `${font_size_base * font_scale_curve.h1}pt`,
-            "--h2-size": `${font_size_base * font_scale_curve.h2}pt`,
-            "--h3-size": `${font_size_base * font_scale_curve.h3}pt`,
+            "--font-size-base": `${font_size_base}pt`,
+            "--section-title-size": `${font_size_base * font_scale_curve.h2}pt`,
 
             // Spacing
             "--page-margin": `${page_margin}in`,
             "--section-gap": `${templateData.default_config.spacing.section_gap}pt`,
             "--instance-gap": `${templateData.default_config.spacing.instance_gap}pt`,
             "--divider-gap": `${templateData.default_config.spacing.divider_gap}pt`,
+            "--bullet-indentation": `${templateData.default_config.spacing.bullet_indentation}pt`,
             "--line-height": `${font_size_base * line_height}pt`,
 
             // Decorations
@@ -98,27 +122,44 @@ export const LiveTemplate = ({ templateData }: LiveTemplateProps) => {
               templateData.default_config.decorations.bullet_style,
             "--sub-bullet-style":
               templateData.default_config.decorations.sub_bullet_style,
+
+            //Colors (Field colors are handled dynamically in the LiveFieldItem component)
             "--divider-color": templateData.default_config.theme.colors.divider,
+            "--header-color": templateData.default_config.theme.colors.heading,
+            "--section-title_color":
+              templateData.default_config.theme.colors.section_title,
+            "--bullet-color": templateData.default_config.theme.colors.body,
+
+            //Weight (Field weight are handled dynamically in the LiveFieldItem componet)
+            "--header-weight":
+              templateData.default_config.theme.typography.font_weight.heading,
+            "--section-title-weight":
+              templateData.default_config.theme.typography.font_weight
+                .section_title,
+            "--bullet-weight":
+              templateData.default_config.theme.typography.font_weight.body,
           } as React.CSSProperties
         }
       >
         {/* Header */}
-        {/* {templateData.sections
-          .filter((dbSection) => dbSection.order === 0)
-          .map((dbSection) => (
-            <HeaderItem
-              templateData={templateData}
-              dbSection={dbSection}
-              key={dbSection.id}
-            />
-          ))} */}
+        <div className="pb-[var(--section-gap)]">
+          {templateData.sections
+            .filter((dbSection) => dbSection.order === 0)
+            .map((dbSection) => (
+              <LiveHeaderItem
+                templateData={templateData}
+                dbSection={dbSection}
+                key={dbSection.id}
+              />
+            ))}
+        </div>
 
         {/* Sections */}
         <div className="flex flex-col gap-[var(--section-gap)]">
           {templateData.sections
             .filter((dbSection) => dbSection.order !== 0)
             .map((dbSection) => (
-              <SortableSectionItem
+              <LiveSortableSectionItem
                 templateData={templateData}
                 dbSection={dbSection}
                 key={dbSection.id}
@@ -126,7 +167,7 @@ export const LiveTemplate = ({ templateData }: LiveTemplateProps) => {
             ))}
         </div>
       </LivePaper>
-      <LivePaper />
+      {/* <LivePaper /> */}
     </div>
   );
 };

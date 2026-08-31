@@ -110,23 +110,25 @@ export const SortableSubSectionItem = ({
           </FieldGroup>
 
           {/* Bullets */}
-          <Button
-            variant="outline"
-            size="xs"
-            className={cn("col-span-full w-25", {
-              "mt-8": templateData.sections[sectionIndex].fields.length >= 1,
-              "mb-8":
+          {section.order !== 0 && (
+            <Button
+              variant="outline"
+              size="xs"
+              className={cn("col-span-full w-25", {
+                "mt-8": templateData.sections[sectionIndex].fields.length >= 1,
+                "mb-8":
+                  mainSectionsStorage[section.id][subSectionIndex].bullets
+                    .length > 0,
+              })}
+              onClick={() => addMainBullet(section.id, subSectionIndex)}
+              disabled={
                 mainSectionsStorage[section.id][subSectionIndex].bullets
-                  .length > 0,
-            })}
-            onClick={() => addMainBullet(section.id, subSectionIndex)}
-            disabled={
-              mainSectionsStorage[section.id][subSectionIndex].bullets.length >=
-              MAX_BULLET_COUNT
-            }
-          >
-            <Plus /> Add Bullet
-          </Button>
+                  .length >= MAX_BULLET_COUNT
+              }
+            >
+              <Plus /> Add Bullet
+            </Button>
+          )}
 
           {mainSectionsStorage[section.id][subSectionIndex].bullets.map(
             (mainBullet, mainBulletIndex) => (

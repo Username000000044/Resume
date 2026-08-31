@@ -10,37 +10,69 @@ import {
 	boolean,
 } from "drizzle-orm/pg-core";
 
-// TEMPLATES
+// ENUMS
 export const templateTypeEnum = pgEnum("template_type", ["ats", "standard"]);
+export const inputTypeEnum = pgEnum("field_type", [
+	"button",
+	"checkbox",
+	"color",
+	"date",
+	"email",
+	"file",
+	"image",
+	"month",
+	"number",
+	"radio",
+	"range",
+	"search",
+	"tel",
+	"text",
+	"time",
+	"url",
+	"week",
+	"textarea",
+]);
+export const fieldPositionEnum = pgEnum("field_position", [
+	"left",
+	"center",
+	"right",
+]);
+export const fieldRenderRoleEnum = pgEnum("render_role", [
+	"heading",
+	"secondary_heading",
+	"section_title",
+	"entity_title",
+	"role_title",
+	"metadata",
+	"body",
+]);
 
+// TEMPLATE
 interface SpacingConfig {
 	page_margin: number; // (in)
 	section_gap: number; // space between sections
 	instance_gap: number; // sapce between section instances (pt) (eg. job1, job2)
 	divider_gap: number; // space on the top + bottom of dividers (pt)
+	bullet_indentation: number; // space before bullet (pt)
 	line_height: number; // individual character height (pt) multiplied by scale curve.
 }
 
 interface TypographyConfig {
-	font_family: string;
-	font_url: string;
+	primary_font_family: string;
+	primary_font_url: string;
+
+	secondary_font_family: string;
+	secondary_font_url: string;
+
 	font_size_base: number; // 11pt (stored as num) so it can be multiplied by scale curve.
 	scale_curve: "editorial" | "balanced" | "minimal";
 	font_weight: Record<(typeof fieldRenderRoleEnum.enumValues)[number], number>;
 }
 
-interface ColorPalette {
-	primary: string;
-	secondary: string;
-	accent: string;
-	text_main: string;
-	text_muted: string;
-	divider: string;
-}
-
 interface TemplateConfig {
 	// decorations, typography/fontsizes, colors
 	decorations: {
+		header_divider: boolean;
 		section_divider: boolean;
 		divider_style: "solid" | "dashed" | "thick";
 		bullet_style: "disc" | "circle" | "square" | "none";
@@ -48,7 +80,10 @@ interface TemplateConfig {
 	};
 	theme: {
 		typography: TypographyConfig;
-		colors: ColorPalette;
+		colors: Record<
+			(typeof fieldRenderRoleEnum.enumValues)[number] | "divider",
+			string
+		>; // fieldRole : color hex;
 	};
 	spacing: SpacingConfig;
 	elements: Record<
@@ -73,6 +108,9 @@ interface SectionConfig {
 	alignment: {
 		title: "left" | "center" | "right";
 	};
+	spacing: {
+		instance_gap: boolean;
+	};
 }
 
 export const sectionsTable = pgTable("sections", {
@@ -89,45 +127,9 @@ export const sectionsTable = pgTable("sections", {
 });
 
 // FIELDS
-export const inputTypeEnum = pgEnum("field_type", [
-	"button",
-	"checkbox",
-	"color",
-	"date",
-	"email",
-	"file",
-	"image",
-	"month",
-	"number",
-	"radio",
-	"range",
-	"search",
-	"tel",
-	"text",
-	"time",
-	"url",
-	"week",
-]);
-
-export const fieldPositionEnum = pgEnum("field_position", [
-	"left",
-	"center",
-	"right",
-]);
-
-export const fieldRenderRoleEnum = pgEnum("render_role", [
-	"header",
-	"secondary_header",
-	"section_title",
-	"entity_title",
-	"role_title",
-	"metadata",
-	"body",
-]);
-
 export const fieldsTable = pgTable("fields", {
 	id: uuid().defaultRandom().primaryKey(),
-	sectionsId: uuid("sections_id")
+	sectionsId: uuid("section_id")
 		.references(() => sectionsTable.id, {
 			onDelete: "cascade",
 		})

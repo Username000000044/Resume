@@ -3,14 +3,14 @@ import { useShallow } from "zustand/react/shallow";
 import { DragDropProvider } from "@dnd-kit/react";
 import { Plus } from "lucide-react";
 import { SortableSubSectionItem } from "./SortableSubSectionItem";
-import { ScrollArea } from "#/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "#/components/ui/scroll-area";
 import { Button } from "#/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
 import type { TemplateType } from "#/types/Template";
 
-export const MAX_BULLET_COUNT = 5;
+export const MAX_BULLET_COUNT = 10;
 export const MAX_SUB_BULLET_COUNT = 5;
-const MAX_SUB_SECTION_COUNT = 4;
+const MAX_SUB_SECTION_COUNT = 5;
 
 interface EditorTabsProps {
   templateData: TemplateType;
@@ -28,18 +28,17 @@ export const EditorTabs = ({ templateData }: EditorTabsProps) => {
     );
 
   return (
-    <Tabs defaultValue="account" className="w-[calc(100%-90px)] gap-0">
-      <ScrollArea className="mx-auto px-4 md:m-0">
-        <TabsList className="bg-transparent py-0 overflow-y-hidden md:gap-4">
+    <Tabs className="w-[calc(100%-90px)] max-w-150 gap-0">
+      <ScrollArea className="w-full max-w-full overflow-hidden mx-auto px-4 md:m-0">
+        <TabsList className="bg-transparent py-0 overflow-y-hidden overflow-x-auto justify-start gap-2 md:gap-3">
           {/* Tabs */}
           {templateData.sections.map((section) => (
             <TabsTrigger
-              className="cursor-pointer px-3 rounded-b-none font-normal data-active:bg-primary data-active:text-primary-foreground data-active:hover:text-primary-foreground"
+              className="cursor-pointer px-2 rounded-b-none font-normal data-active:bg-primary data-active:text-primary-foreground data-active:hover:text-primary-foreground"
               value={section.title}
               key={section.id}
             >
-              {section.title.charAt(0).toUpperCase() +
-                section.title.slice(1).toLowerCase()}
+              {section.title}
             </TabsTrigger>
           ))}
         </TabsList>

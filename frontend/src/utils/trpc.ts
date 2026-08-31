@@ -6,10 +6,14 @@ import { QueryClient } from "@tanstack/react-query";
 export const queryClient = new QueryClient();
 
 const trpcClient = createTRPCClient<AppRouter>({
-  links: [httpBatchLink({ url: import.meta.env.VITE_TRPC_API_URL })],
+	links: [
+		httpBatchLink({
+			url: import.meta.env.VITE_TRPC_API_URL,
+		}),
+	],
 });
 
 export const trpc = createTRPCOptionsProxy<AppRouter>({
-  client: trpcClient,
-  queryClient,
+	client: trpcClient,
+	queryClient,
 });

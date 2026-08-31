@@ -1,50 +1,151 @@
-import type { inferRouterOutputs } from "@trpc/server";
-import type { AppRouter } from "../../../../../backend/src/appRouter";
 import { useResumeStore } from "#/store/useResumeStore";
-import type { SectionType, TemplateType } from "#/types/Template";
+import type { FieldType, SectionType, TemplateType } from "#/types/Template";
+import { DividerItem } from "./DividerItem";
+import { LiveFieldItem } from "./LiveFieldItem";
+import {
+  constructLayoutMatrix,
+  getFieldProperties,
+} from "#/utils/live-preview";
 
 interface HeaderItemProps {
   templateData: TemplateType;
   dbSection: SectionType;
 }
 
-export const HeaderItem = ({ dbSection, templateData }: HeaderItemProps) => {
+export const LiveHeaderItem = ({
+  dbSection,
+  templateData,
+}: HeaderItemProps) => {
   const liveSections = useResumeStore((store) => store.liveMainSections);
 
-  // Alignment
-  const alignmentKey = templateData.default_config.alignment;
-  const headerAlignment = TEXT_ALIGNMENT[alignmentKey.header];
-
   return (
-    <section className={`text-(length:--font_size_base) ${headerAlignment}`}>
-      {/* Header Title */}
-      <h1 className={`text-(length:--h1-size) font-bold`}>{dbSection.title}</h1>
-      {liveSections[dbSection.id].map((liveSubSection) => (
-        <div key={liveSubSection.id} className="space-y-[var(--content-gap)]">
-          {/* Sorted Section Fields */}
-          {dbSection.fields
-            // .sort((a, b) => a.order - b.order)
-            .map((field) => (
-              <p key={field.id}>{liveSubSection.fields[field.id]}</p>
-            ))}
+    <section className={`text-(length:--font-size-base) text-wrap`}>
+      {/* Sub Sections */}
+      <div className="flex flex-col gap-[var(--instance-gap)]">
+        {liveSections[dbSection.id].map((liveSubSection) => {
+          const matrix = constructLayoutMatrix(dbSection.fields);
 
-          {/* Section Bullets */}
-          <ul className="list-disc list-inside pl-8">
-            {liveSubSection.bullets.map((bullet) => (
-              <li key={bullet.id}>
-                {bullet.text}
+          // Formats Input Field Value
+          const formatFieldValue = (field: FieldType) => {
+            const value = liveSubSection.fields[field.id];
 
-                {/* Bullet's Sub Bullets */}
-                <ul className="list-[circle] list-inside pl-8">
-                  {bullet.subBullets.map((subBullet) => (
-                    <li key={subBullet.id}>{subBullet.text}</li>
-                  ))}
-                </ul>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ))}
+            const currrentRowIndex = field.alignment?.rowIndex ?? 0;
+            const currentItemOrder = field.alignment?.itemOrder ?? 0;
+            const previousFieldInRow =
+              matrix[currrentRowIndex][currentItemOrder - 1];
+
+            // Heading Alterations
+            if (
+              previousFieldInRow &&
+              previousFieldInRow.renderRole === "heading"
+            ) {
+              return `\u00A0${value}`;
+            }
+
+            // Secondary Heading
+            if (
+              previousFieldInRow &&
+              previousFieldInRow.renderRole !== "heading"
+            ) {
+              const seperator = "·";
+              const seperatorSpacing = `\u00A0\u00A0${seperator}\u00A0\u00A0`;
+
+              return `${seperatorSpacing}${value}`;
+            }
+
+            if (field.name.includes("location") && value) {
+              //Location Alterations
+              // Previous and current element are in the same position + previous item exists
+              if (
+                previousFieldInRow &&
+                previousFieldInRow.alignment?.position ===
+                  field.alignment?.position &&
+                liveSubSection.fields[previousFieldInRow.id]
+              ) {
+                return `,\u00A0${value}`;
+              }
+            }
+
+            return value;
+          };
+
+          return (
+            <div key={liveSubSection.id}>
+              {/* Row Index */}
+              {matrix.map((_, rowIndex) => (
+                <div
+                  key={crypto.randomUUID()}
+                  className="grid grid-cols-[auto_auto_auto] items-top w-full"
+                >
+                  {/* Left Aligned */}
+                  <div className="flex justify-start">
+                    {matrix[rowIndex]
+                      .filter((field) => field.alignment?.position === "left")
+                      .map((field) => {
+                        return (
+                          <LiveFieldItem
+                            key={field.id}
+                            value={formatFieldValue(field)}
+                            properties={getFieldProperties(field, templateData)}
+                          />
+                        );
+                      })}
+                  </div>
+
+                  {/* Center Aligned */}
+                  <div className="flex justify-center">
+                    {matrix[rowIndex]
+                      .filter((field) => field.alignment?.position === "center")
+                      .map((field) => {
+                        return (
+                          <LiveFieldItem
+                            key={field.id}
+                            value={formatFieldValue(field)}
+                            properties={getFieldProperties(field, templateData)}
+                          />
+                        );
+                      })}
+                  </div>
+
+                  {/* Right Aligned */}
+                  <div className="flex justify-end">
+                    {matrix[rowIndex]
+                      .filter((field) => field.alignment?.position === "right")
+                      .map((field) => {
+                        return (
+                          <LiveFieldItem
+                            key={field.id}
+                            value={formatFieldValue(field)}
+                            properties={getFieldProperties(field, templateData)}
+                          />
+                        );
+                      })}
+                  </div>
+                </div>
+              ))}
+
+              {/* Section Bullets */}
+              {/* <ul className="list-[var(--bullet-style)] text-[var(--bullet-color)] font-[var(--bullet-weight)] list-inside pl-8">
+                {liveSubSection.bullets.map((bullet) => (
+                  <li key={bullet.id}>
+                    {bullet.text}
+
+                    <ul className="list-[var(--sub-bullet-style)] list-inside pl-8">
+                      {bullet.subBullets.map((subBullet) => (
+                        <li key={subBullet.id}>{subBullet.text}</li>
+                      ))}
+                    </ul>
+                  </li>
+                ))}
+              </ul> */}
+            </div>
+          );
+        })}
+      </div>
+
+      {templateData.default_config.decorations.header_divider && (
+        <DividerItem templateData={templateData} />
+      )}
     </section>
   );
 };

@@ -1,7 +1,7 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "ea08d91f-0496-4821-b665-ae9f5d7f23d3",
+  "id": "53477e31-0443-4109-9005-1eb90d3ad26b",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
@@ -18,8 +18,8 @@
     },
     {
       "values": [
-        "header",
-        "secondary_header",
+        "heading",
+        "secondary_heading",
         "section_title",
         "entity_title",
         "role_title",
@@ -48,7 +48,8 @@
         "text",
         "time",
         "url",
-        "week"
+        "week",
+        "textarea"
       ],
       "name": "field_type",
       "entityType": "enums",
@@ -173,7 +174,7 @@
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "sections_id",
+      "name": "section_id",
       "entityType": "columns",
       "schema": "public",
       "table": "fields"
@@ -445,7 +446,7 @@
     {
       "nameExplicit": false,
       "columns": [
-        "sections_id"
+        "section_id"
       ],
       "schemaTo": "public",
       "tableTo": "sections",
@@ -454,7 +455,7 @@
       ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
-      "name": "fields_sections_id_sections_id_fkey",
+      "name": "fields_section_id_sections_id_fkey",
       "entityType": "fks",
       "schema": "public",
       "table": "fields"

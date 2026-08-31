@@ -58,14 +58,14 @@ function RouteComponent() {
   if (!isPayloadReady) return <div>Loading template configurations...</div>;
 
   return (
-    <div className="pt-12 lg:py-18">
+    <div className="pt-12 lg:py-24 print:p-0">
       <div className="grid lg:grid-cols-[auto_auto] gap-10 max-w-min mx-auto">
-        <div className="flex flex-col items-center 2xl:items-start w-full">
+        {/* Editor Column */}
+        <div className="flex flex-col items-center 2xl:items-start w-full print:hidden">
           <h1 className="text-4xl pb-8 text-primary font-bold tracking-wide">
             Resume Editor
           </h1>
 
-          {/* Editor Column */}
           <EditorTabs templateData={templateRequest.data} />
         </div>
 
