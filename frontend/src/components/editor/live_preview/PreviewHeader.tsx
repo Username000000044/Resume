@@ -46,7 +46,7 @@ const downloadOptions: DownloadOption[] = [
     suggested: true,
   },
   {
-    name: "PDF Standard",
+    name: "PDF Print",
     description: "Best for printing",
     icon: "FileText",
   },
