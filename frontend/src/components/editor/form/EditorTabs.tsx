@@ -28,7 +28,7 @@ export const EditorTabs = ({ templateData }: EditorTabsProps) => {
     );
 
   return (
-    <Tabs className="w-[calc(100%-90px)] max-w-150 gap-0">
+    <Tabs className="w-[calc(100%-90px)] max-w-140 gap-0">
       <ScrollArea className="w-full max-w-full overflow-hidden mx-auto px-4 md:m-0">
         <TabsList className="bg-transparent py-0 overflow-y-hidden overflow-x-auto justify-start gap-2 md:gap-3">
           {/* Tabs */}

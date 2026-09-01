@@ -10,7 +10,7 @@ import { LiveSortableSectionItem } from "./LiveSortableSectionItem";
 import type { TemplateType } from "#/types/Template";
 import { LiveHeaderItem } from "./LiveHeaderItem";
 
-interface LiveTemplateProps {
+interface LivePreviewProps {
   templateData: TemplateType;
 }
 
@@ -50,7 +50,7 @@ export const ALIGNMENT_MAP = {
   right: "text-right",
 } as const;
 
-export const LiveTemplate = ({ templateData }: LiveTemplateProps) => {
+export const LivePreview = ({ templateData }: LivePreviewProps) => {
   const liveSections = useResumeStore((store) => store.liveMainSections);
 
   if (!liveSections) return <div>Loading template live preview...</div>;
@@ -100,7 +100,7 @@ export const LiveTemplate = ({ templateData }: LiveTemplateProps) => {
     SCALE_CURVES[templateData.default_config.theme.typography.scale_curve];
 
   return (
-    <div className="flex flex-col gap-8 w-full">
+    <div className="flex flex-col gap-4 w-full">
       <LivePaper
         className="flex flex-col text-(length:--font-size-base) leading-[var(--line-f)] !p-[var(--page-margin)]"
         style={
@@ -167,7 +167,7 @@ export const LiveTemplate = ({ templateData }: LiveTemplateProps) => {
             ))}
         </div>
       </LivePaper>
-      {/* <LivePaper /> */}
+      <LivePaper />
     </div>
   );
 };

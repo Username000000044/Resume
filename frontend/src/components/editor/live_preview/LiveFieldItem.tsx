@@ -1,5 +1,5 @@
 import type { FieldType, TemplateType } from "#/types/Template";
-import type { SCALE_CURVES } from "./LiveTemplate";
+import type { SCALE_CURVES } from "./LivePreview";
 
 type FieldRole = FieldType["renderRole"];
 type FieldColor =

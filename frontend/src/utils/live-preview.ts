@@ -1,4 +1,4 @@
-import { SCALE_CURVES } from "#/components/editor/live_preview/LiveTemplate";
+import { SCALE_CURVES } from "#/components/editor/live_preview/LivePreview";
 import type { FieldType, TemplateType } from "#/types/Template";
 
 export const getFieldProperties = (

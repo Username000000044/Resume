@@ -13,7 +13,7 @@ export const LivePaper = ({
 }) => {
   return (
     <div
-      className={`${className} aspect-[8.5/11] w-screen h-full bg-white border-3 border-zinc-300 border-dashed p-[72px] lg:w-220 print:block print:border-0 print:[print-color-adjust:exact] print:[webkit-print-color-adjust:exact]`}
+      className={`${className} aspect-[8.5/11] w-screen h-full bg-white shadow-[0_0_10px_2px_rgba(0,0,0,0.1)] p-[72px] lg:w-220 print:block print:border-0 print:[print-color-adjust:exact] print:[webkit-print-color-adjust:exact]`}
       style={style}
       {...props}
     >

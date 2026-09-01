@@ -1,5 +1,5 @@
 import { useResumeStore } from "#/store/useResumeStore";
-import { ALIGNMENT_MAP, SCALE_CURVES } from "./LiveTemplate";
+import { ALIGNMENT_MAP, SCALE_CURVES } from "./LivePreview";
 import { DividerItem } from "./DividerItem";
 import { LiveFieldItem } from "./LiveFieldItem";
 import type { FieldType, SectionType, TemplateType } from "#/types/Template";
