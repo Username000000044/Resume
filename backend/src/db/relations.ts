@@ -11,15 +11,20 @@ export const relations = defineRelations(schema, (r) => ({
 			to: r.templatesTable.id,
 		}),
 		fields: r.many.fieldsTable(),
+		groups: r.many.fieldGroupsTable(),
 	},
 	fieldsTable: {
 		section: r.one.sectionsTable({
-			from: r.fieldsTable.sectionsId,
+			from: r.fieldsTable.sectionId,
 			to: r.sectionsTable.id,
 		}),
 		alignment: r.one.fieldAlignmentsTable({
 			from: r.fieldsTable.id,
 			to: r.fieldAlignmentsTable.fieldId,
+		}),
+		group: r.one.fieldGroupsTable({
+			from: r.fieldsTable.groupId,
+			to: r.fieldGroupsTable.id,
 		}),
 	},
 	fieldAlignmentsTable: {
@@ -27,5 +32,12 @@ export const relations = defineRelations(schema, (r) => ({
 			from: r.fieldAlignmentsTable.fieldId,
 			to: r.fieldsTable.id,
 		}),
+	},
+	fieldGroupsTable: {
+		section: r.one.sectionsTable({
+			from: r.fieldGroupsTable.sectionId,
+			to: r.sectionsTable.id,
+		}),
+		fields: r.many.fieldsTable(),
 	},
 }));

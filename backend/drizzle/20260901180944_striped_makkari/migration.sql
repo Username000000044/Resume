@@ -1,0 +1,1 @@
+ALTER TABLE "field_groups" RENAME COLUMN "seperator" TO "separator";

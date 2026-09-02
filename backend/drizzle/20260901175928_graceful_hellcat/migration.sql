@@ -1,6 +1,7 @@
 CREATE TYPE "field_position" AS ENUM('left', 'center', 'right');--> statement-breakpoint
 CREATE TYPE "render_role" AS ENUM('heading', 'secondary_heading', 'section_title', 'entity_title', 'role_title', 'metadata', 'body');--> statement-breakpoint
 CREATE TYPE "field_type" AS ENUM('button', 'checkbox', 'color', 'date', 'email', 'file', 'image', 'month', 'number', 'radio', 'range', 'search', 'tel', 'text', 'time', 'url', 'week', 'textarea');--> statement-breakpoint
+CREATE TYPE "separator_style" AS ENUM('dot', 'bullet', 'pipe', 'comma', 'slash', 'none');--> statement-breakpoint
 CREATE TYPE "template_type" AS ENUM('ats', 'standard');--> statement-breakpoint
 CREATE TABLE "field_alignments" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -10,9 +11,17 @@ CREATE TABLE "field_alignments" (
 	"item_order" integer NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "field_groups" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"section_id" uuid NOT NULL,
+	"name" varchar(50),
+	"seperator" "separator_style" DEFAULT 'dot'::"separator_style" NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "fields" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"section_id" uuid NOT NULL,
+	"group_id" uuid,
 	"name" varchar(50) NOT NULL,
 	"label" varchar(50) NOT NULL,
 	"render_role" "render_role" NOT NULL,
@@ -41,5 +50,7 @@ CREATE TABLE "templates" (
 );
 --> statement-breakpoint
 ALTER TABLE "field_alignments" ADD CONSTRAINT "field_alignments_field_id_fields_id_fkey" FOREIGN KEY ("field_id") REFERENCES "fields"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "field_groups" ADD CONSTRAINT "field_groups_section_id_sections_id_fkey" FOREIGN KEY ("section_id") REFERENCES "sections"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "fields" ADD CONSTRAINT "fields_section_id_sections_id_fkey" FOREIGN KEY ("section_id") REFERENCES "sections"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "fields" ADD CONSTRAINT "fields_group_id_field_groups_id_fkey" FOREIGN KEY ("group_id") REFERENCES "field_groups"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "sections" ADD CONSTRAINT "sections_template_id_templates_id_fkey" FOREIGN KEY ("template_id") REFERENCES "templates"("id") ON DELETE CASCADE;

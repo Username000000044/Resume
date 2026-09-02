@@ -1,9 +1,9 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "53477e31-0443-4109-9005-1eb90d3ad26b",
+  "id": "22e41df1-057e-4c52-8216-66fda16eabd6",
   "prevIds": [
-    "00000000-0000-0000-0000-000000000000"
+    "14d86d92-993a-4add-9385-0fefb8c7e06b"
   ],
   "ddl": [
     {
@@ -57,6 +57,19 @@
     },
     {
       "values": [
+        "dot",
+        "bullet",
+        "pipe",
+        "comma",
+        "slash",
+        "none"
+      ],
+      "name": "separator_style",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "values": [
         "ats",
         "standard"
       ],
@@ -67,6 +80,12 @@
     {
       "isRlsEnabled": false,
       "name": "field_alignments",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "field_groups",
       "entityType": "tables",
       "schema": "public"
     },
@@ -164,6 +183,58 @@
       "name": "id",
       "entityType": "columns",
       "schema": "public",
+      "table": "field_groups"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "section_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "field_groups"
+    },
+    {
+      "type": "varchar(50)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "name",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "field_groups"
+    },
+    {
+      "type": "separator_style",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'dot'",
+      "generated": null,
+      "identity": null,
+      "name": "separator",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "field_groups"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "gen_random_uuid()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
       "table": "fields"
     },
     {
@@ -175,6 +246,19 @@
       "generated": null,
       "identity": null,
       "name": "section_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "fields"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "group_id",
       "entityType": "columns",
       "schema": "public",
       "table": "fields"
@@ -455,7 +539,41 @@
       ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
+      "name": "field_groups_section_id_sections_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "field_groups"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "section_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "sections",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
       "name": "fields_section_id_sections_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "fields"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "group_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "field_groups",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "fields_group_id_field_groups_id_fkey",
       "entityType": "fks",
       "schema": "public",
       "table": "fields"
@@ -485,6 +603,16 @@
       "name": "field_alignments_pkey",
       "schema": "public",
       "table": "field_alignments",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "field_groups_pkey",
+      "schema": "public",
+      "table": "field_groups",
       "entityType": "pks"
     },
     {
@@ -540,5 +668,7 @@
       "entityType": "uniques"
     }
   ],
-  "renames": []
+  "renames": [
+    "public.field_groups.seperator->public.field_groups.separator"
+  ]
 }

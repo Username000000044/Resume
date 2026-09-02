@@ -46,6 +46,14 @@ export const fieldRenderRoleEnum = pgEnum("render_role", [
 	"metadata",
 	"body",
 ]);
+export const separatorStyleEnum = pgEnum("separator_style", [
+	"dot", // ·
+	"bullet", // •
+	"pipe", // |
+	"comma", // ,
+	"slash", // /
+	"none",
+]);
 
 // TEMPLATE
 interface SpacingConfig {
@@ -53,6 +61,7 @@ interface SpacingConfig {
 	section_gap: number; // space between sections
 	instance_gap: number; // sapce between section instances (pt) (eg. job1, job2)
 	divider_gap: number; // space on the top + bottom of dividers (pt)
+	separator_gap: number; // space to the left + right of separator (pt)
 	bullet_indentation: number; // space before bullet (pt)
 	line_height: number; // individual character height (pt) multiplied by scale curve.
 }
@@ -129,16 +138,30 @@ export const sectionsTable = pgTable("sections", {
 // FIELDS
 export const fieldsTable = pgTable("fields", {
 	id: uuid().defaultRandom().primaryKey(),
-	sectionsId: uuid("section_id")
+	sectionId: uuid("section_id")
 		.references(() => sectionsTable.id, {
 			onDelete: "cascade",
 		})
 		.notNull(),
+	groupId: uuid("group_id").references(() => fieldGroupsTable.id, {
+		onDelete: "cascade",
+	}),
 	name: varchar({ length: 50 }).notNull(),
 	label: varchar({ length: 50 }).notNull(),
 	renderRole: fieldRenderRoleEnum("render_role").notNull(),
 	type: inputTypeEnum().notNull(),
 	placeholder: text(),
+});
+
+export const fieldGroupsTable = pgTable("field_groups", {
+	id: uuid().defaultRandom().primaryKey(),
+	sectionId: uuid("section_id")
+		.references(() => sectionsTable.id, {
+			onDelete: "cascade",
+		})
+		.notNull(),
+	name: varchar({ length: 50 }),
+	separator: separatorStyleEnum("separator").notNull().default("dot"),
 });
 
 export const fieldAlignmentsTable = pgTable("field_alignments", {

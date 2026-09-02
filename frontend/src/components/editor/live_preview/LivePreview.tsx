@@ -114,6 +114,7 @@ export const LivePreview = ({ templateData }: LivePreviewProps) => {
             "--section-gap": `${templateData.default_config.spacing.section_gap}pt`,
             "--instance-gap": `${templateData.default_config.spacing.instance_gap}pt`,
             "--divider-gap": `${templateData.default_config.spacing.divider_gap}pt`,
+            "--separator-gap": `${templateData.default_config.spacing.separator_gap}pt`,
             "--bullet-indentation": `${templateData.default_config.spacing.bullet_indentation}pt`,
             "--line-height": `${font_size_base * line_height}pt`,
 

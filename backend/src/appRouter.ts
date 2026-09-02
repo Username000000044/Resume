@@ -13,8 +13,14 @@ export const appRouter = router({
 						fields: {
 							with: {
 								alignment: true,
+								group: {
+									with: {
+										fields: true,
+									},
+								},
 							},
 						},
+						groups: true,
 					},
 				},
 			},
@@ -41,8 +47,14 @@ export const appRouter = router({
 						fields: {
 							with: {
 								alignment: true,
+								group: {
+									with: {
+										fields: true,
+									},
+								},
 							},
 						},
+						groups: true,
 					},
 				},
 			},

@@ -1,0 +1,672 @@
+{
+  "version": "8",
+  "dialect": "postgres",
+  "id": "14d86d92-993a-4add-9385-0fefb8c7e06b",
+  "prevIds": [
+    "00000000-0000-0000-0000-000000000000"
+  ],
+  "ddl": [
+    {
+      "values": [
+        "left",
+        "center",
+        "right"
+      ],
+      "name": "field_position",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "values": [
+        "heading",
+        "secondary_heading",
+        "section_title",
+        "entity_title",
+        "role_title",
+        "metadata",
+        "body"
+      ],
+      "name": "render_role",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "values": [
+        "button",
+        "checkbox",
+        "color",
+        "date",
+        "email",
+        "file",
+        "image",
+        "month",
+        "number",
+        "radio",
+        "range",
+        "search",
+        "tel",
+        "text",
+        "time",
+        "url",
+        "week",
+        "textarea"
+      ],
+      "name": "field_type",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "values": [
+        "dot",
+        "bullet",
+        "pipe",
+        "comma",
+        "slash",
+        "none"
+      ],
+      "name": "separator_style",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "values": [
+        "ats",
+        "standard"
+      ],
+      "name": "template_type",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "field_alignments",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "field_groups",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "fields",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "sections",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "templates",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "gen_random_uuid()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "field_alignments"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "field_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "field_alignments"
+    },
+    {
+      "type": "field_position",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "field_position",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "field_alignments"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "row_index",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "field_alignments"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "item_order",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "field_alignments"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "gen_random_uuid()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "field_groups"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "section_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "field_groups"
+    },
+    {
+      "type": "varchar(50)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "name",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "field_groups"
+    },
+    {
+      "type": "separator_style",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'dot'",
+      "generated": null,
+      "identity": null,
+      "name": "seperator",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "field_groups"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "gen_random_uuid()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "fields"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "section_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "fields"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "group_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "fields"
+    },
+    {
+      "type": "varchar(50)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "name",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "fields"
+    },
+    {
+      "type": "varchar(50)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "label",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "fields"
+    },
+    {
+      "type": "render_role",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "render_role",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "fields"
+    },
+    {
+      "type": "field_type",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "type",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "fields"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "placeholder",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "fields"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "gen_random_uuid()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "sections"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "template_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "sections"
+    },
+    {
+      "type": "varchar(100)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "title",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "sections"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "order",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "sections"
+    },
+    {
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "default_config",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "sections"
+    },
+    {
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "many_instances",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "sections"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "gen_random_uuid()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "templates"
+    },
+    {
+      "type": "varchar(50)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "name",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "templates"
+    },
+    {
+      "type": "template_type",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "template_type",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "templates"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "thumbnail",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "templates"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "owner_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "templates"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 1,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "keywords",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "templates"
+    },
+    {
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "default_config",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "templates"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "templates"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "field_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "fields",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "field_alignments_field_id_fields_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "field_alignments"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "section_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "sections",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "field_groups_section_id_sections_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "field_groups"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "section_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "sections",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "fields_section_id_sections_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "fields"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "group_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "field_groups",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "fields_group_id_field_groups_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "fields"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "template_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "templates",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "sections_template_id_templates_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "sections"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "field_alignments_pkey",
+      "schema": "public",
+      "table": "field_alignments",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "field_groups_pkey",
+      "schema": "public",
+      "table": "field_groups",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "fields_pkey",
+      "schema": "public",
+      "table": "fields",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "sections_pkey",
+      "schema": "public",
+      "table": "sections",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "templates_pkey",
+      "schema": "public",
+      "table": "templates",
+      "entityType": "pks"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "field_id"
+      ],
+      "nullsNotDistinct": false,
+      "name": "field_alignments_field_id_key",
+      "schema": "public",
+      "table": "field_alignments",
+      "entityType": "uniques"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "order"
+      ],
+      "nullsNotDistinct": false,
+      "name": "sections_order_key",
+      "schema": "public",
+      "table": "sections",
+      "entityType": "uniques"
+    }
+  ],
+  "renames": []
+}

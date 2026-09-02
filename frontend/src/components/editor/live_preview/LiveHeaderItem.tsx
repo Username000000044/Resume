@@ -6,6 +6,7 @@ import {
   constructLayoutMatrix,
   getFieldProperties,
 } from "#/utils/live-preview";
+import { LiveFieldWrapper } from "./LiveFieldWrapper";
 
 interface HeaderItemProps {
   templateData: TemplateType;
@@ -42,19 +43,8 @@ export const LiveHeaderItem = ({
               return `\u00A0${value}`;
             }
 
-            // Secondary Heading
-            if (
-              previousFieldInRow &&
-              previousFieldInRow.renderRole !== "heading"
-            ) {
-              const seperator = "·";
-              const seperatorSpacing = `\u00A0\u00A0${seperator}\u00A0\u00A0`;
-
-              return `${seperatorSpacing}${value}`;
-            }
-
+            //Location Alterations
             if (field.name.includes("location") && value) {
-              //Location Alterations
               // Previous and current element are in the same position + previous item exists
               if (
                 previousFieldInRow &&
@@ -83,11 +73,15 @@ export const LiveHeaderItem = ({
                       .filter((field) => field.alignment?.position === "left")
                       .map((field) => {
                         return (
-                          <LiveFieldItem
-                            key={field.id}
-                            value={formatFieldValue(field)}
-                            properties={getFieldProperties(field, templateData)}
-                          />
+                          <LiveFieldWrapper key={field.id} field={field}>
+                            <LiveFieldItem
+                              value={formatFieldValue(field)}
+                              properties={getFieldProperties(
+                                field,
+                                templateData,
+                              )}
+                            />
+                          </LiveFieldWrapper>
                         );
                       })}
                   </div>
@@ -98,11 +92,15 @@ export const LiveHeaderItem = ({
                       .filter((field) => field.alignment?.position === "center")
                       .map((field) => {
                         return (
-                          <LiveFieldItem
-                            key={field.id}
-                            value={formatFieldValue(field)}
-                            properties={getFieldProperties(field, templateData)}
-                          />
+                          <LiveFieldWrapper key={field.id} field={field}>
+                            <LiveFieldItem
+                              value={formatFieldValue(field)}
+                              properties={getFieldProperties(
+                                field,
+                                templateData,
+                              )}
+                            />
+                          </LiveFieldWrapper>
                         );
                       })}
                   </div>
@@ -113,11 +111,15 @@ export const LiveHeaderItem = ({
                       .filter((field) => field.alignment?.position === "right")
                       .map((field) => {
                         return (
-                          <LiveFieldItem
-                            key={field.id}
-                            value={formatFieldValue(field)}
-                            properties={getFieldProperties(field, templateData)}
-                          />
+                          <LiveFieldWrapper key={field.id} field={field}>
+                            <LiveFieldItem
+                              value={formatFieldValue(field)}
+                              properties={getFieldProperties(
+                                field,
+                                templateData,
+                              )}
+                            />
+                          </LiveFieldWrapper>
                         );
                       })}
                   </div>
