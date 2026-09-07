@@ -1,5 +1,5 @@
 import { useResumeStore } from "#/store/useResumeStore";
-import { ALIGNMENT_MAP, SCALE_CURVES } from "./LivePreview";
+import { ALIGNMENT_MAP } from "./LivePreview";
 import { DividerItem } from "./DividerItem";
 import { LiveFieldItem } from "./LiveFieldItem";
 import type { FieldType, SectionType, TemplateType } from "#/types/Template";
@@ -14,6 +14,7 @@ import { useSortable } from "@dnd-kit/react/sortable";
 import { RestrictToVerticalAxis } from "@dnd-kit/abstract/modifiers";
 import { Button } from "#/components/ui/button";
 import { GripHorizontal } from "lucide-react";
+import { useResumeConfigStore } from "#/store/useResumeConfigStore";
 
 interface SectionItemProps {
   templateData: TemplateType;
@@ -37,28 +38,31 @@ export const LiveSortableSectionItem = ({
   });
 
   const liveSections = useResumeStore((store) => store.liveMainSections);
+  const liveConfig = useResumeConfigStore((store) => store.liveConfig);
 
   const numOfFilledSections = useMemo(() => {
-    return templateData.sections.reduce((count, dbSection) => {
-      const liveSection = liveSections[dbSection.id] || { subSections: [] };
+    return templateData.sections
+      .filter((section) => section.order !== 0)
+      .reduce((count, dbSection) => {
+        const liveSection = liveSections[dbSection.id] || { subSections: [] };
 
-      const sectionHasContent = liveSection.subSections.some((subSection) => {
-        const contentField = dbSection.fields.some(
-          (field) =>
-            subSection.fields[field.id] && subSection.fields[field.id] !== "",
-        );
+        const sectionHasContent = liveSection.subSections.some((subSection) => {
+          const contentField = dbSection.fields.some(
+            (field) =>
+              subSection.fields[field.id] && subSection.fields[field.id] !== "",
+          );
 
-        const contentBullet = subSection.bullets.some(
-          (bullet) =>
-            (bullet.text && bullet.text !== "") ||
-            bullet.subBullets.some((subBullet) => subBullet.text !== ""),
-        );
+          const contentBullet = subSection.bullets.some(
+            (bullet) =>
+              (bullet.text && bullet.text !== "") ||
+              bullet.subBullets.some((subBullet) => subBullet.text !== ""),
+          );
 
-        return contentField || contentBullet;
-      });
+          return contentField || contentBullet;
+        });
 
-      return sectionHasContent ? count + 1 : count;
-    }, 0);
+        return sectionHasContent ? count + 1 : count;
+      }, 0);
   }, [templateData, liveSections]);
 
   // Alignment
@@ -98,15 +102,15 @@ export const LiveSortableSectionItem = ({
           {liveSections[dbSection.id].order}
         </h2>
 
-        {templateData.default_config.decorations.section_divider && (
-          <DividerItem templateData={templateData} />
+        {liveConfig.template_config.decorations.section_divider && (
+          <DividerItem template_config={liveConfig.template_config} />
         )}
 
         {/* Sub Sections */}
         <div
           className={cn("flex flex-col", {
             "gap-[var(--instance-gap)]":
-              dbSection.default_config.spacing.instance_gap,
+              liveConfig.template_config.spacing.instance_gap,
           })}
         >
           {liveSections[dbSection.id].subSections.map((liveSubSection) => {

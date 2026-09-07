@@ -1,12 +1,12 @@
 import { cn } from "#/lib/utils";
-import type { TemplateType } from "#/types/Template";
+import type { SectionConfig, TemplateConfig } from "#/types/Template";
 
 interface DividerItemProps {
-  templateData: TemplateType;
+  template_config: TemplateConfig;
 }
 
-export const DividerItem = ({ templateData }: DividerItemProps) => {
-  const dividerStyle = templateData.default_config.decorations.divider_style;
+export const DividerItem = ({ template_config }: DividerItemProps) => {
+  const dividerStyle = template_config.decorations.divider_style;
 
   return (
     <hr

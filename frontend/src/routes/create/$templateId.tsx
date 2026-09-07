@@ -20,7 +20,10 @@ function RouteComponent() {
     trpc.templateById.queryOptions(templateId, { retry: false }),
   );
 
-  const [isPayloadReady, setIsPayloadReady] = useState(false);
+  // [sectionsInitialization, configInitialization]
+  const [isSectionsPayloadReady, setIsSectionsPayloadReady] = useState(false);
+  const [isConfigPayloadReady, setIsConfigPayloadReady] = useState(false);
+
   const initializeSections = useResumeStore(
     (state) => state.initializeSections,
   );
@@ -56,42 +59,45 @@ function RouteComponent() {
         }));
 
         initializeSections(syncPayload);
-        setIsPayloadReady(true);
+        setIsSectionsPayloadReady(true);
       }
     };
 
-    // const handleConfigInitialization = async () => {
-    //   const persistName = useResumeConfigStore.persist.getOptions().name;
-    //   const targetName = `template-config-${templateId}`;
+    const handleConfigInitialization = async () => {
+      const persistName = useResumeConfigStore.persist.getOptions().name;
+      const targetName = `template-config-${templateId}`;
 
-    //   if (persistName !== targetName) {
-    //     if (persistName) {
-    //       localStorage.removeItem(persistName);
-    //     }
+      if (persistName !== targetName) {
+        if (persistName) {
+          localStorage.removeItem(persistName);
+        }
 
-    //     useResumeConfigStore.persist.setOptions({
-    //       name: targetName,
-    //     });
+        useResumeConfigStore.persist.setOptions({
+          name: targetName,
+        });
 
-    //     await useResumeConfigStore.persist.rehydrate();
-    //   }
+        await useResumeConfigStore.persist.rehydrate();
+      }
 
-    //   // Populate zustand store with db default db config;
-    //   if (templateRequest.data) {
-    //     const syncSections = templateRequest.data.sections.map((s) => ({
-    //       id: s.id,
-    //     }));
+      // Populate zustand store with db default db config;
+      if (templateRequest.data.sections) {
+        const syncPayload = templateRequest.data.sections.map((s) => ({
+          id: s.id,
+          config: s.default_config,
+        }));
 
-    //     // initializeConfig(templateRequest.data.default_config, syncSections);
-    //   }
-    // };
+        initializeConfig(templateRequest.data.default_config, syncPayload);
+        setIsConfigPayloadReady(true);
+      }
+    };
 
     handleSectionsInitialization();
-    // handleConfigInitialization();
+    handleConfigInitialization();
   }, [templateRequest.data, templateId, initializeSections]);
 
   if (!templateRequest.data) return <div>{templateRequest.error?.message}</div>;
-  if (!isPayloadReady) return <div>Loading template configurations...</div>;
+  if (!isSectionsPayloadReady && !isConfigPayloadReady)
+    return <div>Loading template configurations...</div>;
 
   return (
     <div className="pt-12 lg:py-24 print:p-0">

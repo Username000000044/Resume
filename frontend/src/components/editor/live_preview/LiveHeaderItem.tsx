@@ -7,6 +7,7 @@ import {
   getFieldProperties,
 } from "#/utils/live-preview";
 import { LiveFieldWrapper } from "./LiveFieldWrapper";
+import { useResumeConfigStore } from "#/store/useResumeConfigStore";
 
 interface HeaderItemProps {
   templateData: TemplateType;
@@ -18,6 +19,7 @@ export const LiveHeaderItem = ({
   templateData,
 }: HeaderItemProps) => {
   const liveSections = useResumeStore((store) => store.liveMainSections);
+  const liveConfig = useResumeConfigStore((store) => store.liveConfig);
 
   return (
     <section className={`text-(length:--font-size-base) text-wrap`}>
@@ -158,7 +160,7 @@ export const LiveHeaderItem = ({
       </div>
 
       {templateData.default_config.decorations.header_divider && (
-        <DividerItem templateData={templateData} />
+        <DividerItem template_config={liveConfig.template_config} />
       )}
     </section>
   );

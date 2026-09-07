@@ -55,6 +55,7 @@ export const ALIGNMENT_MAP = {
 } as const;
 
 export const LivePreview = ({ templateData }: LivePreviewProps) => {
+  const liveConfig = useResumeConfigStore((state) => state.liveConfig);
   const { liveSections, reorderSections } = useResumeStore(
     useShallow((state) => ({
       liveSections: state.liveMainSections,
@@ -115,16 +116,16 @@ export const LivePreview = ({ templateData }: LivePreviewProps) => {
     );
 
   //Spacing
-  const page_margin = templateData.default_config.spacing.page_margin;
+  const page_margin = liveConfig.template_config.spacing.page_margin;
   const line_height =
-    SCALE_CURVES[templateData.default_config.theme.typography.scale_curve]
+    SCALE_CURVES[liveConfig.template_config.theme.typography.scale_curve]
       .line_height;
 
   // Typography
   const font_size_base =
-    templateData.default_config.theme.typography.font_size_base;
+    liveConfig.template_config.theme.typography.font_size_base;
   const font_scale_curve =
-    SCALE_CURVES[templateData.default_config.theme.typography.scale_curve];
+    SCALE_CURVES[liveConfig.template_config.theme.typography.scale_curve];
 
   const dynamicPreviewStyles = {
     // Typography
@@ -133,32 +134,32 @@ export const LivePreview = ({ templateData }: LivePreviewProps) => {
 
     // Spacing
     "--page-margin": `${page_margin}in`,
-    "--section-gap": `${templateData.default_config.spacing.section_gap}pt`,
-    "--instance-gap": `${templateData.default_config.spacing.instance_gap}pt`,
-    "--divider-gap": `${templateData.default_config.spacing.divider_gap}pt`,
-    "--separator-gap": `${templateData.default_config.spacing.separator_gap}pt`,
-    "--bullet-indentation": `${templateData.default_config.spacing.bullet_indentation}pt`,
+    "--section-gap": `${liveConfig.template_config.spacing.section_gap}pt`,
+    "--instance-gap": `${liveConfig.template_config.spacing.instance_gap}pt`,
+    "--divider-gap": `${liveConfig.template_config.spacing.divider_gap}pt`,
+    "--separator-gap": `${liveConfig.template_config.spacing.separator_gap}pt`,
+    "--bullet-indentation": `${liveConfig.template_config.spacing.bullet_indentation}pt`,
     "--line-height": `${font_size_base * line_height}pt`,
 
     // Decorations
-    "--bullet-style": templateData.default_config.decorations.bullet_style,
+    "--bullet-style": liveConfig.template_config.decorations.bullet_style,
     "--sub-bullet-style":
-      templateData.default_config.decorations.sub_bullet_style,
+      liveConfig.template_config.decorations.sub_bullet_style,
 
     //Colors (Field colors are handled dynamically in the LiveFieldItem component)
-    "--divider-color": templateData.default_config.theme.colors.divider,
-    "--header-color": templateData.default_config.theme.colors.heading,
+    "--divider-color": liveConfig.template_config.theme.colors.divider,
+    "--header-color": liveConfig.template_config.theme.colors.heading,
     "--section-title_color":
-      templateData.default_config.theme.colors.section_title,
-    "--bullet-color": templateData.default_config.theme.colors.body,
+      liveConfig.template_config.theme.colors.section_title,
+    "--bullet-color": liveConfig.template_config.theme.colors.body,
 
     //Weight (Field weight are handled dynamically in the LiveFieldItem componet)
     "--header-weight":
-      templateData.default_config.theme.typography.font_weight.heading,
+      liveConfig.template_config.theme.typography.font_weight.heading,
     "--section-title-weight":
-      templateData.default_config.theme.typography.font_weight.section_title,
+      liveConfig.template_config.theme.typography.font_weight.section_title,
     "--bullet-weight":
-      templateData.default_config.theme.typography.font_weight.body,
+      liveConfig.template_config.theme.typography.font_weight.body,
   } as CSSProperties;
 
   return (

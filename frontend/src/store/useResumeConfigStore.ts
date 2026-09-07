@@ -1,77 +1,73 @@
-import type { TemplateConfig } from "@resume/backend/src/db/schema.js";
-import { move } from "@dnd-kit/helpers";
+import type { SectionConfig, TemplateConfig } from "#/types/Template";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
-import { useResumeStore } from "./useResumeStore";
-import type { DragEndEvent } from "@dnd-kit/react";
-import type { SectionType, TemplateType } from "#/types/Template";
 
 interface ConfigData {
-	config: TemplateConfig;
-	sectionOrder: Record<string, number>; // uuid : 0
+  template_config: TemplateConfig;
+  section_configs: Record<string, SectionConfig>; // uuid : config
 }
+
+interface SectionConfigInitialization {
+  id: string;
+  config: SectionConfig;
+}
+
 type LiveMode = "view" | "config";
-
-interface SectionInitialization {
-	id: string;
-	order: number;
-}
-
 interface ResumeConfigStoreState {
-	liveMode: LiveMode;
-	setLiveMode: (mode: LiveMode) => void;
-	persistantConfig: ConfigData;
-	liveConfig: ConfigData;
-	initializeConfig: (
-		config: TemplateConfig,
-		sections: SectionInitialization[],
-	) => void;
+  liveMode: LiveMode;
+  setLiveMode: (mode: LiveMode) => void;
 
-	// resetLiveConfig: () => void;
+  persistantConfig: ConfigData;
+  liveConfig: ConfigData;
+
+  initializeConfig: (
+    default_config: TemplateConfig,
+    sctions_config: SectionConfigInitialization[],
+  ) => void;
+
+  // resetLiveConfig: () => void;
 }
 
 export const useResumeConfigStore = create<ResumeConfigStoreState>()(
-	persist(
-		immer((set) => ({
-			liveMode: "view",
-			setLiveMode: (mode) =>
-				set((state) => {
-					state.liveMode = mode;
-				}),
+  persist(
+    immer((set) => ({
+      liveMode: "view",
+      setLiveMode: (mode) =>
+        set((state) => {
+          state.liveMode = mode;
+        }),
 
-			persistantConfig: { config: {} as TemplateConfig, sectionOrder: {} },
-			liveConfig: { config: {} as TemplateConfig, sectionOrder: {} },
+      persistantConfig: {
+        template_config: {},
+        section_configs: {},
+      } as ConfigData,
+      liveConfig: { template_config: {}, section_configs: {} } as ConfigData,
 
-			initializeConfig: (config, sections) =>
-				set((state) => {
-					// Create config object if doesn't exist
-					if (
-						!state.persistantConfig ||
-						Object.keys(state.persistantConfig).length === 0
-					) {
-						state.persistantConfig.config = config;
-					}
+      initializeConfig: (default_config, incomingSectionsConfig) =>
+        set((state) => {
+          if (
+            state.persistantConfig &&
+            Object.keys(state.persistantConfig).length > 0
+          ) {
+            return;
+          }
 
-					// Pre-populate section order
-					sections.forEach((section) => {
-						if (state.persistantConfig.sectionOrder[section.id] === undefined) {
-							state.persistantConfig.sectionOrder[section.id] = section.order;
-						}
-					});
-
-					// Sync live state with the initial payload on load
-					state.liveConfig = {
-						config: state.persistantConfig.config,
-						sectionOrder: { ...state.persistantConfig.sectionOrder },
-					};
-				}),
-		})),
-		{
-			name: "template-config-default",
-			partialize: (state) => ({
-				persistantConfig: state.persistantConfig,
-			}),
-		},
-	),
+          state.persistantConfig = {
+            template_config: default_config,
+            section_configs: Object.fromEntries(
+              incomingSectionsConfig.map(({ id, config }) => [id, config]),
+            ),
+          };
+          // Sync live state with the initial payload on load
+          state.liveConfig = JSON.parse(JSON.stringify(state.persistantConfig));
+        }),
+    })),
+    {
+      name: "template-config-default",
+      partialize: (state) => ({
+        persistantConfig: state.persistantConfig,
+      }),
+    },
+  ),
 );
