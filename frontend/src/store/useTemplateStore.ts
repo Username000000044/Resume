@@ -1,12 +1,9 @@
-import type { inferRouterOutputs } from "@trpc/server";
 import { create } from "zustand";
-import type { AppRouter } from "../../../backend/src/appRouter";
-
-type templateType = inferRouterOutputs<AppRouter>["templatesList"][number];
+import type { TemplateType } from "#/types/Template";
 
 interface TemplateState {
-	selectedTemplate?: templateType;
-	setSelectedTemplate: (template: templateType) => void;
+	selectedTemplate?: TemplateType;
+	setSelectedTemplate: (template: TemplateType) => void;
 }
 
 export const useTemplateStore = create<TemplateState>()((set) => ({

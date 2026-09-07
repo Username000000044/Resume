@@ -7,8 +7,12 @@ import {
 } from "../../ui/empty";
 import { LivePaper } from "../../Paper";
 import { LiveSortableSectionItem } from "./LiveSortableSectionItem";
-import type { TemplateType } from "#/types/Template";
+import type { SectionType, TemplateType } from "#/types/Template";
 import { LiveHeaderItem } from "./LiveHeaderItem";
+import type { CSSProperties } from "react";
+import { useResumeConfigStore } from "#/store/useResumeConfigStore";
+import { DragDropProvider } from "@dnd-kit/react";
+import { useShallow } from "zustand/react/shallow";
 
 interface LivePreviewProps {
   templateData: TemplateType;
@@ -51,15 +55,20 @@ export const ALIGNMENT_MAP = {
 } as const;
 
 export const LivePreview = ({ templateData }: LivePreviewProps) => {
-  const liveSections = useResumeStore((store) => store.liveMainSections);
+  const { liveSections, reorderSections } = useResumeStore(
+    useShallow((state) => ({
+      liveSections: state.liveMainSections,
+      reorderSections: state.reorderSections,
+    })),
+  );
 
   if (!liveSections) return <div>Loading template live preview...</div>;
 
-  const templateIsEmpty = templateData.sections.every((section) => {
-    const liveMainSection = liveSections[section.id] || [];
+  const templateIsEmpty = templateData.sections.every((dbSection) => {
+    const liveMainSection = liveSections[dbSection.id] || [];
 
-    return liveMainSection.every((subSection) => {
-      const fieldsEmpty = section.fields.every(
+    return liveMainSection.subSections.every((subSection) => {
+      const fieldsEmpty = dbSection.fields.every(
         (field) => subSection.fields[field.id] === "",
       );
 
@@ -72,6 +81,24 @@ export const LivePreview = ({ templateData }: LivePreviewProps) => {
       return fieldsEmpty && bulletsEmpty;
     });
   });
+
+  const sectionIsEmpty = (dbSection: SectionType) => {
+    const liveMainSection = liveSections[dbSection.id] || { subSections: [] };
+
+    return liveMainSection.subSections.every((subSection) => {
+      const fieldsEmpty = dbSection.fields.every(
+        (field) => subSection.fields[field.id] === "",
+      );
+
+      const bulletsEmpty = subSection.bullets.every(
+        (bullet) =>
+          bullet.text === "" &&
+          bullet.subBullets.every((subBullet) => subBullet.text === ""),
+      );
+
+      return fieldsEmpty && bulletsEmpty;
+    });
+  };
 
   if (templateIsEmpty)
     return (
@@ -99,53 +126,53 @@ export const LivePreview = ({ templateData }: LivePreviewProps) => {
   const font_scale_curve =
     SCALE_CURVES[templateData.default_config.theme.typography.scale_curve];
 
+  const dynamicPreviewStyles = {
+    // Typography
+    "--font-size-base": `${font_size_base}pt`,
+    "--section-title-size": `${font_size_base * font_scale_curve.h2}pt`,
+
+    // Spacing
+    "--page-margin": `${page_margin}in`,
+    "--section-gap": `${templateData.default_config.spacing.section_gap}pt`,
+    "--instance-gap": `${templateData.default_config.spacing.instance_gap}pt`,
+    "--divider-gap": `${templateData.default_config.spacing.divider_gap}pt`,
+    "--separator-gap": `${templateData.default_config.spacing.separator_gap}pt`,
+    "--bullet-indentation": `${templateData.default_config.spacing.bullet_indentation}pt`,
+    "--line-height": `${font_size_base * line_height}pt`,
+
+    // Decorations
+    "--bullet-style": templateData.default_config.decorations.bullet_style,
+    "--sub-bullet-style":
+      templateData.default_config.decorations.sub_bullet_style,
+
+    //Colors (Field colors are handled dynamically in the LiveFieldItem component)
+    "--divider-color": templateData.default_config.theme.colors.divider,
+    "--header-color": templateData.default_config.theme.colors.heading,
+    "--section-title_color":
+      templateData.default_config.theme.colors.section_title,
+    "--bullet-color": templateData.default_config.theme.colors.body,
+
+    //Weight (Field weight are handled dynamically in the LiveFieldItem componet)
+    "--header-weight":
+      templateData.default_config.theme.typography.font_weight.heading,
+    "--section-title-weight":
+      templateData.default_config.theme.typography.font_weight.section_title,
+    "--bullet-weight":
+      templateData.default_config.theme.typography.font_weight.body,
+  } as CSSProperties;
+
   return (
-    <div className="flex flex-col gap-4 w-full">
-      <LivePaper
-        className="flex flex-col text-(length:--font-size-base) leading-[var(--line-f)] !p-[var(--page-margin)]"
-        style={
-          {
-            // Typography
-            "--font-size-base": `${font_size_base}pt`,
-            "--section-title-size": `${font_size_base * font_scale_curve.h2}pt`,
-
-            // Spacing
-            "--page-margin": `${page_margin}in`,
-            "--section-gap": `${templateData.default_config.spacing.section_gap}pt`,
-            "--instance-gap": `${templateData.default_config.spacing.instance_gap}pt`,
-            "--divider-gap": `${templateData.default_config.spacing.divider_gap}pt`,
-            "--separator-gap": `${templateData.default_config.spacing.separator_gap}pt`,
-            "--bullet-indentation": `${templateData.default_config.spacing.bullet_indentation}pt`,
-            "--line-height": `${font_size_base * line_height}pt`,
-
-            // Decorations
-            "--bullet-style":
-              templateData.default_config.decorations.bullet_style,
-            "--sub-bullet-style":
-              templateData.default_config.decorations.sub_bullet_style,
-
-            //Colors (Field colors are handled dynamically in the LiveFieldItem component)
-            "--divider-color": templateData.default_config.theme.colors.divider,
-            "--header-color": templateData.default_config.theme.colors.heading,
-            "--section-title_color":
-              templateData.default_config.theme.colors.section_title,
-            "--bullet-color": templateData.default_config.theme.colors.body,
-
-            //Weight (Field weight are handled dynamically in the LiveFieldItem componet)
-            "--header-weight":
-              templateData.default_config.theme.typography.font_weight.heading,
-            "--section-title-weight":
-              templateData.default_config.theme.typography.font_weight
-                .section_title,
-            "--bullet-weight":
-              templateData.default_config.theme.typography.font_weight.body,
-          } as React.CSSProperties
-        }
-      >
+    <div className="flex flex-col gap-4 w-full" style={dynamicPreviewStyles}>
+      <LivePaper className="flex flex-col text-(length:--font-size-base) leading-[var(--line-height)] !p-[var(--page-margin)]">
         {/* Header */}
         <div className="pb-[var(--section-gap)]">
           {templateData.sections
-            .filter((dbSection) => dbSection.order === 0)
+            .filter((dbSection) => {
+              const isHeaderSection = dbSection.order === 0;
+              const sectionHasContents = !sectionIsEmpty(dbSection);
+
+              return isHeaderSection && sectionHasContents;
+            })
             .map((dbSection) => (
               <LiveHeaderItem
                 templateData={templateData}
@@ -155,18 +182,37 @@ export const LivePreview = ({ templateData }: LivePreviewProps) => {
             ))}
         </div>
 
-        {/* Sections */}
-        <div className="flex flex-col gap-[var(--section-gap)]">
-          {templateData.sections
-            .filter((dbSection) => dbSection.order !== 0)
-            .map((dbSection) => (
-              <LiveSortableSectionItem
-                templateData={templateData}
-                dbSection={dbSection}
-                key={dbSection.id}
-              />
-            ))}
-        </div>
+        <DragDropProvider
+          onDragEnd={(event) => {
+            const sectionId = event.operation.target?.id;
+
+            if (sectionId) {
+              reorderSections(event);
+            }
+          }}
+        >
+          {/* Sections */}
+          <ul className="flex flex-col gap-[var(--section-gap)]">
+            {templateData.sections
+              .filter((dbSection) => {
+                const isNotHeaderSection = dbSection.order !== 0;
+                const sectionHasContents = !sectionIsEmpty(dbSection);
+
+                return isNotHeaderSection && sectionHasContents;
+              })
+              .sort(
+                (a, b) => liveSections[a.id].order - liveSections[b.id].order,
+              )
+              .map((dbSection, dbSectionIndex) => (
+                <LiveSortableSectionItem
+                  templateData={templateData}
+                  dbSection={dbSection}
+                  dbSectionIndex={dbSectionIndex}
+                  key={dbSection.id}
+                />
+              ))}
+          </ul>
+        </DragDropProvider>
       </LivePaper>
       <LivePaper />
     </div>

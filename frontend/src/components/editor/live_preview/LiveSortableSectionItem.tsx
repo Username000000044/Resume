@@ -8,166 +8,258 @@ import {
   getFieldProperties,
 } from "#/utils/live-preview";
 import { cn } from "#/lib/utils";
+import { LiveFieldWrapper } from "./LiveFieldWrapper";
+import { useMemo, useRef, useState } from "react";
+import { useSortable } from "@dnd-kit/react/sortable";
+import { RestrictToVerticalAxis } from "@dnd-kit/abstract/modifiers";
+import { Button } from "#/components/ui/button";
+import { GripHorizontal } from "lucide-react";
 
 interface SectionItemProps {
   templateData: TemplateType;
   dbSection: SectionType;
+  dbSectionIndex: number;
 }
 
 export const LiveSortableSectionItem = ({
   dbSection,
+  dbSectionIndex,
   templateData,
 }: SectionItemProps) => {
+  const [element, setElement] = useState<Element | null>(null);
+  const handleRef = useRef<HTMLButtonElement | null>(null);
+  const { isDragging } = useSortable({
+    id: dbSection.id,
+    index: dbSectionIndex,
+    element,
+    handle: handleRef,
+    modifiers: [RestrictToVerticalAxis],
+  });
+
   const liveSections = useResumeStore((store) => store.liveMainSections);
+
+  const numOfFilledSections = useMemo(() => {
+    return templateData.sections.reduce((count, dbSection) => {
+      const liveSection = liveSections[dbSection.id] || { subSections: [] };
+
+      const sectionHasContent = liveSection.subSections.some((subSection) => {
+        const contentField = dbSection.fields.some(
+          (field) =>
+            subSection.fields[field.id] && subSection.fields[field.id] !== "",
+        );
+
+        const contentBullet = subSection.bullets.some(
+          (bullet) =>
+            (bullet.text && bullet.text !== "") ||
+            bullet.subBullets.some((subBullet) => subBullet.text !== ""),
+        );
+
+        return contentField || contentBullet;
+      });
+
+      return sectionHasContent ? count + 1 : count;
+    }, 0);
+  }, [templateData, liveSections]);
 
   // Alignment
   const titleAlignment =
     ALIGNMENT_MAP[dbSection.default_config.alignment.title];
 
   return (
-    <section className={`text-(length:--font-size-base) text-wrap`}>
-      {/* Section Title */}
-      <h2
-        className={`text-(length:--section-title-size) text-[var(--section-title-color)] font-[var(--section-title-weight)]  ${titleAlignment}`}
-      >
-        {dbSection.title}
-      </h2>
-
-      {templateData.default_config.decorations.section_divider && (
-        <DividerItem templateData={templateData} />
-      )}
-
-      {/* Sub Sections */}
-      <div
-        className={cn("flex flex-col", {
-          "gap-[var(--instance-gap)]":
-            dbSection.default_config.spacing.instance_gap,
-        })}
-      >
-        {liveSections[dbSection.id].map((liveSubSection) => {
-          const matrix = constructLayoutMatrix(dbSection.fields);
-
-          // Formats Input Field Value
-          const formatFieldValue = (field: FieldType) => {
-            const value = liveSubSection.fields[field.id];
-
-            const currrentRowIndex = field.alignment?.rowIndex ?? 0;
-            const currentItemOrder = field.alignment?.itemOrder ?? 0;
-            const previousFieldInRow =
-              matrix[currrentRowIndex][currentItemOrder - 1];
-
-            //Location Alterations
-            if (field.name.includes("location") && value) {
-              // Previous and current element are in the same position + previous item exists
-              if (
-                previousFieldInRow &&
-                previousFieldInRow.alignment?.position ===
-                  field.alignment?.position &&
-                liveSubSection.fields[previousFieldInRow.id]
-              ) {
-                return `, ${value}`;
-              }
-            }
-
-            // Date Alterations
-            if (field.type === "date" && value) {
-              const rawInputDate = new Date(`${value}T23:59:59`); // hacky way to compare current date with selected date
-              const rawTodayDate = new Date();
-
-              const formattedInputDate = formatDate(rawInputDate); // year-month-day
-
-              // Both previous and current field is a date + previous value exists
-              if (
-                previousFieldInRow.type === "date" &&
-                liveSubSection.fields[previousFieldInRow.id]
-              ) {
-                return rawInputDate.valueOf() > rawTodayDate.valueOf()
-                  ? "—Present"
-                  : `—${formattedInputDate}`;
-              }
-
-              return rawInputDate.valueOf() > rawTodayDate.valueOf()
-                ? "Present"
-                : formattedInputDate;
-            }
-            return value;
-          };
-
-          return (
-            <div key={liveSubSection.id}>
-              {/* Row Index */}
-              {matrix.map((_, rowIndex) => (
-                <div
-                  key={crypto.randomUUID()}
-                  className="grid grid-cols-[auto_auto_auto] items-top w-full"
-                >
-                  {/* Left Aligned */}
-                  <div className="flex justify-start">
-                    {matrix[rowIndex]
-                      .filter((field) => field.alignment?.position === "left")
-                      .map((field) => {
-                        return (
-                          <LiveFieldItem
-                            key={field.id}
-                            value={formatFieldValue(field)}
-                            properties={getFieldProperties(field, templateData)}
-                          />
-                        );
-                      })}
-                  </div>
-
-                  {/* Center Aligned */}
-                  <div className="flex justify-center">
-                    {matrix[rowIndex]
-                      .filter((field) => field.alignment?.position === "center")
-                      .map((field) => {
-                        return (
-                          <LiveFieldItem
-                            key={field.id}
-                            value={formatFieldValue(field)}
-                            properties={getFieldProperties(field, templateData)}
-                          />
-                        );
-                      })}
-                  </div>
-
-                  {/* Right Aligned */}
-                  <div className="flex justify-end">
-                    {matrix[rowIndex]
-                      .filter((field) => field.alignment?.position === "right")
-                      .map((field) => {
-                        return (
-                          <LiveFieldItem
-                            key={field.id}
-                            value={formatFieldValue(field)}
-                            properties={getFieldProperties(field, templateData)}
-                          />
-                        );
-                      })}
-                  </div>
-                </div>
-              ))}
-
-              {/* Section Bullets */}
-              <ul className="list-[var(--bullet-style)] text-[var(--bullet-color)] font-[var(--bullet-weight)] pl-[var(--bullet-indentation)] list-inside">
-                {liveSubSection.bullets.map((bullet) => (
-                  <li key={bullet.id}>
-                    {bullet.text}
-
-                    {/* Bullet's Sub Bullets */}
-                    <ul className="list-[var(--sub-bullet-style)] pl-[var(--bullet-indentation)] list-inside">
-                      {bullet.subBullets.map((subBullet) => (
-                        <li key={subBullet.id}>{subBullet.text}</li>
-                      ))}
-                    </ul>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          );
-        })}
+    <li
+      ref={setElement}
+      className="relative text-(length:--font-size-base) text-wrap"
+    >
+      {/* Section Actions */}
+      <div className="absolute top-1/2 -translate-y-1/2 -right-[calc(var(--page-margin)+50px)]">
+        <div className="*:text-muted-foreground *:cursor-pointer *:hover:bg-transparent">
+          <Button
+            size="icon-sm"
+            variant="ghost"
+            ref={handleRef}
+            disabled={numOfFilledSections === 1}
+          >
+            <GripHorizontal />
+          </Button>
+        </div>
       </div>
-    </section>
+
+      {/* Section Content */}
+      <section
+        className={cn({
+          "p-2 bg-white rounded-4xl shadow-md": isDragging,
+        })}
+      >
+        {/* Section Title */}
+        <h2
+          className={`text-(length:--section-title-size) text-[var(--section-title-color)] font-[var(--section-title-weight)]  ${titleAlignment}`}
+        >
+          {dbSection.title}
+          {liveSections[dbSection.id].order}
+        </h2>
+
+        {templateData.default_config.decorations.section_divider && (
+          <DividerItem templateData={templateData} />
+        )}
+
+        {/* Sub Sections */}
+        <div
+          className={cn("flex flex-col", {
+            "gap-[var(--instance-gap)]":
+              dbSection.default_config.spacing.instance_gap,
+          })}
+        >
+          {liveSections[dbSection.id].subSections.map((liveSubSection) => {
+            const matrix = constructLayoutMatrix(dbSection.fields);
+
+            // Formats Input Field Value
+            const formatFieldValue = (field: FieldType) => {
+              const value = liveSubSection.fields[field.id];
+
+              const currrentRowIndex = field.alignment?.rowIndex ?? 0;
+              const currentItemOrder = field.alignment?.itemOrder ?? 0;
+              const previousFieldInRow =
+                matrix[currrentRowIndex][currentItemOrder - 1];
+
+              //Location Alterations
+              if (field.name.includes("location") && value) {
+                // Previous and current element are in the same position + previous item exists
+                if (
+                  previousFieldInRow &&
+                  previousFieldInRow.alignment?.position ===
+                    field.alignment?.position &&
+                  liveSubSection.fields[previousFieldInRow.id]
+                ) {
+                  return `, ${value}`;
+                }
+              }
+
+              // Date Alterations
+              if (field.type === "date" && value) {
+                const rawInputDate = new Date(`${value}T23:59:59`); // hacky way to compare current date with selected date
+                const rawTodayDate = new Date();
+
+                const formattedInputDate = formatDate(rawInputDate); // year-month-day
+
+                // Both previous and current field is a date + previous value exists
+                if (
+                  previousFieldInRow.type === "date" &&
+                  liveSubSection.fields[previousFieldInRow.id]
+                ) {
+                  return rawInputDate.valueOf() > rawTodayDate.valueOf()
+                    ? "—Present"
+                    : `—${formattedInputDate}`;
+                }
+
+                return rawInputDate.valueOf() > rawTodayDate.valueOf()
+                  ? "Present"
+                  : formattedInputDate;
+              }
+              return value;
+            };
+
+            return (
+              <div key={liveSubSection.id}>
+                {/* Row Index */}
+                {matrix.map((_, rowIndex) => (
+                  <div
+                    key={crypto.randomUUID()}
+                    className="grid grid-cols-[auto_auto_auto] items-top w-full"
+                  >
+                    {/* Left Aligned */}
+                    <div className="flex justify-start">
+                      {matrix[rowIndex]
+                        .filter((field) => field.alignment?.position === "left")
+                        .map((field) => {
+                          return (
+                            <LiveFieldWrapper
+                              key={field.id}
+                              field={field}
+                              value={liveSubSection.fields[field.id]}
+                            >
+                              <LiveFieldItem
+                                value={formatFieldValue(field)}
+                                properties={getFieldProperties(
+                                  field,
+                                  templateData,
+                                )}
+                              />
+                            </LiveFieldWrapper>
+                          );
+                        })}
+                    </div>
+                    {/* Center Aligned */}
+                    <div className="flex justify-center">
+                      {matrix[rowIndex]
+                        .filter(
+                          (field) => field.alignment?.position === "center",
+                        )
+                        .map((field) => {
+                          return (
+                            <LiveFieldWrapper
+                              key={field.id}
+                              field={field}
+                              value={liveSubSection.fields[field.id]}
+                            >
+                              <LiveFieldItem
+                                value={formatFieldValue(field)}
+                                properties={getFieldProperties(
+                                  field,
+                                  templateData,
+                                )}
+                              />
+                            </LiveFieldWrapper>
+                          );
+                        })}
+                    </div>
+                    {/* Right Aligned */}
+                    <div className="flex justify-end">
+                      {matrix[rowIndex]
+                        .filter(
+                          (field) => field.alignment?.position === "right",
+                        )
+                        .map((field) => {
+                          return (
+                            <LiveFieldWrapper
+                              key={field.id}
+                              field={field}
+                              value={liveSubSection.fields[field.id]}
+                            >
+                              <LiveFieldItem
+                                value={formatFieldValue(field)}
+                                properties={getFieldProperties(
+                                  field,
+                                  templateData,
+                                )}
+                              />
+                            </LiveFieldWrapper>
+                          );
+                        })}
+                    </div>
+                  </div>
+                ))}
+
+                {/* Section Bullets */}
+                <ul className="list-[var(--bullet-style)] text-[var(--bullet-color)] font-[var(--bullet-weight)] pl-[var(--bullet-indentation)] list-inside">
+                  {liveSubSection.bullets.map((bullet) => (
+                    <li key={bullet.id}>
+                      {bullet.text}
+
+                      {/* Bullet's Sub Bullets */}
+                      <ul className="list-[var(--sub-bullet-style)] pl-[var(--bullet-indentation)] list-inside">
+                        {bullet.subBullets.map((subBullet) => (
+                          <li key={subBullet.id}>{subBullet.text}</li>
+                        ))}
+                      </ul>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+    </li>
   );
 };
 

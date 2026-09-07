@@ -46,8 +46,9 @@ export const BulletItem = ({
   );
 
   const liveValue =
-    liveMainSections[section.id][subSectionIndex].bullets[bulletIndex].text ||
-    "";
+    liveMainSections[section.id].subSections[subSectionIndex].bullets[
+      bulletIndex
+    ].text || "";
 
   const debouncedSave = useMemo(
     () =>

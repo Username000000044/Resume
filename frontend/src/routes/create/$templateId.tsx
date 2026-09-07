@@ -7,17 +7,14 @@ import { EditorTabs } from "#/components/editor/form/EditorTabs";
 
 import { PreviewHeader } from "#/components/editor/live_preview/PreviewHeader";
 import { LivePreview } from "#/components/editor/live_preview/LivePreview";
+import { useResumeConfigStore } from "#/store/useResumeConfigStore";
 
 export const Route = createFileRoute("/create/$templateId")({
   component: RouteComponent,
   notFoundComponent: () => <div>Template Not Found</div>,
 });
 
-export type LiveMode = "view" | "config";
-
 function RouteComponent() {
-  const [liveMode, setLivewMode] = useState<LiveMode>("view");
-
   const { templateId } = useParams({ from: "/create/$templateId" });
   const templateRequest = useQuery(
     trpc.templateById.queryOptions(templateId, { retry: false }),
@@ -27,11 +24,14 @@ function RouteComponent() {
   const initializeSections = useResumeStore(
     (state) => state.initializeSections,
   );
+  const initializeConfig = useResumeConfigStore(
+    (state) => state.initializeConfig,
+  );
 
   useEffect(() => {
     if (!templateRequest.data) return;
 
-    const handleInitialization = async () => {
+    const handleSectionsInitialization = async () => {
       const persistName = useResumeStore.persist.getOptions().name;
       const targetName = `template-${templateId}`;
 
@@ -52,6 +52,7 @@ function RouteComponent() {
         const syncPayload = templateRequest.data.sections.map((s) => ({
           id: s.id,
           fieldIds: s.fields.map((f) => f.id),
+          order: s.order,
         }));
 
         initializeSections(syncPayload);
@@ -59,7 +60,34 @@ function RouteComponent() {
       }
     };
 
-    handleInitialization();
+    // const handleConfigInitialization = async () => {
+    //   const persistName = useResumeConfigStore.persist.getOptions().name;
+    //   const targetName = `template-config-${templateId}`;
+
+    //   if (persistName !== targetName) {
+    //     if (persistName) {
+    //       localStorage.removeItem(persistName);
+    //     }
+
+    //     useResumeConfigStore.persist.setOptions({
+    //       name: targetName,
+    //     });
+
+    //     await useResumeConfigStore.persist.rehydrate();
+    //   }
+
+    //   // Populate zustand store with db default db config;
+    //   if (templateRequest.data) {
+    //     const syncSections = templateRequest.data.sections.map((s) => ({
+    //       id: s.id,
+    //     }));
+
+    //     // initializeConfig(templateRequest.data.default_config, syncSections);
+    //   }
+    // };
+
+    handleSectionsInitialization();
+    // handleConfigInitialization();
   }, [templateRequest.data, templateId, initializeSections]);
 
   if (!templateRequest.data) return <div>{templateRequest.error?.message}</div>;
@@ -79,7 +107,7 @@ function RouteComponent() {
 
         {/* Live Resume Column */}
         <div className="flex flex-col gap-1">
-          <PreviewHeader liveMode={liveMode} setLiveMode={setLivewMode} />
+          <PreviewHeader />
           <div className="bg-linear-to-b from-primary/8 to-primary/12 p-4 rounded-4xl">
             <LivePreview templateData={templateRequest.data} />
           </div>

@@ -2,6 +2,7 @@ import { createRootRoute, Outlet } from "@tanstack/react-router";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { queryClient } from "#/utils/trpc";
+import texturedPaper from "@/assets/textured-paper.webp";
 import "../styles.css";
 
 export const Route = createRootRoute({
@@ -13,7 +14,10 @@ function RootComponent() {
   return (
     <>
       <QueryClientProvider client={queryClient}>
-        <div className="min-h-screen w-full bg-[url('/assets/textured-paper.webp')] bg-cover bg-fixed bg-no-repeat bg-top bg-[#ffffff]">
+        <div
+          className="min-h-screen w-full bg-cover bg-fixed bg-no-repeat bg-top bg-[#ffffff]"
+          style={{ backgroundImage: `url(${texturedPaper})` }}
+        >
           <Outlet />
         </div>
 

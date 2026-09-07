@@ -66,19 +66,31 @@ interface SpacingConfig {
 	line_height: number; // individual character height (pt) multiplied by scale curve.
 }
 
+type Font =
+	| "inter"
+	| "roboto"
+	| "open-sans"
+	| "montserrat"
+	| "arimo"
+	| "noto-sans"
+	| "libre-franklin"
+	| "source-sans-3"
+	| "rubik"
+	| "plus-jakarta-sans";
+
 interface TypographyConfig {
-	primary_font_family: string;
-	primary_font_url: string;
-
-	secondary_font_family: string;
-	secondary_font_url: string;
-
+	primary_font_family: Font;
+	secondary_font_family: Font;
+	role_font_family: Record<
+		(typeof fieldRenderRoleEnum.enumValues)[number],
+		"primary" | "secondary"
+	>;
 	font_size_base: number; // 11pt (stored as num) so it can be multiplied by scale curve.
 	scale_curve: "editorial" | "balanced" | "minimal";
 	font_weight: Record<(typeof fieldRenderRoleEnum.enumValues)[number], number>;
 }
 
-interface TemplateConfig {
+export interface TemplateConfig {
 	// decorations, typography/fontsizes, colors
 	decorations: {
 		header_divider: boolean;

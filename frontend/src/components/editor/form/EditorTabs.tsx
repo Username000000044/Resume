@@ -42,7 +42,7 @@ export const EditorTabs = ({ templateData }: EditorTabsProps) => {
             </TabsTrigger>
           ))}
         </TabsList>
-        {/* <ScrollBar orientation="horizontal" className="px-4 !h-[6px]" /> */}
+        {/* <ScrollBar orientation="horizontal" className="px-4 !h-[6px] " /> */}
       </ScrollArea>
       {templateData.sections.map((section, sectionIndex) => (
         <TabsContent
@@ -58,7 +58,7 @@ export const EditorTabs = ({ templateData }: EditorTabsProps) => {
           >
             {/* Map main sections to expose sections*/}
             <ul className="flex flex-col gap-4">
-              {persistantMainSectionsStorage[section.id].map(
+              {persistantMainSectionsStorage[section.id].subSections.map(
                 (subSection, subSectionIndex) => (
                   <SortableSubSectionItem
                     key={subSection.id}
@@ -82,8 +82,8 @@ export const EditorTabs = ({ templateData }: EditorTabsProps) => {
                 className="border-none shadow-sm ring-1 ring-foreground/5 cursor-pointer"
                 onClick={() => addSubSection(section.id)}
                 disabled={
-                  persistantMainSectionsStorage[section.id].length >=
-                  MAX_SUB_SECTION_COUNT
+                  persistantMainSectionsStorage[section.id].subSections
+                    .length >= MAX_SUB_SECTION_COUNT
                 }
               >
                 <Plus />

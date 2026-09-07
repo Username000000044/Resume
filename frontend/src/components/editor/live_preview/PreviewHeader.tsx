@@ -4,22 +4,13 @@ import { Label } from "#/components/ui/label";
 import {
   Popover,
   PopoverContent,
-  PopoverDescription,
-  PopoverHeader,
-  PopoverTitle,
   PopoverTrigger,
 } from "#/components/ui/popover";
 import { Switch } from "#/components/ui/switch";
-import type { LiveMode } from "#/routes/create/$templateId";
+import { useResumeConfigStore } from "#/store/useResumeConfigStore";
 import { useResumeStore } from "#/store/useResumeStore";
-import { Download, Folder, icons, Image, RefreshCcw } from "lucide-react";
-import type { Dispatch, SetStateAction } from "react";
+import { Download, Folder, icons, RefreshCcw } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
-
-interface PreviewHeaderProps {
-  liveMode: LiveMode;
-  setLiveMode: Dispatch<SetStateAction<LiveMode>>;
-}
 
 interface DownloadOption {
   name: string;
@@ -57,10 +48,14 @@ const downloadOptions: DownloadOption[] = [
   },
 ];
 
-export const PreviewHeader = ({
-  liveMode,
-  setLiveMode,
-}: PreviewHeaderProps) => {
+export const PreviewHeader = () => {
+  const { liveMode, setLiveMode } = useResumeConfigStore(
+    useShallow((state) => ({
+      liveMode: state.liveMode,
+      setLiveMode: state.setLiveMode,
+    })),
+  );
+
   const { persistantMainSections, liveMainSections } = useResumeStore(
     useShallow((state) => ({
       persistantMainSections: state.persistantMainSections,

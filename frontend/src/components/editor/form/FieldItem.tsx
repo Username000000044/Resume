@@ -28,7 +28,9 @@ export const FieldInput = ({
   );
 
   const liveValue =
-    liveMainSections[section.id][subSectionIndex].fields[field.id] || "";
+    liveMainSections[section.id].subSections[subSectionIndex].fields[
+      field.id
+    ] || "";
 
   const debouncedSave = useMemo(
     () =>

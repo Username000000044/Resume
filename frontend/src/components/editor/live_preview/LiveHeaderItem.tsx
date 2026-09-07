@@ -23,7 +23,7 @@ export const LiveHeaderItem = ({
     <section className={`text-(length:--font-size-base) text-wrap`}>
       {/* Sub Sections */}
       <div className="flex flex-col gap-[var(--instance-gap)]">
-        {liveSections[dbSection.id].map((liveSubSection) => {
+        {liveSections[dbSection.id].subSections.map((liveSubSection) => {
           const matrix = constructLayoutMatrix(dbSection.fields);
 
           // Formats Input Field Value
@@ -73,7 +73,11 @@ export const LiveHeaderItem = ({
                       .filter((field) => field.alignment?.position === "left")
                       .map((field) => {
                         return (
-                          <LiveFieldWrapper key={field.id} field={field}>
+                          <LiveFieldWrapper
+                            key={field.id}
+                            field={field}
+                            value={liveSubSection.fields[field.id]}
+                          >
                             <LiveFieldItem
                               value={formatFieldValue(field)}
                               properties={getFieldProperties(
@@ -92,7 +96,11 @@ export const LiveHeaderItem = ({
                       .filter((field) => field.alignment?.position === "center")
                       .map((field) => {
                         return (
-                          <LiveFieldWrapper key={field.id} field={field}>
+                          <LiveFieldWrapper
+                            key={field.id}
+                            field={field}
+                            value={liveSubSection.fields[field.id]}
+                          >
                             <LiveFieldItem
                               value={formatFieldValue(field)}
                               properties={getFieldProperties(
@@ -111,7 +119,11 @@ export const LiveHeaderItem = ({
                       .filter((field) => field.alignment?.position === "right")
                       .map((field) => {
                         return (
-                          <LiveFieldWrapper key={field.id} field={field}>
+                          <LiveFieldWrapper
+                            key={field.id}
+                            field={field}
+                            value={liveSubSection.fields[field.id]}
+                          >
                             <LiveFieldItem
                               value={formatFieldValue(field)}
                               properties={getFieldProperties(

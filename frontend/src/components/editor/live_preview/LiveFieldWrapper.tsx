@@ -1,8 +1,9 @@
-import type { FieldType, SectionType } from "#/types/Template";
+import type { FieldType } from "#/types/Template";
 import type { ReactNode } from "react";
 
 interface LiveGroupProps {
   field: FieldType;
+  value: string;
   children: ReactNode;
 }
 
@@ -15,7 +16,13 @@ const seperatorMap = {
   none: "",
 };
 
-export const LiveFieldWrapper = ({ field, children }: LiveGroupProps) => {
+export const LiveFieldWrapper = ({
+  field,
+  value,
+  children,
+}: LiveGroupProps) => {
+  if (!value) return;
+
   const group = field.group;
   if (!group || group.separator === "none") return <>{children}</>;
 

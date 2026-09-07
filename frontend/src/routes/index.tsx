@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Feather, Plus } from "lucide-react";
 import { Header } from "#/components/Header";
 import { Button, buttonVariants } from "#/components/ui/button";
+import cursor from "@/assets/cursor.svg";
+import writtenPaper from "@/assets/written-paper.svg";
 
 import "#/styles/animations.css";
 import { TemplatesOverlay } from "#/components/TemplatesOverlay";
@@ -22,7 +24,7 @@ function Home() {
                   ATS
                 </p>
                 <img
-                  src="assets/cursor.svg"
+                  src={cursor}
                   alt=""
                   className="absolute size-6 -bottom-2 -right-4 lg:-bottom-6 lg:-right-8 lg:size-max"
                 ></img>
@@ -67,11 +69,7 @@ function Home() {
       <div className="h-full bg-background/25 border-x-3 border-t-3 border-zinc-300 border-dashed">
         <div className="h-full min-h-150 p-6 flex flex-col justify-center items-center">
           <div className="size-40 rounded-full bg-primary mx-auto">
-            <img
-              src="assets/written-paper.svg"
-              alt=""
-              className="relative bottom-5"
-            ></img>
+            <img src={writtenPaper} alt="" className="relative bottom-5"></img>
           </div>
           <div className="flex flex-col gap-4 mt-18 w-75">
             {/* TODO: Make TemplateOverlay button a child of TemplateOverlay so it can be used in many locations with different button.*/}

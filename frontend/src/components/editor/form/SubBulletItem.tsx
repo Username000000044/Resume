@@ -50,8 +50,9 @@ export const SubBulletItem = ({
   );
 
   const liveValue =
-    liveMainSections[section.id][subSectionIndex].bullets[mainBulletIndex]
-      .subBullets[subBulletIndex].text || "";
+    liveMainSections[section.id].subSections[subSectionIndex].bullets[
+      mainBulletIndex
+    ].subBullets[subBulletIndex].text || "";
 
   const debouncedSave = useMemo(
     () =>

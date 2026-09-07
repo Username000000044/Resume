@@ -1,6 +1,7 @@
-import { create } from "zustand";
+import { create, type ExtractState } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { persist } from "zustand/middleware";
+import type { DragEndEvent } from "@dnd-kit/react";
 import { move } from "@dnd-kit/helpers";
 
 export interface MainBullet {
@@ -21,20 +22,29 @@ export interface SubSectionData {
 	order: number;
 }
 
+export interface SectionData {
+	id: string;
+	subSections: SubSectionData[];
+	order: number;
+}
+
 interface SectionInitialization {
 	id: string;
 	fieldIds: string[];
+	order: number;
 }
 
 interface ResumeStoreState {
-	persistantMainSections: Record<string, SubSectionData[]>; // mainSection id : [{subSection}, {subSection}]
-	liveMainSections: Record<string, SubSectionData[]>; // mainSection id : [{subSection}, {subSection}]
+	persistantMainSections: Record<string, SectionData>; // mainSection id : [{subSection}, {subSection}]
+	liveMainSections: Record<string, SectionData>; // mainSection id : [{subSection}, {subSection}]
 
 	initializeSections: (sections: SectionInitialization[]) => void;
 
+	reorderSections: (event: DragEndEvent) => void;
+
 	addSubSection: (mainSectionId: string) => void;
 	removeSubSection: (mainSectionId: string, subSectionIndex: number) => void;
-	reorderSubSections: (mainSectionId: string, event: any) => void;
+	reorderSubSections: (mainSectionId: string, event: DragEndEvent) => void;
 
 	updateLiveField: (
 		mainSectionId: string,
@@ -102,30 +112,75 @@ export const useResumeStore = create<ResumeStoreState>()(
 
 			initializeSections: (incommingSections) =>
 				set((state) => {
-					incommingSections.forEach(({ id, fieldIds }) => {
-						// Create section object if doesn't exist
+					incommingSections.forEach(({ id, fieldIds, order }) => {
+						// Initialize main section if doesn't exist
 						if (!state.persistantMainSections[id]) {
-							state.persistantMainSections[id] = [
+							state.persistantMainSections[id] = {
+								id,
+								subSections: [
+									{
+										id: crypto.randomUUID(),
+										fields: {},
+										bullets: [],
+										order: 0,
+									},
+								],
+								order,
+							};
+						}
+						// Fallback to nitialize default sub section if subsection was empty/missing
+						else if (
+							!state.persistantMainSections[id].subSections ||
+							state.persistantMainSections[id].subSections.length === 0
+						) {
+							state.persistantMainSections[id].subSections = [
 								{ id: crypto.randomUUID(), fields: {}, bullets: [], order: 0 },
 							];
 						}
 
 						// Pre-populate field key with empty string and order
-						state.persistantMainSections[id].forEach((_, idx) => {
-							fieldIds.forEach((fieldId) => {
-								const subSection = state.persistantMainSections[id][idx];
-
-								if (subSection.fields[fieldId] === undefined) {
-									subSection.fields[fieldId] = "";
-								}
-							});
-						});
+						state.persistantMainSections[id].subSections.forEach(
+							(subSection) => {
+								fieldIds.forEach((fieldId) => {
+									if (subSection.fields[fieldId] === undefined) {
+										subSection.fields[fieldId] = "";
+									}
+								});
+							},
+						);
 					});
 
 					// Sync live state with the initial payload on load
 					state.liveMainSections = JSON.parse(
 						JSON.stringify(state.persistantMainSections),
 					);
+				}),
+
+			reorderSections: (event) =>
+				set((state) => {
+					// Persist
+
+					// Sorts keys from lowest to highest
+					const sortedIds = Object.keys(state.persistantMainSections).sort(
+						(a, b) => {
+							return (
+								(state.persistantMainSections[a].order || 0) -
+								(state.persistantMainSections[b].order || 0)
+							);
+						},
+					);
+
+					const reorderedIds = move(sortedIds, event);
+
+					// Assign new placement order based on idx of the new reorderedIds array
+					reorderedIds.forEach((id, idx) => {
+						if (state.persistantMainSections[id]) {
+							state.persistantMainSections[id].order = idx;
+						}
+						if (state.liveMainSections[id]) {
+							state.liveMainSections[id].order = idx;
+						}
+					});
 				}),
 
 			addSubSection: (mainSectionId) =>
@@ -136,7 +191,7 @@ export const useResumeStore = create<ResumeStoreState>()(
 					if (!mainSection) return;
 
 					const newId = crypto.randomUUID();
-					const orderIndex = mainSection.length;
+					const orderIndex = mainSection.subSections.length;
 
 					const persistantSubSection: SubSectionData = {
 						id: newId,
@@ -151,8 +206,8 @@ export const useResumeStore = create<ResumeStoreState>()(
 						order: orderIndex,
 					};
 
-					mainSection.push(persistantSubSection);
-					liveSection.push(liveSubSection);
+					mainSection.subSections.push(persistantSubSection);
+					liveSection.subSections.push(liveSubSection);
 				}),
 
 			removeSubSection: (mainSectionId, subSectionIndex) =>
@@ -164,54 +219,59 @@ export const useResumeStore = create<ResumeStoreState>()(
 
 					// Persist
 					if (mainSection) {
-						mainSection.splice(subSectionIndex, 1);
+						mainSection.subSections.splice(subSectionIndex, 1);
 					}
 
 					// Live
 					if (liveSection) {
-						liveSection.splice(subSectionIndex, 1);
+						liveSection.subSections.splice(subSectionIndex, 1);
 					}
 				}),
 
 			reorderSubSections: (mainSectionId, event) =>
 				set((state) => {
-					// Persist
-					const orderedMainSection = move(
-						state.persistantMainSections[mainSectionId],
+					const persistantSection = state.persistantMainSections[mainSectionId];
+					const liveSection = state.liveMainSections[mainSectionId];
+
+					if (!persistantSection || !liveSection) return;
+
+					// Persistant
+					const orderedPersistSection = move(
+						persistantSection.subSections,
 						event,
-					);
-					state.persistantMainSections[mainSectionId] = orderedMainSection;
-					state.persistantMainSections[mainSectionId].forEach(
-						(subSection, idx) => {
-							subSection.order = idx;
-						},
 					);
 
+					persistantSection.subSections = orderedPersistSection;
+					persistantSection.subSections.forEach((subSection, idx) => {
+						subSection.order = idx;
+					});
+
 					// Live
-					const orderedLiveSection = move(
-						state.liveMainSections[mainSectionId],
-						event,
-					);
-					state.liveMainSections[mainSectionId] = orderedLiveSection;
-					state.liveMainSections[mainSectionId].forEach((subSection, idx) => {
+					const orderedLiveSection = move(liveSection.subSections, event);
+
+					liveSection.subSections = orderedLiveSection;
+					liveSection.subSections.forEach((subSection, idx) => {
 						subSection.order = idx;
 					});
 				}),
 
 			updateLiveField: (mainSectionId, sectionIdx, fieldId, value) =>
 				set((state) => {
-					if (state.liveMainSections[mainSectionId][sectionIdx]) {
-						state.liveMainSections[mainSectionId][sectionIdx].fields[fieldId] =
-							value;
+					if (state.liveMainSections[mainSectionId].subSections[sectionIdx]) {
+						state.liveMainSections[mainSectionId].subSections[
+							sectionIdx
+						].fields[fieldId] = value;
 					}
 				}),
 
 			updateField: (mainSectionId, sectionIdx, fieldId, value) =>
 				set((state) => {
-					if (state.persistantMainSections[mainSectionId][sectionIdx]) {
-						state.persistantMainSections[mainSectionId][sectionIdx].fields[
-							fieldId
-						] = value;
+					if (
+						state.persistantMainSections[mainSectionId].subSections[sectionIdx]
+					) {
+						state.persistantMainSections[mainSectionId].subSections[
+							sectionIdx
+						].fields[fieldId] = value;
 					}
 				}),
 
@@ -220,14 +280,18 @@ export const useResumeStore = create<ResumeStoreState>()(
 					const bulletId = crypto.randomUUID();
 
 					// Persist
-					state.persistantMainSections[mainSectionId][sectionIdx].bullets.push({
+					state.persistantMainSections[mainSectionId].subSections[
+						sectionIdx
+					].bullets.push({
 						id: bulletId,
 						text,
 						subBullets: [],
 					});
 
 					// Live
-					state.liveMainSections[mainSectionId][sectionIdx].bullets.push({
+					state.liveMainSections[mainSectionId].subSections[
+						sectionIdx
+					].bullets.push({
 						id: bulletId,
 						text,
 						subBullets: [],
@@ -237,9 +301,9 @@ export const useResumeStore = create<ResumeStoreState>()(
 			removeMainBullet: (mainSectionId, sectionIdx, bulletId) =>
 				set((state) => {
 					const mainSubSection =
-						state.persistantMainSections[mainSectionId][sectionIdx];
+						state.persistantMainSections[mainSectionId].subSections[sectionIdx];
 					const liveMainSubSection =
-						state.liveMainSections[mainSectionId][sectionIdx];
+						state.liveMainSections[mainSectionId].subSections[sectionIdx];
 
 					// Persist
 					if (mainSubSection) {
@@ -259,7 +323,7 @@ export const useResumeStore = create<ResumeStoreState>()(
 			updateLiveMainBullet: (mainSectionId, sectionIdx, bulletId, text) =>
 				set((state) => {
 					const liveSubSection =
-						state.liveMainSections[mainSectionId][sectionIdx];
+						state.liveMainSections[mainSectionId].subSections[sectionIdx];
 
 					// Live
 					const liveMainBullet = liveSubSection.bullets.find(
@@ -271,7 +335,7 @@ export const useResumeStore = create<ResumeStoreState>()(
 			updateMainBullet: (mainSectionId, sectionIdx, bulletId, text) =>
 				set((state) => {
 					const mainSubSection =
-						state.persistantMainSections[mainSectionId][sectionIdx];
+						state.persistantMainSections[mainSectionId].subSections[sectionIdx];
 
 					// Persist
 					const mainBullet = mainSubSection.bullets.find(
@@ -283,9 +347,9 @@ export const useResumeStore = create<ResumeStoreState>()(
 			addSubBullet: (mainSectionId, sectionIdx, parentBulletId, text = "") =>
 				set((state) => {
 					const mainSubSection =
-						state.persistantMainSections[mainSectionId][sectionIdx];
+						state.persistantMainSections[mainSectionId].subSections[sectionIdx];
 					const liveSubSection =
-						state.liveMainSections[mainSectionId][sectionIdx];
+						state.liveMainSections[mainSectionId].subSections[sectionIdx];
 
 					const subBulletId = crypto.randomUUID();
 
@@ -309,9 +373,9 @@ export const useResumeStore = create<ResumeStoreState>()(
 			) =>
 				set((state) => {
 					const subSection =
-						state.persistantMainSections[mainSectionId][sectionIdx];
+						state.persistantMainSections[mainSectionId].subSections[sectionIdx];
 					const liveSubSection =
-						state.liveMainSections[mainSectionId][sectionIdx];
+						state.liveMainSections[mainSectionId].subSections[sectionIdx];
 
 					// Persist
 					const mainBullet = subSection.bullets.find(
@@ -341,7 +405,7 @@ export const useResumeStore = create<ResumeStoreState>()(
 			) =>
 				set((state) => {
 					const liveSubSection =
-						state.liveMainSections[mainSectionId][sectionIdx];
+						state.liveMainSections[mainSectionId].subSections[sectionIdx];
 
 					// Live
 					const liveMainBullet = liveSubSection.bullets.find(
@@ -362,7 +426,7 @@ export const useResumeStore = create<ResumeStoreState>()(
 			) =>
 				set((state) => {
 					const subSection =
-						state.persistantMainSections[mainSectionId][sectionIdx];
+						state.persistantMainSections[mainSectionId].subSections[sectionIdx];
 
 					// Persist
 					const mainBullet = subSection.bullets.find(
@@ -382,3 +446,5 @@ export const useResumeStore = create<ResumeStoreState>()(
 		},
 	),
 );
+
+export type ResumeStore = ExtractState<typeof useResumeStore>;
