@@ -1,13 +1,20 @@
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { trpc } from "#/utils/trpc";
-import { useResumeStore } from "#/store/useResumeStore";
+import {
+  DEFAULT_RESUME_STORE_PERSIST_NAME,
+  useResumeStore,
+} from "#/store/useResumeStore";
 import { useEffect, useState } from "react";
 import { EditorTabs } from "#/components/editor/form/EditorTabs";
 
 import { PreviewHeader } from "#/components/editor/live_preview/PreviewHeader";
 import { LivePreview } from "#/components/editor/live_preview/LivePreview";
-import { useResumeConfigStore } from "#/store/useResumeConfigStore";
+import {
+  DEFAULT_RESUME_CONFIG_STORE_PERSIST_NAME,
+  useResumeConfigStore,
+} from "#/store/useResumeConfigStore";
+import { useShallow } from "zustand/react/shallow";
 
 export const Route = createFileRoute("/create/$templateId")({
   component: RouteComponent,
@@ -20,84 +27,157 @@ function RouteComponent() {
     trpc.templateById.queryOptions(templateId, { retry: false }),
   );
 
-  // [sectionsInitialization, configInitialization]
-  const [isSectionsPayloadReady, setIsSectionsPayloadReady] = useState(false);
-  const [isConfigPayloadReady, setIsConfigPayloadReady] = useState(false);
-
   const initializeSections = useResumeStore(
     (state) => state.initializeSections,
   );
-  const initializeConfig = useResumeConfigStore(
-    (state) => state.initializeConfig,
+  const { initializeConfig, liveConfig } = useResumeConfigStore(
+    useShallow((state) => ({
+      liveConfig: state.liveConfig,
+      initializeConfig: state.initializeConfig,
+    })),
   );
+
+  const [isSectionsPayloadReady, setIsSectionsPayloadReady] = useState(false);
+  const [isConfigPayloadReady, setIsConfigPayloadReady] = useState(false);
 
   useEffect(() => {
     if (!templateRequest.data) return;
 
-    const handleSectionsInitialization = async () => {
-      const persistName = useResumeStore.persist.getOptions().name;
-      const targetName = `template-${templateId}`;
+    // template-{id}-{name}
+    // config-{id}-{name}
+    // {name} = (Captial One Buisness -> captial_one_buisness) or template name
 
-      if (persistName !== targetName) {
-        if (persistName) {
-          localStorage.removeItem(persistName);
-        }
-
-        useResumeStore.persist.setOptions({
-          name: targetName,
-        });
-
-        await useResumeStore.persist.rehydrate();
-      }
-
-      // Populate zustand store with sections, field, and bullets
-      if (templateRequest.data.sections) {
-        const syncPayload = templateRequest.data.sections.map((s) => ({
-          id: s.id,
-          fieldIds: s.fields.map((f) => f.id),
-          order: s.order,
-        }));
-
-        initializeSections(syncPayload);
-        setIsSectionsPayloadReady(true);
-      }
+    const formatStorageName = (name: string) => {
+      return (
+        name
+          .toLowerCase()
+          // Removes all non alphabetical + numerical charcters
+          .replaceAll(/[^a-zA-Z0-9 ]/g, "")
+          // Converts spaces into _
+          .replaceAll(" ", "_")
+      );
     };
 
-    const handleConfigInitialization = async () => {
-      const persistName = useResumeConfigStore.persist.getOptions().name;
-      const targetName = `template-config-${templateId}`;
+    const templateName = liveConfig.templateName
+      ? formatStorageName(liveConfig.templateName)
+      : formatStorageName(templateRequest.data.name);
 
-      if (persistName !== targetName) {
-        if (persistName) {
+    const handleSectionsInitialization = async () => {
+      const persistName = useResumeStore.persist.getOptions().name;
+      const targetName = `template-${templateId}-${templateName}`;
+
+      // If Zustand's persist store exists but isn't targetName
+      if (persistName && persistName !== targetName) {
+        const existingData = localStorage.getItem(persistName);
+
+        // Zustand's persist name is still default and there is data
+        if (persistName === DEFAULT_RESUME_STORE_PERSIST_NAME && existingData) {
+          // Push data from default name into targetName
+          localStorage.setItem(targetName, existingData);
           localStorage.removeItem(persistName);
         }
 
-        useResumeConfigStore.persist.setOptions({
-          name: targetName,
-        });
-
-        await useResumeConfigStore.persist.rehydrate();
+        // Tell Zustand to change where its looking for persist data
+        useResumeStore.persist.setOptions({ name: targetName });
       }
 
-      // Populate zustand store with db default db config;
-      if (templateRequest.data.sections) {
-        const syncPayload = templateRequest.data.sections.map((s) => ({
-          id: s.id,
-          config: s.default_config,
-        }));
+      const unsub = useResumeStore.persist.onFinishHydration(() => {
+        // Only fills store will new data if doesn't exist.
+        const currentSections =
+          useResumeStore.getState().persistantMainSections;
+        if (!currentSections || Object.values(currentSections).length === 0) {
+          // Populate zustand store with sections, field, and bullets
+          if (templateRequest.data.sections) {
+            const syncPayload = templateRequest.data.sections.map((s) => ({
+              id: s.id,
+              fieldIds: s.fields.map((f) => f.id),
+              order: s.order,
+            }));
 
-        initializeConfig(templateRequest.data.default_config, syncPayload);
+            initializeSections(syncPayload);
+          }
+        } else {
+          useResumeStore.getState().syncLiveSections();
+        }
+
+        setIsSectionsPayloadReady(true);
+        unsub();
+      });
+
+      // Wakes up zustand and forces it to pull data from new folder
+      await useResumeStore.persist.rehydrate();
+    };
+
+    // Copied logic from handleSectionsInitialization
+    const handleConfigInitialization = async () => {
+      const persistName = useResumeConfigStore.persist.getOptions().name;
+      const targetName = `config-${templateId}-${templateName}`;
+
+      if (persistName && persistName !== targetName) {
+        const existingData = localStorage.getItem(persistName);
+
+        if (
+          persistName === DEFAULT_RESUME_CONFIG_STORE_PERSIST_NAME &&
+          existingData
+        ) {
+          localStorage.setItem(targetName, existingData);
+          localStorage.removeItem(persistName);
+        }
+
+        useResumeConfigStore.persist.setOptions({ name: targetName });
+      }
+
+      const unsub = useResumeConfigStore.persist.onFinishHydration(() => {
+        const persistConfig = useResumeConfigStore.getState().persistantConfig;
+        if (
+          !persistConfig.templateConfig ||
+          Object.values(persistConfig.sectionConfigs).length === 0 ||
+          !persistConfig.templateName
+        ) {
+          // Populate zustand store with db default db config;
+          if (templateRequest.data.sections) {
+            const syncPayload = templateRequest.data.sections.map((s) => ({
+              id: s.id,
+              config: s.default_config,
+            }));
+
+            initializeConfig(
+              templateName,
+              templateRequest.data.default_config,
+              syncPayload,
+            );
+          }
+        } else {
+          useResumeConfigStore.getState().syncLiveSections();
+        }
+
         setIsConfigPayloadReady(true);
-      }
+        unsub();
+      });
+
+      await useResumeConfigStore.persist.rehydrate();
     };
 
     handleSectionsInitialization();
     handleConfigInitialization();
-  }, [templateRequest.data, templateId, initializeSections]);
+  }, [
+    templateRequest.data,
+    liveConfig.templateName,
+    templateId,
+    initializeConfig,
+    initializeSections,
+  ]);
 
   if (!templateRequest.data) return <div>{templateRequest.error?.message}</div>;
-  if (!isSectionsPayloadReady && !isConfigPayloadReady)
-    return <div>Loading template configurations...</div>;
+
+  if (!isSectionsPayloadReady || !isConfigPayloadReady) {
+    return (
+      <div>
+        {!isSectionsPayloadReady && <div>Loading template data...</div>}
+        {!isConfigPayloadReady && <div>Loading config data...</div>}
+      </div>
+    );
+  }
 
   return (
     <div className="pt-12 lg:py-24 print:p-0">

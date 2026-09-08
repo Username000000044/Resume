@@ -102,15 +102,15 @@ export const LiveSortableSectionItem = ({
           {liveSections[dbSection.id].order}
         </h2>
 
-        {liveConfig.template_config.decorations.section_divider && (
-          <DividerItem template_config={liveConfig.template_config} />
+        {liveConfig.templateConfig.decorations.section_divider && (
+          <DividerItem template_config={liveConfig.templateConfig} />
         )}
 
         {/* Sub Sections */}
         <div
           className={cn("flex flex-col", {
             "gap-[var(--instance-gap)]":
-              liveConfig.template_config.spacing.instance_gap,
+              liveConfig.templateConfig.spacing.instance_gap,
           })}
         >
           {liveSections[dbSection.id].subSections.map((liveSubSection) => {

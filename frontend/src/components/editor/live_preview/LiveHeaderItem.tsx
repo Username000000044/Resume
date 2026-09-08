@@ -160,7 +160,7 @@ export const LiveHeaderItem = ({
       </div>
 
       {templateData.default_config.decorations.header_divider && (
-        <DividerItem template_config={liveConfig.template_config} />
+        <DividerItem template_config={liveConfig.templateConfig} />
       )}
     </section>
   );

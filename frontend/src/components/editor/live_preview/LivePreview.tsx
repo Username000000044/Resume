@@ -116,16 +116,16 @@ export const LivePreview = ({ templateData }: LivePreviewProps) => {
     );
 
   //Spacing
-  const page_margin = liveConfig.template_config.spacing.page_margin;
+  const page_margin = liveConfig.templateConfig.spacing.page_margin;
   const line_height =
-    SCALE_CURVES[liveConfig.template_config.theme.typography.scale_curve]
+    SCALE_CURVES[liveConfig.templateConfig.theme.typography.scale_curve]
       .line_height;
 
   // Typography
   const font_size_base =
-    liveConfig.template_config.theme.typography.font_size_base;
+    liveConfig.templateConfig.theme.typography.font_size_base;
   const font_scale_curve =
-    SCALE_CURVES[liveConfig.template_config.theme.typography.scale_curve];
+    SCALE_CURVES[liveConfig.templateConfig.theme.typography.scale_curve];
 
   const dynamicPreviewStyles = {
     // Typography
@@ -134,32 +134,32 @@ export const LivePreview = ({ templateData }: LivePreviewProps) => {
 
     // Spacing
     "--page-margin": `${page_margin}in`,
-    "--section-gap": `${liveConfig.template_config.spacing.section_gap}pt`,
-    "--instance-gap": `${liveConfig.template_config.spacing.instance_gap}pt`,
-    "--divider-gap": `${liveConfig.template_config.spacing.divider_gap}pt`,
-    "--separator-gap": `${liveConfig.template_config.spacing.separator_gap}pt`,
-    "--bullet-indentation": `${liveConfig.template_config.spacing.bullet_indentation}pt`,
+    "--section-gap": `${liveConfig.templateConfig.spacing.section_gap}pt`,
+    "--instance-gap": `${liveConfig.templateConfig.spacing.instance_gap}pt`,
+    "--divider-gap": `${liveConfig.templateConfig.spacing.divider_gap}pt`,
+    "--separator-gap": `${liveConfig.templateConfig.spacing.separator_gap}pt`,
+    "--bullet-indentation": `${liveConfig.templateConfig.spacing.bullet_indentation}pt`,
     "--line-height": `${font_size_base * line_height}pt`,
 
     // Decorations
-    "--bullet-style": liveConfig.template_config.decorations.bullet_style,
+    "--bullet-style": liveConfig.templateConfig.decorations.bullet_style,
     "--sub-bullet-style":
-      liveConfig.template_config.decorations.sub_bullet_style,
+      liveConfig.templateConfig.decorations.sub_bullet_style,
 
     //Colors (Field colors are handled dynamically in the LiveFieldItem component)
-    "--divider-color": liveConfig.template_config.theme.colors.divider,
-    "--header-color": liveConfig.template_config.theme.colors.heading,
+    "--divider-color": liveConfig.templateConfig.theme.colors.divider,
+    "--header-color": liveConfig.templateConfig.theme.colors.heading,
     "--section-title_color":
-      liveConfig.template_config.theme.colors.section_title,
-    "--bullet-color": liveConfig.template_config.theme.colors.body,
+      liveConfig.templateConfig.theme.colors.section_title,
+    "--bullet-color": liveConfig.templateConfig.theme.colors.body,
 
     //Weight (Field weight are handled dynamically in the LiveFieldItem componet)
     "--header-weight":
-      liveConfig.template_config.theme.typography.font_weight.heading,
+      liveConfig.templateConfig.theme.typography.font_weight.heading,
     "--section-title-weight":
-      liveConfig.template_config.theme.typography.font_weight.section_title,
+      liveConfig.templateConfig.theme.typography.font_weight.section_title,
     "--bullet-weight":
-      liveConfig.template_config.theme.typography.font_weight.body,
+      liveConfig.templateConfig.theme.typography.font_weight.body,
   } as CSSProperties;
 
   return (
