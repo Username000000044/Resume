@@ -30,9 +30,16 @@ function RouteComponent() {
   const initializeSections = useResumeStore(
     (state) => state.initializeSections,
   );
-  const { initializeConfig, liveConfig } = useResumeConfigStore(
+  const {
+    initializeConfig,
+    liveConfig,
+    defaultTemplateConfig,
+    defaultSectionConfig,
+  } = useResumeConfigStore(
     useShallow((state) => ({
       liveConfig: state.liveConfig,
+      defaultTemplateConfig: state.defaultTemplateConfig,
+      defaultSectionConfig: state.defaultSectionConfig,
       initializeConfig: state.initializeConfig,
     })),
   );
@@ -130,7 +137,11 @@ function RouteComponent() {
       const unsub = useResumeConfigStore.persist.onFinishHydration(() => {
         const persistConfig = useResumeConfigStore.getState().persistantConfig;
         if (
-          !persistConfig.templateConfig ||
+          // Default Config
+          Object.values(defaultTemplateConfig).length === 0 ||
+          Object.values(defaultSectionConfig).length === 0 ||
+          // Persist Config
+          Object.values(persistConfig.templateConfig).length === 0 ||
           Object.values(persistConfig.sectionConfigs).length === 0 ||
           !persistConfig.templateName
         ) {
@@ -164,6 +175,8 @@ function RouteComponent() {
     templateRequest.data,
     liveConfig.templateName,
     templateId,
+    defaultSectionConfig,
+    defaultTemplateConfig,
     initializeConfig,
     initializeSections,
   ]);

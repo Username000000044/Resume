@@ -61,9 +61,6 @@ export const FieldInput = ({
   ];
   const colsTwoWords = ["name", "number"];
 
-  if (field.type === "textarea") {
-  }
-
   return (
     <Field
       className={cn("col-span-full gap-0", {

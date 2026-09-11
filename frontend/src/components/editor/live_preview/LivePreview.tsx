@@ -13,6 +13,7 @@ import type { CSSProperties } from "react";
 import { useResumeConfigStore } from "#/store/useResumeConfigStore";
 import { DragDropProvider } from "@dnd-kit/react";
 import { useShallow } from "zustand/react/shallow";
+import { NumberScrubberItem } from "./NumberScrubberItem";
 
 interface LivePreviewProps {
   templateData: TemplateType;
@@ -55,7 +56,12 @@ export const ALIGNMENT_MAP = {
 } as const;
 
 export const LivePreview = ({ templateData }: LivePreviewProps) => {
-  const liveConfig = useResumeConfigStore((state) => state.liveConfig);
+  const { liveConfig, liveMode } = useResumeConfigStore(
+    useShallow((state) => ({
+      liveConfig: state.liveConfig,
+      liveMode: state.liveMode,
+    })),
+  );
   const { liveSections, reorderSections } = useResumeStore(
     useShallow((state) => ({
       liveSections: state.liveMainSections,
@@ -137,7 +143,7 @@ export const LivePreview = ({ templateData }: LivePreviewProps) => {
     "--section-gap": `${liveConfig.templateConfig.spacing.section_gap}pt`,
     "--instance-gap": `${liveConfig.templateConfig.spacing.instance_gap}pt`,
     "--divider-gap": `${liveConfig.templateConfig.spacing.divider_gap}pt`,
-    "--separator-gap": `${liveConfig.templateConfig.spacing.separator_gap}pt`,
+    "--group-gap": `${liveConfig.templateConfig.spacing.group_gap}pt`,
     "--bullet-indentation": `${liveConfig.templateConfig.spacing.bullet_indentation}pt`,
     "--line-height": `${font_size_base * line_height}pt`,
 
@@ -164,7 +170,18 @@ export const LivePreview = ({ templateData }: LivePreviewProps) => {
 
   return (
     <div className="flex flex-col gap-4 w-full" style={dynamicPreviewStyles}>
-      <LivePaper className="flex flex-col text-(length:--font-size-base) leading-[var(--line-height)] !p-[var(--page-margin)]">
+      <LivePaper className="relative flex flex-col text-(length:--font-size-base) leading-[var(--line-height)] !p-[var(--page-margin)]">
+        {/* Config Mode */}
+        {liveMode === "config" && (
+          <div className="absolute top-8 right-8">
+            <NumberScrubberItem
+              defaultValue={templateData.default_config.spacing.page_margin}
+              path={["templateConfig", "spacing", "page_margin"]}
+              config={{ step: 0.01, min: 0, max: 2 }}
+            />
+          </div>
+        )}
+
         {/* Header */}
         <div className="pb-[var(--section-gap)]">
           {templateData.sections
@@ -175,14 +192,11 @@ export const LivePreview = ({ templateData }: LivePreviewProps) => {
               return isHeaderSection && sectionHasContents;
             })
             .map((dbSection) => (
-              <LiveHeaderItem
-                templateData={templateData}
-                dbSection={dbSection}
-                key={dbSection.id}
-              />
+              <LiveHeaderItem dbSection={dbSection} key={dbSection.id} />
             ))}
         </div>
 
+        {/* Sections */}
         <DragDropProvider
           onDragEnd={(event) => {
             const sectionId = event.operation.target?.id;
@@ -192,14 +206,13 @@ export const LivePreview = ({ templateData }: LivePreviewProps) => {
             }
           }}
         >
-          {/* Sections */}
           <ul className="flex flex-col gap-[var(--section-gap)]">
             {templateData.sections
               .filter((dbSection) => {
                 const isNotHeaderSection = dbSection.order !== 0;
-                const sectionHasContents = !sectionIsEmpty(dbSection);
+                // const sectionHasContents = !sectionIsEmpty(dbSection);
 
-                return isNotHeaderSection && sectionHasContents;
+                return isNotHeaderSection;
               })
               .sort(
                 (a, b) => liveSections[a.id].order - liveSections[b.id].order,

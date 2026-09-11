@@ -1,5 +1,5 @@
 import { cn } from "#/lib/utils";
-import type { SectionConfig, TemplateConfig } from "#/types/Template";
+import type { TemplateConfig } from "#/types/Template";
 
 interface DividerItemProps {
   template_config: TemplateConfig;

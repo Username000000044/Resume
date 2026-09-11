@@ -61,7 +61,7 @@ interface SpacingConfig {
 	section_gap: number; // space between sections
 	instance_gap: number; // sapce between section instances (pt) (eg. job1, job2)
 	divider_gap: number; // space on the top + bottom of dividers (pt)
-	separator_gap: number; // space to the left + right of separator (pt)
+	group_gap: number; // space to the left + right of each group item (pt)
 	bullet_indentation: number; // space before bullet (pt)
 	line_height: number; // individual character height (pt) multiplied by scale curve.
 }

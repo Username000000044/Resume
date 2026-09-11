@@ -1,21 +1,21 @@
 import { SCALE_CURVES } from "#/components/editor/live_preview/LivePreview";
-import type { FieldType, TemplateType } from "#/types/Template";
+import type { FieldType, TemplateConfig, TemplateType } from "#/types/Template";
+import { property } from "lodash";
 
 export const getFieldProperties = (
 	field: FieldType,
-	templateData: TemplateType,
+	liveTemplateConfig: TemplateConfig,
 ) => {
 	const fieldRole = field.renderRole;
 	const fieldWeight =
-		templateData.default_config.theme.typography.font_weight[fieldRole];
-	const fieldColor = templateData.default_config.theme.colors[fieldRole];
-	const FieldElement = templateData.default_config.elements[fieldRole] ?? "p";
+		liveTemplateConfig.theme.typography.font_weight[fieldRole];
+	const fieldColor = liveTemplateConfig.theme.colors[fieldRole];
+	const FieldElement = liveTemplateConfig.elements[fieldRole] ?? "p";
 
 	// Field Size
-	const font_size_base =
-		templateData.default_config.theme.typography.font_size_base;
+	const font_size_base = liveTemplateConfig.theme.typography.font_size_base;
 	const scale_curve =
-		SCALE_CURVES[templateData.default_config.theme.typography.scale_curve];
+		SCALE_CURVES[liveTemplateConfig.theme.typography.scale_curve];
 	const fieldSize = scale_curve[FieldElement] * font_size_base;
 
 	return {

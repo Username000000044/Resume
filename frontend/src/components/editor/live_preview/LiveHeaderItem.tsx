@@ -1,25 +1,27 @@
 import { useResumeStore } from "#/store/useResumeStore";
-import type { FieldType, SectionType, TemplateType } from "#/types/Template";
+import type { FieldType, SectionType } from "#/types/Template";
 import { DividerItem } from "./DividerItem";
 import { LiveFieldItem } from "./LiveFieldItem";
 import {
   constructLayoutMatrix,
   getFieldProperties,
 } from "#/utils/live-preview";
-import { LiveFieldWrapper } from "./LiveFieldWrapper";
 import { useResumeConfigStore } from "#/store/useResumeConfigStore";
+import { useShallow } from "zustand/react/shallow";
+import { LiveFieldGroupWrapper } from "./LiveFieldGroupWrapper";
 
 interface HeaderItemProps {
-  templateData: TemplateType;
   dbSection: SectionType;
 }
 
-export const LiveHeaderItem = ({
-  dbSection,
-  templateData,
-}: HeaderItemProps) => {
+export const LiveHeaderItem = ({ dbSection }: HeaderItemProps) => {
   const liveSections = useResumeStore((store) => store.liveMainSections);
-  const liveConfig = useResumeConfigStore((store) => store.liveConfig);
+  const { liveConfig, defaultTemplateConfig } = useResumeConfigStore(
+    useShallow((store) => ({
+      liveConfig: store.liveConfig,
+      defaultTemplateConfig: store.defaultTemplateConfig,
+    })),
+  );
 
   return (
     <section className={`text-(length:--font-size-base) text-wrap`}>
@@ -75,7 +77,7 @@ export const LiveHeaderItem = ({
                       .filter((field) => field.alignment?.position === "left")
                       .map((field) => {
                         return (
-                          <LiveFieldWrapper
+                          <LiveFieldGroupWrapper
                             key={field.id}
                             field={field}
                             value={liveSubSection.fields[field.id]}
@@ -84,10 +86,10 @@ export const LiveHeaderItem = ({
                               value={formatFieldValue(field)}
                               properties={getFieldProperties(
                                 field,
-                                templateData,
+                                liveConfig.templateConfig,
                               )}
                             />
-                          </LiveFieldWrapper>
+                          </LiveFieldGroupWrapper>
                         );
                       })}
                   </div>
@@ -98,7 +100,7 @@ export const LiveHeaderItem = ({
                       .filter((field) => field.alignment?.position === "center")
                       .map((field) => {
                         return (
-                          <LiveFieldWrapper
+                          <LiveFieldGroupWrapper
                             key={field.id}
                             field={field}
                             value={liveSubSection.fields[field.id]}
@@ -107,10 +109,10 @@ export const LiveHeaderItem = ({
                               value={formatFieldValue(field)}
                               properties={getFieldProperties(
                                 field,
-                                templateData,
+                                liveConfig.templateConfig,
                               )}
                             />
-                          </LiveFieldWrapper>
+                          </LiveFieldGroupWrapper>
                         );
                       })}
                   </div>
@@ -121,7 +123,7 @@ export const LiveHeaderItem = ({
                       .filter((field) => field.alignment?.position === "right")
                       .map((field) => {
                         return (
-                          <LiveFieldWrapper
+                          <LiveFieldGroupWrapper
                             key={field.id}
                             field={field}
                             value={liveSubSection.fields[field.id]}
@@ -130,10 +132,10 @@ export const LiveHeaderItem = ({
                               value={formatFieldValue(field)}
                               properties={getFieldProperties(
                                 field,
-                                templateData,
+                                liveConfig.templateConfig,
                               )}
                             />
-                          </LiveFieldWrapper>
+                          </LiveFieldGroupWrapper>
                         );
                       })}
                   </div>
@@ -159,7 +161,7 @@ export const LiveHeaderItem = ({
         })}
       </div>
 
-      {templateData.default_config.decorations.header_divider && (
+      {defaultTemplateConfig.decorations.header_divider && (
         <DividerItem template_config={liveConfig.templateConfig} />
       )}
     </section>

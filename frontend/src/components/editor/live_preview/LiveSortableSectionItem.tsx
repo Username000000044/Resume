@@ -8,13 +8,15 @@ import {
   getFieldProperties,
 } from "#/utils/live-preview";
 import { cn } from "#/lib/utils";
-import { LiveFieldWrapper } from "./LiveFieldWrapper";
+import { LiveFieldGroupWrapper } from "./LiveFieldGroupWrapper";
 import { useMemo, useRef, useState } from "react";
 import { useSortable } from "@dnd-kit/react/sortable";
 import { RestrictToVerticalAxis } from "@dnd-kit/abstract/modifiers";
 import { Button } from "#/components/ui/button";
 import { GripHorizontal } from "lucide-react";
 import { useResumeConfigStore } from "#/store/useResumeConfigStore";
+import { useShallow } from "zustand/react/shallow";
+import { NumberScrubberItem } from "./NumberScrubberItem";
 
 interface SectionItemProps {
   templateData: TemplateType;
@@ -38,7 +40,13 @@ export const LiveSortableSectionItem = ({
   });
 
   const liveSections = useResumeStore((store) => store.liveMainSections);
-  const liveConfig = useResumeConfigStore((store) => store.liveConfig);
+  const { liveConfig, liveMode, defaultTemplateConfig } = useResumeConfigStore(
+    useShallow((store) => ({
+      liveConfig: store.liveConfig,
+      defaultTemplateConfig: store.defaultTemplateConfig,
+      liveMode: store.liveMode,
+    })),
+  );
 
   const numOfFilledSections = useMemo(() => {
     return templateData.sections
@@ -99,7 +107,6 @@ export const LiveSortableSectionItem = ({
           className={`text-(length:--section-title-size) text-[var(--section-title-color)] font-[var(--section-title-weight)]  ${titleAlignment}`}
         >
           {dbSection.title}
-          {liveSections[dbSection.id].order}
         </h2>
 
         {liveConfig.templateConfig.decorations.section_divider && (
@@ -122,12 +129,13 @@ export const LiveSortableSectionItem = ({
 
               const currrentRowIndex = field.alignment?.rowIndex ?? 0;
               const currentItemOrder = field.alignment?.itemOrder ?? 0;
-              const previousFieldInRow =
-                matrix[currrentRowIndex][currentItemOrder - 1];
 
-              //Location Alterations
+              // Safe extraction of previous item
+              const previousFieldInRow =
+                matrix[currrentRowIndex]?.[currentItemOrder - 1];
+
+              // Location Alterations
               if (field.name.includes("location") && value) {
-                // Previous and current element are in the same position + previous item exists
                 if (
                   previousFieldInRow &&
                   previousFieldInRow.alignment?.position ===
@@ -140,13 +148,12 @@ export const LiveSortableSectionItem = ({
 
               // Date Alterations
               if (field.type === "date" && value) {
-                const rawInputDate = new Date(`${value}T23:59:59`); // hacky way to compare current date with selected date
+                const rawInputDate = new Date(`${value}T23:59:59`);
                 const rawTodayDate = new Date();
+                const formattedInputDate = formatDate(rawInputDate);
 
-                const formattedInputDate = formatDate(rawInputDate); // year-month-day
-
-                // Both previous and current field is a date + previous value exists
                 if (
+                  previousFieldInRow && // ✨ Safe check
                   previousFieldInRow.type === "date" &&
                   liveSubSection.fields[previousFieldInRow.id]
                 ) {
@@ -165,18 +172,18 @@ export const LiveSortableSectionItem = ({
             return (
               <div key={liveSubSection.id}>
                 {/* Row Index */}
-                {matrix.map((_, rowIndex) => (
+                {matrix.map((e, rowIndex) => (
                   <div
                     key={crypto.randomUUID()}
                     className="grid grid-cols-[auto_auto_auto] items-top w-full"
                   >
                     {/* Left Aligned */}
-                    <div className="flex justify-start">
+                    <div className="relative flex justify-start">
                       {matrix[rowIndex]
                         .filter((field) => field.alignment?.position === "left")
-                        .map((field) => {
+                        .map((field, idx) => {
                           return (
-                            <LiveFieldWrapper
+                            <LiveFieldGroupWrapper
                               key={field.id}
                               field={field}
                               value={liveSubSection.fields[field.id]}
@@ -185,10 +192,10 @@ export const LiveSortableSectionItem = ({
                                 value={formatFieldValue(field)}
                                 properties={getFieldProperties(
                                   field,
-                                  templateData,
+                                  liveConfig.templateConfig,
                                 )}
                               />
-                            </LiveFieldWrapper>
+                            </LiveFieldGroupWrapper>
                           );
                         })}
                     </div>
@@ -198,9 +205,9 @@ export const LiveSortableSectionItem = ({
                         .filter(
                           (field) => field.alignment?.position === "center",
                         )
-                        .map((field) => {
+                        .map((field, idx) => {
                           return (
-                            <LiveFieldWrapper
+                            <LiveFieldGroupWrapper
                               key={field.id}
                               field={field}
                               value={liveSubSection.fields[field.id]}
@@ -209,10 +216,10 @@ export const LiveSortableSectionItem = ({
                                 value={formatFieldValue(field)}
                                 properties={getFieldProperties(
                                   field,
-                                  templateData,
+                                  liveConfig.templateConfig,
                                 )}
                               />
-                            </LiveFieldWrapper>
+                            </LiveFieldGroupWrapper>
                           );
                         })}
                     </div>
@@ -222,9 +229,9 @@ export const LiveSortableSectionItem = ({
                         .filter(
                           (field) => field.alignment?.position === "right",
                         )
-                        .map((field) => {
+                        .map((field, idx) => {
                           return (
-                            <LiveFieldWrapper
+                            <LiveFieldGroupWrapper
                               key={field.id}
                               field={field}
                               value={liveSubSection.fields[field.id]}
@@ -233,10 +240,10 @@ export const LiveSortableSectionItem = ({
                                 value={formatFieldValue(field)}
                                 properties={getFieldProperties(
                                   field,
-                                  templateData,
+                                  liveConfig.templateConfig,
                                 )}
                               />
-                            </LiveFieldWrapper>
+                            </LiveFieldGroupWrapper>
                           );
                         })}
                     </div>
