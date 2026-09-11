@@ -35,54 +35,28 @@ export const SubBulletItem = ({
   subSectionIndex,
   subBulletIndex,
 }: FieldInputProps) => {
-  const {
-    liveMainSections,
-    removeSubBullet,
-    updateSubBullet,
-    updateLiveSubBullet,
-  } = useResumeStore(
+  const { sections, removeSubBullet, updateSubBullet } = useResumeStore(
     useShallow((store) => ({
-      liveMainSections: store.liveMainSections,
+      sections: store.sections,
       removeSubBullet: store.removeSubBullet,
-      updateLiveSubBullet: store.updateLiveSubBullet,
       updateSubBullet: store.updateSubBullet,
     })),
   );
 
-  const liveValue =
-    liveMainSections[section.id].subSections[subSectionIndex].bullets[
-      mainBulletIndex
-    ].subBullets[subBulletIndex].text || "";
-
-  const debouncedSave = useMemo(
-    () =>
-      debounce((value) => {
-        updateSubBullet(
-          section.id,
-          subSectionIndex,
-          mainBullet.id,
-          subBullet.id,
-          value,
-        );
-      }, 500), // 500ms debounce
-    [section.id, mainBullet.id, subBullet.id, subSectionIndex, updateSubBullet],
-  );
-
-  // Cleanup debouced fn if componet unmounts
-  useEffect(() => {
-    return () => debouncedSave.cancel();
-  }, [debouncedSave]);
+  const value =
+    sections[section.id].subSections[subSectionIndex].bullets[mainBulletIndex]
+      .subBullets[subBulletIndex].text || "";
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    updateLiveSubBullet(
+
+    updateSubBullet(
       section.id,
       subSectionIndex,
       mainBullet.id,
       subBullet.id,
       value,
-    ); // Fast
-    debouncedSave(value); // Waits for user to stop typing before saving
+    );
   };
 
   return (
@@ -91,10 +65,9 @@ export const SubBulletItem = ({
       <InputGroup>
         <InputGroupInput
           name={subBullet.id}
-          value={liveValue}
+          value={value}
           type="text"
           onChange={handleChange}
-          onBlur={() => debouncedSave.flush()}
         />
         <InputGroupAddon align="inline-end">
           <InputGroupButton

@@ -29,44 +29,23 @@ export const BulletItem = ({
   subSectionIndex,
   bulletIndex,
 }: FieldInputProps) => {
-  const {
-    liveMainSections,
-    updateLiveMainBullet,
-    updateMainBullet,
-    removeMainBullet,
-    addSubBullet,
-  } = useResumeStore(
-    useShallow((store) => ({
-      liveMainSections: store.liveMainSections,
-      updateMainBullet: store.updateMainBullet,
-      updateLiveMainBullet: store.updateLiveMainBullet,
-      removeMainBullet: store.removeMainBullet,
-      addSubBullet: store.addSubBullet,
-    })),
-  );
+  const { sections, updateMainBullet, removeMainBullet, addSubBullet } =
+    useResumeStore(
+      useShallow((store) => ({
+        sections: store.sections,
+        updateMainBullet: store.updateMainBullet,
+        removeMainBullet: store.removeMainBullet,
+        addSubBullet: store.addSubBullet,
+      })),
+    );
 
-  const liveValue =
-    liveMainSections[section.id].subSections[subSectionIndex].bullets[
-      bulletIndex
-    ].text || "";
-
-  const debouncedSave = useMemo(
-    () =>
-      debounce((value) => {
-        updateMainBullet(section.id, subSectionIndex, mainBullet.id, value);
-      }, 500), // 500ms debounce
-    [section.id, mainBullet.id, subSectionIndex, updateMainBullet],
-  );
-
-  // Cleanup debouced fn if componet unmounts
-  useEffect(() => {
-    return () => debouncedSave.cancel();
-  }, [debouncedSave]);
+  const value =
+    sections[section.id].subSections[subSectionIndex].bullets[bulletIndex]
+      .text || "";
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    updateLiveMainBullet(section.id, subSectionIndex, mainBullet.id, value); // Fast
-    debouncedSave(value); // Waits for user to stop typing before saving
+    updateMainBullet(section.id, subSectionIndex, mainBullet.id, value);
   };
 
   return (
@@ -90,10 +69,9 @@ export const BulletItem = ({
       <InputGroup>
         <InputGroupInput
           name={mainBullet.id}
-          value={liveValue}
+          value={value}
           type="text"
           onChange={handleChange}
-          onBlur={() => debouncedSave.flush()}
         />
         <InputGroupAddon align="inline-end">
           <InputGroupButton

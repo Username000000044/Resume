@@ -27,7 +27,7 @@ export const LiveFieldGroupWrapper = ({
   const { liveMode, defaultTemplateConfig } = useResumeConfigStore(
     useShallow((store) => ({
       liveMode: store.liveMode,
-      defaultTemplateConfig: store.defaultTemplateConfig,
+      defaultTemplateConfig: store.defaultConfig.template,
     })),
   );
 

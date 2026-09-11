@@ -9,17 +9,18 @@ import {
 import { useResumeConfigStore } from "#/store/useResumeConfigStore";
 import { useShallow } from "zustand/react/shallow";
 import { LiveFieldGroupWrapper } from "./LiveFieldGroupWrapper";
+import type { fieldPositionEnum } from "@resume/backend/src/db/schema.js";
 
 interface HeaderItemProps {
   dbSection: SectionType;
 }
 
 export const LiveHeaderItem = ({ dbSection }: HeaderItemProps) => {
-  const liveSections = useResumeStore((store) => store.liveMainSections);
-  const { liveConfig, defaultTemplateConfig } = useResumeConfigStore(
+  const sections = useResumeStore((store) => store.sections);
+  const { config, defaultTemplateConfig } = useResumeConfigStore(
     useShallow((store) => ({
-      liveConfig: store.liveConfig,
-      defaultTemplateConfig: store.defaultTemplateConfig,
+      config: store.config,
+      defaultTemplateConfig: store.defaultConfig.template,
     })),
   );
 
@@ -27,8 +28,30 @@ export const LiveHeaderItem = ({ dbSection }: HeaderItemProps) => {
     <section className={`text-(length:--font-size-base) text-wrap`}>
       {/* Sub Sections */}
       <div className="flex flex-col gap-[var(--instance-gap)]">
-        {liveSections[dbSection.id].subSections.map((liveSubSection) => {
+        {sections[dbSection.id].subSections.map((liveSubSection) => {
           const matrix = constructLayoutMatrix(dbSection.fields);
+
+          const alignedRowItem = (
+            rowIndex: number,
+            alignment: (typeof fieldPositionEnum.enumValues)[number],
+          ) => {
+            const items = matrix[rowIndex].filter(
+              (field) => field.alignment?.position === alignment,
+            );
+
+            return items.map((field) => (
+              <LiveFieldGroupWrapper
+                key={field.id}
+                field={field}
+                value={liveSubSection.fields[field.id]}
+              >
+                <LiveFieldItem
+                  value={formatFieldValue(field)}
+                  properties={getFieldProperties(field, config.templateConfig)}
+                />
+              </LiveFieldGroupWrapper>
+            ));
+          };
 
           // Formats Input Field Value
           const formatFieldValue = (field: FieldType) => {
@@ -73,71 +96,17 @@ export const LiveHeaderItem = ({ dbSection }: HeaderItemProps) => {
                 >
                   {/* Left Aligned */}
                   <div className="flex justify-start">
-                    {matrix[rowIndex]
-                      .filter((field) => field.alignment?.position === "left")
-                      .map((field) => {
-                        return (
-                          <LiveFieldGroupWrapper
-                            key={field.id}
-                            field={field}
-                            value={liveSubSection.fields[field.id]}
-                          >
-                            <LiveFieldItem
-                              value={formatFieldValue(field)}
-                              properties={getFieldProperties(
-                                field,
-                                liveConfig.templateConfig,
-                              )}
-                            />
-                          </LiveFieldGroupWrapper>
-                        );
-                      })}
+                    {alignedRowItem(rowIndex, "left")}
                   </div>
 
                   {/* Center Aligned */}
                   <div className="flex justify-center">
-                    {matrix[rowIndex]
-                      .filter((field) => field.alignment?.position === "center")
-                      .map((field) => {
-                        return (
-                          <LiveFieldGroupWrapper
-                            key={field.id}
-                            field={field}
-                            value={liveSubSection.fields[field.id]}
-                          >
-                            <LiveFieldItem
-                              value={formatFieldValue(field)}
-                              properties={getFieldProperties(
-                                field,
-                                liveConfig.templateConfig,
-                              )}
-                            />
-                          </LiveFieldGroupWrapper>
-                        );
-                      })}
+                    {alignedRowItem(rowIndex, "center")}
                   </div>
 
                   {/* Right Aligned */}
                   <div className="flex justify-end">
-                    {matrix[rowIndex]
-                      .filter((field) => field.alignment?.position === "right")
-                      .map((field) => {
-                        return (
-                          <LiveFieldGroupWrapper
-                            key={field.id}
-                            field={field}
-                            value={liveSubSection.fields[field.id]}
-                          >
-                            <LiveFieldItem
-                              value={formatFieldValue(field)}
-                              properties={getFieldProperties(
-                                field,
-                                liveConfig.templateConfig,
-                              )}
-                            />
-                          </LiveFieldGroupWrapper>
-                        );
-                      })}
+                    {alignedRowItem(rowIndex, "right")}
                   </div>
                 </div>
               ))}
@@ -162,7 +131,7 @@ export const LiveHeaderItem = ({ dbSection }: HeaderItemProps) => {
       </div>
 
       {defaultTemplateConfig.decorations.header_divider && (
-        <DividerItem template_config={liveConfig.templateConfig} />
+        <DividerItem template_config={config.templateConfig} />
       )}
     </section>
   );

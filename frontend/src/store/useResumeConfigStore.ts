@@ -1,10 +1,16 @@
 import type { SectionConfig, TemplateConfig } from "#/types/Template";
-import type { ConfigObject } from "#/types/TemplateConfig";
+import type { ConfigObject, ConfigValue } from "#/types/TemplateConfig";
+import { debouncedStorage } from "#/utils/debouncedStorage";
 import { create } from "zustand";
-import { devtools, persist } from "zustand/middleware";
+import { createJSONStorage, devtools, persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 
-export interface UserConfigData {
+interface DefaultConfig {
+	template: TemplateConfig;
+	sections: Record<string, SectionConfig>; // uuid : config
+}
+
+export interface ConfigData {
 	templateName: string;
 	templateConfig: TemplateConfig;
 	sectionConfigs: Record<string, SectionConfig>; // uuid : config
@@ -15,19 +21,14 @@ interface SectionConfigInitialization {
 	config: SectionConfig;
 }
 
-export type LiveMode = "view" | "config";
+type LiveMode = "view" | "config";
 export type ValueType = string | number | boolean;
 interface ResumeConfigStoreState {
 	liveMode: LiveMode;
 	setLiveMode: (mode: LiveMode) => void;
 
-	defaultTemplateConfig: TemplateConfig;
-	defaultSectionConfig: Record<string, SectionConfig>; // section uuid : config
-
-	persistantConfig: UserConfigData;
-	liveConfig: UserConfigData;
-
-	syncLiveSections: () => void;
+	defaultConfig: DefaultConfig;
+	config: ConfigData;
 
 	initializeConfig: (
 		templateName: string,
@@ -35,10 +36,10 @@ interface ResumeConfigStoreState {
 		sectionsConfig: SectionConfigInitialization[],
 	) => void;
 
-	updateLiveProperty: (path: string[], value: ValueType) => void;
 	updateProperty: (path: string[], value: ValueType) => void;
+	getProperty: <T = ConfigValue>(path: string[]) => T | undefined;
 
-	// resetLiveConfig: () => void;
+	resetConfig: () => void;
 }
 
 export const DEFAULT_RESUME_CONFIG_STORE_PERSIST_NAME =
@@ -47,33 +48,16 @@ export const DEFAULT_RESUME_CONFIG_STORE_PERSIST_NAME =
 export const useResumeConfigStore = create<ResumeConfigStoreState>()(
 	devtools(
 		persist(
-			immer((set) => ({
+			immer((set, get) => ({
 				liveMode: "view",
-				setLiveMode: (mode) =>
-					set((state) => {
-						state.liveMode = mode;
-					}),
+				setLiveMode: (mode) => set({ liveMode: mode }),
 
-				defaultTemplateConfig: {} as TemplateConfig,
-				defaultSectionConfig: {},
-
-				persistantConfig: {
+				defaultConfig: { template: {}, sections: {} } as DefaultConfig,
+				config: {
 					templateName: "",
 					templateConfig: {},
 					sectionConfigs: {},
-				} as UserConfigData,
-				liveConfig: {
-					templateName: "",
-					templateConfig: {},
-					sectionConfigs: {},
-				} as UserConfigData,
-
-				syncLiveSections: () =>
-					set((state) => {
-						state.liveConfig = JSON.parse(
-							JSON.stringify(state.persistantConfig),
-						);
-					}),
+				} as ConfigData,
 
 				initializeConfig: (
 					templateName,
@@ -81,14 +65,14 @@ export const useResumeConfigStore = create<ResumeConfigStoreState>()(
 					incomingSectionsConfig,
 				) =>
 					set((state) => {
-						// No persistant config? Create it.
+						// No localsorage config? Create it.
 						if (
-							!state.persistantConfig.templateName ||
-							!state.persistantConfig.templateConfig ||
-							!state.persistantConfig.sectionConfigs
+							!state.config.templateName ||
+							!state.config.templateConfig ||
+							!state.config.sectionConfigs
 						) {
-							state.defaultTemplateConfig = defaultConfig;
-							state.persistantConfig = {
+							state.defaultConfig.template = defaultConfig;
+							state.config = {
 								templateName: templateName,
 								templateConfig: defaultConfig,
 								sectionConfigs: Object.fromEntries(
@@ -96,40 +80,27 @@ export const useResumeConfigStore = create<ResumeConfigStoreState>()(
 								),
 							};
 						}
+
 						// No default config? Create it.
-						if (
-							Object.values(state.defaultTemplateConfig).length === 0 ||
-							Object.values(state.defaultSectionConfig).length === 0
-						) {
-							if (Object.values(state.defaultTemplateConfig).length === 0) {
-								state.defaultTemplateConfig = defaultConfig;
+						const emptyDefaultTemplateConfig =
+							Object.values(state.defaultConfig.template).length === 0;
+						const emptyDefaultSectionsConfig =
+							Object.values(state.defaultConfig.sections).length === 0;
+
+						if (emptyDefaultTemplateConfig || emptyDefaultSectionsConfig) {
+							if (emptyDefaultTemplateConfig) {
+								state.defaultConfig.template = defaultConfig;
 							} else {
-								state.defaultSectionConfig = Object.fromEntries(
+								state.defaultConfig.sections = Object.fromEntries(
 									incomingSectionsConfig.map(({ id, config }) => [id, config]),
 								);
 							}
 						}
-
-						// Sync live state with the initial payload on load
-						state.liveConfig = JSON.parse(
-							JSON.stringify(state.persistantConfig),
-						);
-					}),
-
-				updateLiveProperty: (path, value) =>
-					set((state) => {
-						let target: ConfigObject = state.liveConfig;
-
-						for (let i = 0; i < path.length - 1; i++) {
-							target = target[path[i]] as ConfigObject;
-						}
-
-						target[path[path.length - 1]] = value;
 					}),
 
 				updateProperty: (path, value) =>
 					set((state) => {
-						let target: ConfigObject = state.persistantConfig;
+						let target: ConfigObject = state.config;
 
 						for (let i = 0; i < path.length - 1; i++) {
 							target = target[path[i]] as ConfigObject;
@@ -137,12 +108,31 @@ export const useResumeConfigStore = create<ResumeConfigStoreState>()(
 
 						target[path[path.length - 1]] = value;
 					}),
+
+				getProperty: <T = ConfigData>(path: string[]): T | undefined => {
+					let target = get().config as unknown as ConfigObject;
+
+					for (let i = 0; i < path.length; i++) {
+						if (target == null || target === undefined) return undefined;
+						target = target[path[i]] as unknown as ConfigObject;
+					}
+
+					return target as unknown as T;
+				},
+
+				resetConfig: () =>
+					set((state) => {
+						state.config.templateConfig = state.defaultConfig.template;
+						state.config.sectionConfigs = state.defaultConfig.sections;
+					}),
 			})),
 			{
 				name: DEFAULT_RESUME_CONFIG_STORE_PERSIST_NAME,
-				partialize: (state) => ({
-					persistantConfig: state.persistantConfig,
-				}),
+				storage: debouncedStorage(
+					createJSONStorage(() => localStorage),
+					1500,
+				),
+				partialize: (state) => ({ config: state.config }),
 			},
 		),
 	),

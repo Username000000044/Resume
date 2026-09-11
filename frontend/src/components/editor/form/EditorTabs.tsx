@@ -17,15 +17,14 @@ interface EditorTabsProps {
 }
 
 export const EditorTabs = ({ templateData }: EditorTabsProps) => {
-  const { addSubSection, reorderSubSections, persistantMainSectionsStorage } =
-    useResumeStore(
-      useShallow((state) => ({
-        persistantMainSectionsStorage: state.persistantMainSections,
-        addMainBullet: state.addMainBullet,
-        addSubSection: state.addSubSection,
-        reorderSubSections: state.reorderSubSections,
-      })),
-    );
+  const { sections, addSubSection, reorderSubSections } = useResumeStore(
+    useShallow((state) => ({
+      sections: state.sections,
+      addMainBullet: state.addMainBullet,
+      addSubSection: state.addSubSection,
+      reorderSubSections: state.reorderSubSections,
+    })),
+  );
 
   return (
     <Tabs className="w-[calc(100%-90px)] max-w-140 gap-0">
@@ -58,7 +57,7 @@ export const EditorTabs = ({ templateData }: EditorTabsProps) => {
           >
             {/* Map main sections to expose sections*/}
             <ul className="flex flex-col gap-4">
-              {persistantMainSectionsStorage[section.id].subSections.map(
+              {sections[section.id].subSections.map(
                 (subSection, subSectionIndex) => (
                   <SortableSubSectionItem
                     key={subSection.id}
@@ -82,8 +81,8 @@ export const EditorTabs = ({ templateData }: EditorTabsProps) => {
                 className="border-none shadow-sm ring-1 ring-foreground/5 cursor-pointer"
                 onClick={() => addSubSection(section.id)}
                 disabled={
-                  persistantMainSectionsStorage[section.id].subSections
-                    .length >= MAX_SUB_SECTION_COUNT
+                  sections[section.id].subSections.length >=
+                  MAX_SUB_SECTION_COUNT
                 }
               >
                 <Plus />

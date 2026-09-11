@@ -19,38 +19,22 @@ export const FieldInput = ({
   section,
   subSectionIndex,
 }: FieldInputProps) => {
-  const { liveMainSections, updateLiveField, updateField } = useResumeStore(
+  const { sections, updateField } = useResumeStore(
     useShallow((store) => ({
-      liveMainSections: store.liveMainSections,
-      updateLiveField: store.updateLiveField,
+      sections: store.sections,
       updateField: store.updateField,
     })),
   );
 
-  const liveValue =
-    liveMainSections[section.id].subSections[subSectionIndex].fields[
-      field.id
-    ] || "";
-
-  const debouncedSave = useMemo(
-    () =>
-      debounce((value) => {
-        updateField(section.id, subSectionIndex, field.id, value);
-      }, 500), // 500ms debounce
-    [section.id, field.id, subSectionIndex, updateField],
-  );
-
-  // Cleanup debouced fn if componet unmounts
-  useEffect(() => {
-    return () => debouncedSave.cancel();
-  }, [debouncedSave]);
+  const value =
+    sections[section.id].subSections[subSectionIndex].fields[field.id] || "";
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const value = e.target.value;
-    updateLiveField(section.id, subSectionIndex, field.id, value); // Fast
-    debouncedSave(value); // Waits for user to stop typing before saving
+
+    updateField(section.id, subSectionIndex, field.id, value);
   };
 
   const colsTwoFieldTypes: FieldType["type"][] = [
@@ -73,18 +57,16 @@ export const FieldInput = ({
       {field.type === "textarea" ? (
         <Textarea
           placeholder={field?.placeholder || ""}
-          value={liveValue}
+          value={value}
           onChange={handleChange}
-          onBlur={() => debouncedSave.flush()}
         />
       ) : (
         <Input
           name={field.label.toLowerCase().replaceAll(" ", "")}
           placeholder={field?.placeholder || ""}
           type={field.type}
-          value={liveValue}
+          value={value}
           onChange={handleChange}
-          onBlur={() => debouncedSave.flush()}
         />
       )}
     </Field>

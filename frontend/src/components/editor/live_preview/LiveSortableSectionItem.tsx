@@ -16,7 +16,7 @@ import { Button } from "#/components/ui/button";
 import { GripHorizontal } from "lucide-react";
 import { useResumeConfigStore } from "#/store/useResumeConfigStore";
 import { useShallow } from "zustand/react/shallow";
-import { NumberScrubberItem } from "./NumberScrubberItem";
+import type { fieldPositionEnum } from "@resume/backend/src/db/schema.js";
 
 interface SectionItemProps {
   templateData: TemplateType;
@@ -39,12 +39,12 @@ export const LiveSortableSectionItem = ({
     modifiers: [RestrictToVerticalAxis],
   });
 
-  const liveSections = useResumeStore((store) => store.liveMainSections);
-  const { liveConfig, liveMode, defaultTemplateConfig } = useResumeConfigStore(
+  const sections = useResumeStore((store) => store.sections);
+  const { config, liveMode, defaultTemplateConfig } = useResumeConfigStore(
     useShallow((store) => ({
-      liveConfig: store.liveConfig,
-      defaultTemplateConfig: store.defaultTemplateConfig,
       liveMode: store.liveMode,
+      config: store.config,
+      defaultTemplateConfig: store.defaultConfig.template,
     })),
   );
 
@@ -52,7 +52,7 @@ export const LiveSortableSectionItem = ({
     return templateData.sections
       .filter((section) => section.order !== 0)
       .reduce((count, dbSection) => {
-        const liveSection = liveSections[dbSection.id] || { subSections: [] };
+        const liveSection = sections[dbSection.id] || { subSections: [] };
 
         const sectionHasContent = liveSection.subSections.some((subSection) => {
           const contentField = dbSection.fields.some(
@@ -71,7 +71,7 @@ export const LiveSortableSectionItem = ({
 
         return sectionHasContent ? count + 1 : count;
       }, 0);
-  }, [templateData, liveSections]);
+  }, [templateData, sections]);
 
   // Alignment
   const titleAlignment =
@@ -109,19 +109,44 @@ export const LiveSortableSectionItem = ({
           {dbSection.title}
         </h2>
 
-        {liveConfig.templateConfig.decorations.section_divider && (
-          <DividerItem template_config={liveConfig.templateConfig} />
+        {config.templateConfig.decorations.section_divider && (
+          <DividerItem template_config={config.templateConfig} />
         )}
 
         {/* Sub Sections */}
         <div
           className={cn("flex flex-col", {
             "gap-[var(--instance-gap)]":
-              liveConfig.templateConfig.spacing.instance_gap,
+              config.templateConfig.spacing.instance_gap,
           })}
         >
-          {liveSections[dbSection.id].subSections.map((liveSubSection) => {
+          {sections[dbSection.id].subSections.map((liveSubSection) => {
             const matrix = constructLayoutMatrix(dbSection.fields);
+
+            const alignedRowItem = (
+              rowIndex: number,
+              alignment: (typeof fieldPositionEnum.enumValues)[number],
+            ) => {
+              const items = matrix[rowIndex].filter(
+                (field) => field.alignment?.position === alignment,
+              );
+
+              return items.map((field) => (
+                <LiveFieldGroupWrapper
+                  key={field.id}
+                  field={field}
+                  value={liveSubSection.fields[field.id]}
+                >
+                  <LiveFieldItem
+                    value={formatFieldValue(field)}
+                    properties={getFieldProperties(
+                      field,
+                      config.templateConfig,
+                    )}
+                  />
+                </LiveFieldGroupWrapper>
+              ));
+            };
 
             // Formats Input Field Value
             const formatFieldValue = (field: FieldType) => {
@@ -172,80 +197,24 @@ export const LiveSortableSectionItem = ({
             return (
               <div key={liveSubSection.id}>
                 {/* Row Index */}
-                {matrix.map((e, rowIndex) => (
+                {matrix.map((_, rowIndex) => (
                   <div
                     key={crypto.randomUUID()}
                     className="grid grid-cols-[auto_auto_auto] items-top w-full"
                   >
                     {/* Left Aligned */}
-                    <div className="relative flex justify-start">
-                      {matrix[rowIndex]
-                        .filter((field) => field.alignment?.position === "left")
-                        .map((field, idx) => {
-                          return (
-                            <LiveFieldGroupWrapper
-                              key={field.id}
-                              field={field}
-                              value={liveSubSection.fields[field.id]}
-                            >
-                              <LiveFieldItem
-                                value={formatFieldValue(field)}
-                                properties={getFieldProperties(
-                                  field,
-                                  liveConfig.templateConfig,
-                                )}
-                              />
-                            </LiveFieldGroupWrapper>
-                          );
-                        })}
+                    <div className="flex justify-start">
+                      {alignedRowItem(rowIndex, "left")}
                     </div>
+
                     {/* Center Aligned */}
                     <div className="flex justify-center">
-                      {matrix[rowIndex]
-                        .filter(
-                          (field) => field.alignment?.position === "center",
-                        )
-                        .map((field, idx) => {
-                          return (
-                            <LiveFieldGroupWrapper
-                              key={field.id}
-                              field={field}
-                              value={liveSubSection.fields[field.id]}
-                            >
-                              <LiveFieldItem
-                                value={formatFieldValue(field)}
-                                properties={getFieldProperties(
-                                  field,
-                                  liveConfig.templateConfig,
-                                )}
-                              />
-                            </LiveFieldGroupWrapper>
-                          );
-                        })}
+                      {alignedRowItem(rowIndex, "center")}
                     </div>
+
                     {/* Right Aligned */}
                     <div className="flex justify-end">
-                      {matrix[rowIndex]
-                        .filter(
-                          (field) => field.alignment?.position === "right",
-                        )
-                        .map((field, idx) => {
-                          return (
-                            <LiveFieldGroupWrapper
-                              key={field.id}
-                              field={field}
-                              value={liveSubSection.fields[field.id]}
-                            >
-                              <LiveFieldItem
-                                value={formatFieldValue(field)}
-                                properties={getFieldProperties(
-                                  field,
-                                  liveConfig.templateConfig,
-                                )}
-                              />
-                            </LiveFieldGroupWrapper>
-                          );
-                        })}
+                      {alignedRowItem(rowIndex, "right")}
                     </div>
                   </div>
                 ))}

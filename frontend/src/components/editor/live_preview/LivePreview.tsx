@@ -56,23 +56,23 @@ export const ALIGNMENT_MAP = {
 } as const;
 
 export const LivePreview = ({ templateData }: LivePreviewProps) => {
-  const { liveConfig, liveMode } = useResumeConfigStore(
+  const { config, liveMode } = useResumeConfigStore(
     useShallow((state) => ({
-      liveConfig: state.liveConfig,
+      config: state.config,
       liveMode: state.liveMode,
     })),
   );
-  const { liveSections, reorderSections } = useResumeStore(
+  const { sections, reorderSections } = useResumeStore(
     useShallow((state) => ({
-      liveSections: state.liveMainSections,
+      sections: state.sections,
       reorderSections: state.reorderSections,
     })),
   );
 
-  if (!liveSections) return <div>Loading template live preview...</div>;
+  if (!sections) return <div>Loading template live preview...</div>;
 
   const templateIsEmpty = templateData.sections.every((dbSection) => {
-    const liveMainSection = liveSections[dbSection.id] || [];
+    const liveMainSection = sections[dbSection.id] || [];
 
     return liveMainSection.subSections.every((subSection) => {
       const fieldsEmpty = dbSection.fields.every(
@@ -90,7 +90,7 @@ export const LivePreview = ({ templateData }: LivePreviewProps) => {
   });
 
   const sectionIsEmpty = (dbSection: SectionType) => {
-    const liveMainSection = liveSections[dbSection.id] || { subSections: [] };
+    const liveMainSection = sections[dbSection.id] || { subSections: [] };
 
     return liveMainSection.subSections.every((subSection) => {
       const fieldsEmpty = dbSection.fields.every(
@@ -122,16 +122,15 @@ export const LivePreview = ({ templateData }: LivePreviewProps) => {
     );
 
   //Spacing
-  const page_margin = liveConfig.templateConfig.spacing.page_margin;
+  const page_margin = config.templateConfig.spacing.page_margin;
   const line_height =
-    SCALE_CURVES[liveConfig.templateConfig.theme.typography.scale_curve]
+    SCALE_CURVES[config.templateConfig.theme.typography.scale_curve]
       .line_height;
 
   // Typography
-  const font_size_base =
-    liveConfig.templateConfig.theme.typography.font_size_base;
+  const font_size_base = config.templateConfig.theme.typography.font_size_base;
   const font_scale_curve =
-    SCALE_CURVES[liveConfig.templateConfig.theme.typography.scale_curve];
+    SCALE_CURVES[config.templateConfig.theme.typography.scale_curve];
 
   const dynamicPreviewStyles = {
     // Typography
@@ -140,32 +139,29 @@ export const LivePreview = ({ templateData }: LivePreviewProps) => {
 
     // Spacing
     "--page-margin": `${page_margin}in`,
-    "--section-gap": `${liveConfig.templateConfig.spacing.section_gap}pt`,
-    "--instance-gap": `${liveConfig.templateConfig.spacing.instance_gap}pt`,
-    "--divider-gap": `${liveConfig.templateConfig.spacing.divider_gap}pt`,
-    "--group-gap": `${liveConfig.templateConfig.spacing.group_gap}pt`,
-    "--bullet-indentation": `${liveConfig.templateConfig.spacing.bullet_indentation}pt`,
+    "--section-gap": `${config.templateConfig.spacing.section_gap}pt`,
+    "--instance-gap": `${config.templateConfig.spacing.instance_gap}pt`,
+    "--divider-gap": `${config.templateConfig.spacing.divider_gap}pt`,
+    "--group-gap": `${config.templateConfig.spacing.group_gap}pt`,
+    "--bullet-indentation": `${config.templateConfig.spacing.bullet_indentation}pt`,
     "--line-height": `${font_size_base * line_height}pt`,
 
     // Decorations
-    "--bullet-style": liveConfig.templateConfig.decorations.bullet_style,
-    "--sub-bullet-style":
-      liveConfig.templateConfig.decorations.sub_bullet_style,
+    "--bullet-style": config.templateConfig.decorations.bullet_style,
+    "--sub-bullet-style": config.templateConfig.decorations.sub_bullet_style,
 
     //Colors (Field colors are handled dynamically in the LiveFieldItem component)
-    "--divider-color": liveConfig.templateConfig.theme.colors.divider,
-    "--header-color": liveConfig.templateConfig.theme.colors.heading,
-    "--section-title_color":
-      liveConfig.templateConfig.theme.colors.section_title,
-    "--bullet-color": liveConfig.templateConfig.theme.colors.body,
+    "--divider-color": config.templateConfig.theme.colors.divider,
+    "--header-color": config.templateConfig.theme.colors.heading,
+    "--section-title_color": config.templateConfig.theme.colors.section_title,
+    "--bullet-color": config.templateConfig.theme.colors.body,
 
     //Weight (Field weight are handled dynamically in the LiveFieldItem componet)
     "--header-weight":
-      liveConfig.templateConfig.theme.typography.font_weight.heading,
+      config.templateConfig.theme.typography.font_weight.heading,
     "--section-title-weight":
-      liveConfig.templateConfig.theme.typography.font_weight.section_title,
-    "--bullet-weight":
-      liveConfig.templateConfig.theme.typography.font_weight.body,
+      config.templateConfig.theme.typography.font_weight.section_title,
+    "--bullet-weight": config.templateConfig.theme.typography.font_weight.body,
   } as CSSProperties;
 
   return (
@@ -214,9 +210,7 @@ export const LivePreview = ({ templateData }: LivePreviewProps) => {
 
                 return isNotHeaderSection;
               })
-              .sort(
-                (a, b) => liveSections[a.id].order - liveSections[b.id].order,
-              )
+              .sort((a, b) => sections[a.id].order - sections[b.id].order)
               .map((dbSection, dbSectionIndex) => (
                 <LiveSortableSectionItem
                   templateData={templateData}

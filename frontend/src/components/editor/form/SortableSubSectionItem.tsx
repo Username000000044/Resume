@@ -30,14 +30,13 @@ export const SortableSubSectionItem = ({
   subSectionIndex,
   templateData,
 }: SectionCardTypes) => {
-  const { addMainBullet, removeSubSection, mainSectionsStorage } =
-    useResumeStore(
-      useShallow((state) => ({
-        mainSectionsStorage: state.persistantMainSections,
-        addMainBullet: state.addMainBullet,
-        removeSubSection: state.removeSubSection,
-      })),
-    );
+  const { sections, addMainBullet, removeSubSection } = useResumeStore(
+    useShallow((state) => ({
+      sections: state.sections,
+      addMainBullet: state.addMainBullet,
+      removeSubSection: state.removeSubSection,
+    })),
+  );
 
   const [element, setElement] = useState<Element | null>(null);
   const handleRef = useRef<HTMLButtonElement | null>(null);
@@ -62,7 +61,7 @@ export const SortableSubSectionItem = ({
             size="icon-sm"
             variant="ghost"
             ref={handleRef}
-            disabled={mainSectionsStorage[section.id].subSections.length === 1}
+            disabled={sections[section.id].subSections.length === 1}
           >
             <GripHorizontal />
           </Button>
@@ -71,8 +70,7 @@ export const SortableSubSectionItem = ({
             variant="ghost_destructive"
             onClick={() => removeSubSection(section.id, subSectionIndex)}
             disabled={
-              mainSectionsStorage[section.id].subSections[subSectionIndex]
-                .order === 0
+              sections[section.id].subSections[subSectionIndex].order === 0
             }
           >
             <Trash2 />
@@ -118,48 +116,51 @@ export const SortableSubSectionItem = ({
               className={cn("col-span-full w-25", {
                 "mt-8": templateData.sections[sectionIndex].fields.length >= 1,
                 "mb-8":
-                  mainSectionsStorage[section.id].subSections[subSectionIndex]
-                    .bullets.length > 0,
+                  sections[section.id].subSections[subSectionIndex].bullets
+                    .length > 0,
               })}
               onClick={() => addMainBullet(section.id, subSectionIndex)}
               disabled={
-                mainSectionsStorage[section.id].subSections[subSectionIndex]
-                  .bullets.length >= MAX_BULLET_COUNT
+                sections[section.id].subSections[subSectionIndex].bullets
+                  .length >= MAX_BULLET_COUNT
               }
             >
               <Plus /> Add Bullet
             </Button>
           )}
 
-          {mainSectionsStorage[section.id].subSections[
-            subSectionIndex
-          ].bullets.map((mainBullet, mainBulletIndex) => (
-            <FieldGroup key={mainBullet.id} className="grid grid-cols-6 gap-3">
-              <div className="col-span-5">
-                <BulletItem
-                  section={section}
-                  mainBullet={mainBullet}
-                  subSectionIndex={subSectionIndex}
-                  bulletIndex={mainBulletIndex}
-                />
-              </div>
-
-              {/* Sub Bullets */}
-              <FieldGroup className="col-start-2 col-span-4 gap-3 mb-3">
-                {mainBullet.subBullets.map((subBullet, subBulletIndex) => (
-                  <SubBulletItem
-                    key={subBullet.id}
+          {sections[section.id].subSections[subSectionIndex].bullets.map(
+            (mainBullet, mainBulletIndex) => (
+              <FieldGroup
+                key={mainBullet.id}
+                className="grid grid-cols-6 gap-3"
+              >
+                <div className="col-span-5">
+                  <BulletItem
                     section={section}
-                    subBullet={subBullet}
                     mainBullet={mainBullet}
-                    mainBulletIndex={mainBulletIndex}
                     subSectionIndex={subSectionIndex}
-                    subBulletIndex={subBulletIndex}
+                    bulletIndex={mainBulletIndex}
                   />
-                ))}
+                </div>
+
+                {/* Sub Bullets */}
+                <FieldGroup className="col-start-2 col-span-4 gap-3 mb-3">
+                  {mainBullet.subBullets.map((subBullet, subBulletIndex) => (
+                    <SubBulletItem
+                      key={subBullet.id}
+                      section={section}
+                      subBullet={subBullet}
+                      mainBullet={mainBullet}
+                      mainBulletIndex={mainBulletIndex}
+                      subSectionIndex={subSectionIndex}
+                      subBulletIndex={subBulletIndex}
+                    />
+                  ))}
+                </FieldGroup>
               </FieldGroup>
-            </FieldGroup>
-          ))}
+            ),
+          )}
         </CardContent>
       </Card>
     </li>

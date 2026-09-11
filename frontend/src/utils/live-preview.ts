@@ -1,6 +1,5 @@
 import { SCALE_CURVES } from "#/components/editor/live_preview/LivePreview";
-import type { FieldType, TemplateConfig, TemplateType } from "#/types/Template";
-import { property } from "lodash";
+import type { FieldType, TemplateConfig } from "#/types/Template";
 
 export const getFieldProperties = (
 	field: FieldType,

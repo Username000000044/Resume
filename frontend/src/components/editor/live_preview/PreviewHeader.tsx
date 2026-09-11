@@ -7,9 +7,10 @@ import {
   PopoverTrigger,
 } from "#/components/ui/popover";
 import { Switch } from "#/components/ui/switch";
+import { useSaveStatusStore } from "#/store/uesSaveStatusStore";
 import { useResumeConfigStore } from "#/store/useResumeConfigStore";
 import { useResumeStore } from "#/store/useResumeStore";
-import { Download, Folder, icons, RefreshCcw } from "lucide-react";
+import { Download, Folder, FolderX, icons, RefreshCcw } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
 
 interface DownloadOption {
@@ -49,17 +50,12 @@ const downloadOptions: DownloadOption[] = [
 ];
 
 export const PreviewHeader = () => {
+  const status = useSaveStatusStore((store) => store.status);
+
   const { liveMode, setLiveMode } = useResumeConfigStore(
     useShallow((state) => ({
       liveMode: state.liveMode,
       setLiveMode: state.setLiveMode,
-    })),
-  );
-
-  const { persistantMainSections, liveMainSections } = useResumeStore(
-    useShallow((state) => ({
-      persistantMainSections: state.persistantMainSections,
-      liveMainSections: state.liveMainSections,
     })),
   );
 
@@ -105,9 +101,18 @@ export const PreviewHeader = () => {
         </PopoverContent>
       </Popover>
 
+      {/* Resume data unsaved */}
+      {status === "unsaved" && (
+        <div className="flex items-center gap-1.5 text-muted-foreground">
+          <FolderX size={14} />{" "}
+          <p>
+            Unsaved <span className="italic">(localstorage)</span>
+          </p>
+        </div>
+      )}
+
       {/* Resume data in storage */}
-      {JSON.stringify(persistantMainSections) ===
-        JSON.stringify(liveMainSections) && (
+      {status === "saved" && (
         <div className="flex items-center gap-1.5 text-muted-foreground">
           <Folder size={14} />{" "}
           <p>
@@ -117,8 +122,7 @@ export const PreviewHeader = () => {
       )}
 
       {/* Resume data being saved into storage */}
-      {JSON.stringify(liveMainSections) !==
-        JSON.stringify(persistantMainSections) && (
+      {status === "saving" && (
         <div className="flex items-center gap-1.5 text-muted-foreground">
           <RefreshCcw size={14} />{" "}
           <p>

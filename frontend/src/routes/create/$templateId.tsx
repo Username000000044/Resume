@@ -30,16 +30,10 @@ function RouteComponent() {
   const initializeSections = useResumeStore(
     (state) => state.initializeSections,
   );
-  const {
-    initializeConfig,
-    liveConfig,
-    defaultTemplateConfig,
-    defaultSectionConfig,
-  } = useResumeConfigStore(
+  const { config, defaultConfig, initializeConfig } = useResumeConfigStore(
     useShallow((state) => ({
-      liveConfig: state.liveConfig,
-      defaultTemplateConfig: state.defaultTemplateConfig,
-      defaultSectionConfig: state.defaultSectionConfig,
+      config: state.config,
+      defaultConfig: state.defaultConfig,
       initializeConfig: state.initializeConfig,
     })),
   );
@@ -65,8 +59,8 @@ function RouteComponent() {
       );
     };
 
-    const templateName = liveConfig.templateName
-      ? formatStorageName(liveConfig.templateName)
+    const templateName = config.templateName
+      ? formatStorageName(config.templateName)
       : formatStorageName(templateRequest.data.name);
 
     const handleSectionsInitialization = async () => {
@@ -90,8 +84,7 @@ function RouteComponent() {
 
       const unsub = useResumeStore.persist.onFinishHydration(() => {
         // Only fills store will new data if doesn't exist.
-        const currentSections =
-          useResumeStore.getState().persistantMainSections;
+        const currentSections = useResumeStore.getState().sections;
         if (!currentSections || Object.values(currentSections).length === 0) {
           // Populate zustand store with sections, field, and bullets
           if (templateRequest.data.sections) {
@@ -103,8 +96,6 @@ function RouteComponent() {
 
             initializeSections(syncPayload);
           }
-        } else {
-          useResumeStore.getState().syncLiveSections();
         }
 
         setIsSectionsPayloadReady(true);
@@ -135,15 +126,26 @@ function RouteComponent() {
       }
 
       const unsub = useResumeConfigStore.persist.onFinishHydration(() => {
-        const persistConfig = useResumeConfigStore.getState().persistantConfig;
+        const config = useResumeConfigStore.getState().config;
+
+        // Default Config
+        const emptyDefaultTemplateConfig =
+          Object.values(defaultConfig.template).length === 0;
+        const emptyDefaultSectionsConfig =
+          Object.values(defaultConfig.sections).length === 0;
+
+        // User Config
+        const emptyTemplateConfig =
+          Object.values(config.templateConfig).length === 0;
+        const emptySectionsConfig =
+          Object.values(config.sectionConfigs).length === 0;
+
         if (
-          // Default Config
-          Object.values(defaultTemplateConfig).length === 0 ||
-          Object.values(defaultSectionConfig).length === 0 ||
-          // Persist Config
-          Object.values(persistConfig.templateConfig).length === 0 ||
-          Object.values(persistConfig.sectionConfigs).length === 0 ||
-          !persistConfig.templateName
+          emptyDefaultTemplateConfig ||
+          emptyDefaultSectionsConfig ||
+          emptyTemplateConfig ||
+          emptySectionsConfig ||
+          !config.templateName
         ) {
           // Populate zustand store with db default db config;
           if (templateRequest.data.sections) {
@@ -158,8 +160,6 @@ function RouteComponent() {
               syncPayload,
             );
           }
-        } else {
-          useResumeConfigStore.getState().syncLiveSections();
         }
 
         setIsConfigPayloadReady(true);
@@ -173,10 +173,10 @@ function RouteComponent() {
     handleConfigInitialization();
   }, [
     templateRequest.data,
-    liveConfig.templateName,
+    config.templateName,
     templateId,
-    defaultSectionConfig,
-    defaultTemplateConfig,
+    defaultConfig.sections,
+    defaultConfig.template,
     initializeConfig,
     initializeSections,
   ]);
