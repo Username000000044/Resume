@@ -4,9 +4,9 @@ import {
   type ValueType,
 } from "#/store/useResumeConfigStore";
 import { NumericScrubber } from "#/components/ui/number-scrubber";
-import type { ConfigValue } from "#/types/TemplateConfig";
 
 interface ScrubberInputProps {
+  orientation?: "horizontal" | "vertical";
   defaultValue: number;
   path: string[];
   config: {
@@ -17,6 +17,7 @@ interface ScrubberInputProps {
 }
 
 export const NumberScrubberItem = ({
+  orientation,
   defaultValue,
   path,
   config: { step, min, max },
@@ -40,7 +41,7 @@ export const NumberScrubberItem = ({
 
   return (
     <NumericScrubber
-      variant="destructive"
+      orientation={orientation}
       value={value ?? 0}
       onChange={handleChange}
       onDoubleClick={handleReset}

@@ -130,7 +130,7 @@ export const LiveHeaderItem = ({ dbSection }: HeaderItemProps) => {
         })}
       </div>
 
-      {defaultTemplateConfig.decorations.header_divider && (
+      {config.templateConfig.decorations.header_divider && (
         <DividerItem template_config={config.templateConfig} />
       )}
     </section>

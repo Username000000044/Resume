@@ -15,7 +15,6 @@ import { RestrictToVerticalAxis } from "@dnd-kit/abstract/modifiers";
 import { Button } from "#/components/ui/button";
 import { GripHorizontal } from "lucide-react";
 import { useResumeConfigStore } from "#/store/useResumeConfigStore";
-import { useShallow } from "zustand/react/shallow";
 import type { fieldPositionEnum } from "@resume/backend/src/db/schema.js";
 
 interface SectionItemProps {
@@ -40,13 +39,7 @@ export const LiveSortableSectionItem = ({
   });
 
   const sections = useResumeStore((store) => store.sections);
-  const { config, liveMode, defaultTemplateConfig } = useResumeConfigStore(
-    useShallow((store) => ({
-      liveMode: store.liveMode,
-      config: store.config,
-      defaultTemplateConfig: store.defaultConfig.template,
-    })),
-  );
+  const config = useResumeConfigStore((store) => store.config);
 
   const numOfFilledSections = useMemo(() => {
     return templateData.sections
@@ -104,7 +97,7 @@ export const LiveSortableSectionItem = ({
       >
         {/* Section Title */}
         <h2
-          className={`text-(length:--section-title-size) text-[var(--section-title-color)] font-[var(--section-title-weight)]  ${titleAlignment}`}
+          className={`text-(length:--section-title-size) text-[var(--section-title-color)] font-[var(--section-title-weight)] ${titleAlignment}`}
         >
           {dbSection.title}
         </h2>

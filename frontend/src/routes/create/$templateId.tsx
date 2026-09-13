@@ -6,7 +6,7 @@ import {
   useResumeStore,
 } from "#/store/useResumeStore";
 import { useEffect, useState } from "react";
-import { EditorTabs } from "#/components/editor/form/EditorTabs";
+import { EditorTabs } from "#/components/editor/data_form/EditorTabs";
 
 import { PreviewHeader } from "#/components/editor/live_preview/PreviewHeader";
 import { LivePreview } from "#/components/editor/live_preview/LivePreview";
@@ -15,6 +15,8 @@ import {
   useResumeConfigStore,
 } from "#/store/useResumeConfigStore";
 import { useShallow } from "zustand/react/shallow";
+import { ConfigItems } from "#/components/editor/config_form/ConfigItems";
+import { LivePaper } from "#/components/Paper";
 
 export const Route = createFileRoute("/create/$templateId")({
   component: RouteComponent,
@@ -30,13 +32,15 @@ function RouteComponent() {
   const initializeSections = useResumeStore(
     (state) => state.initializeSections,
   );
-  const { config, defaultConfig, initializeConfig } = useResumeConfigStore(
-    useShallow((state) => ({
-      config: state.config,
-      defaultConfig: state.defaultConfig,
-      initializeConfig: state.initializeConfig,
-    })),
-  );
+  const { config, defaultConfig, liveMode, initializeConfig } =
+    useResumeConfigStore(
+      useShallow((state) => ({
+        config: state.config,
+        defaultConfig: state.defaultConfig,
+        liveMode: state.liveMode,
+        initializeConfig: state.initializeConfig,
+      })),
+    );
 
   const [isSectionsPayloadReady, setIsSectionsPayloadReady] = useState(false);
   const [isConfigPayloadReady, setIsConfigPayloadReady] = useState(false);
@@ -193,22 +197,29 @@ function RouteComponent() {
   }
 
   return (
-    <div className="pt-12 lg:py-24 print:p-0">
-      <div className="grid lg:grid-cols-[auto_auto] gap-10 max-w-min mx-auto">
+    <div className="pt-12 overflow-x-hidden lg:py-24 print:p-0">
+      <div className="grid min-[93rem]:grid-cols-[1fr_auto] gap-12 2xl:gap-24 w-fit mx-auto">
         {/* Editor Column */}
-        <div className="flex flex-col items-center 2xl:items-start w-full print:hidden">
-          <h1 className="text-4xl pb-8 text-primary font-bold tracking-wide">
-            Resume Editor
+        <div className=" flex flex-col w-full px-12 lg:px-0 print:hidden">
+          <h1 className="mx-auto min-[93rem]:ml-0 text-4xl pb-8 text-primary font-bold tracking-wide">
+            Untitled Resume
           </h1>
 
-          <EditorTabs templateData={templateRequest.data} />
+          {liveMode === "view" ? (
+            <EditorTabs templateData={templateRequest.data} />
+          ) : (
+            <ConfigItems />
+          )}
         </div>
 
         {/* Live Resume Column */}
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col mx-12 lg:m-0">
           <PreviewHeader />
           <div className="bg-linear-to-b from-primary/8 to-primary/12 p-4 rounded-4xl">
-            <LivePreview templateData={templateRequest.data} />
+            <div className="flex flex-col gap-4">
+              <LivePreview templateData={templateRequest.data} />
+              <LivePaper />
+            </div>
           </div>
         </div>
       </div>

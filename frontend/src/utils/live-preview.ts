@@ -1,27 +1,30 @@
-import { SCALE_CURVES } from "#/components/editor/live_preview/LivePreview";
+import { PRESET_MAP } from "#/components/editor/live_preview/LivePreview";
 import type { FieldType, TemplateConfig } from "#/types/Template";
 
 export const getFieldProperties = (
 	field: FieldType,
-	liveTemplateConfig: TemplateConfig,
+	templateConfig: TemplateConfig,
 ) => {
+	const preset = PRESET_MAP[templateConfig.theme.typography.preset];
+
 	const fieldRole = field.renderRole;
-	const fieldWeight =
-		liveTemplateConfig.theme.typography.font_weight[fieldRole];
-	const fieldColor = liveTemplateConfig.theme.colors[fieldRole];
-	const FieldElement = liveTemplateConfig.elements[fieldRole] ?? "p";
+	const fieldWeight = templateConfig.theme.typography.font_weight[fieldRole];
+	const fieldColor = templateConfig.theme.colors[fieldRole];
+	const FieldElement = templateConfig.elements[fieldRole] ?? "p";
 
 	// Field Size
-	const font_size_base = liveTemplateConfig.theme.typography.font_size_base;
-	const scale_curve =
-		SCALE_CURVES[liveTemplateConfig.theme.typography.scale_curve];
-	const fieldSize = scale_curve[FieldElement] * font_size_base;
+	const fontSizeBase = templateConfig.theme.typography.font_size_base;
+	const fieldSize = preset.scale_curve[FieldElement] * fontSizeBase;
+
+	// Leading
+	const fieldHeight = preset.line_height[FieldElement];
 
 	return {
 		fieldRole,
+		fieldWeight,
 		fieldSize,
 		fieldColor,
-		fieldWeight,
+		fieldHeight,
 		FieldElement,
 	};
 };

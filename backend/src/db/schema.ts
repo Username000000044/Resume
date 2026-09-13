@@ -63,20 +63,21 @@ interface SpacingConfig {
 	divider_gap: number; // space on the top + bottom of dividers (pt)
 	group_gap: number; // space to the left + right of each group item (pt)
 	bullet_indentation: number; // space before bullet (pt)
-	line_height: number; // individual character height (pt) multiplied by scale curve.
 }
 
-type Font =
-	| "inter"
-	| "roboto"
-	| "open-sans"
-	| "montserrat"
-	| "arimo"
-	| "noto-sans"
-	| "libre-franklin"
-	| "source-sans-3"
-	| "rubik"
-	| "plus-jakarta-sans";
+export const FONTS_LIST = [
+	"inter",
+	"roboto",
+	"open-sans",
+	"montserrat",
+	"arimo",
+	"noto-sans",
+	"libre-franklin",
+	"source-sans-3",
+	"rubik",
+	"plus-jakarta-sans",
+] as const;
+type Font = (typeof FONTS_LIST)[number];
 
 interface TypographyConfig {
 	primary_font_family: Font;
@@ -86,18 +87,24 @@ interface TypographyConfig {
 		"primary" | "secondary"
 	>;
 	font_size_base: number; // 11pt (stored as num) so it can be multiplied by scale curve.
-	scale_curve: "editorial" | "balanced" | "minimal";
+	preset: "editorial" | "balanced" | "minimal";
 	font_weight: Record<(typeof fieldRenderRoleEnum.enumValues)[number], number>;
 }
+
+export const DIVIDER_STYLE = ["solid", "dashed", "thick"] as const;
+export const BULLET_STYLE = ["disc", "circle", "square", "none"] as const;
+
+type DividerStyle = (typeof DIVIDER_STYLE)[number];
+type BulletStyle = (typeof BULLET_STYLE)[number];
 
 export interface TemplateConfig {
 	// decorations, typography/fontsizes, colors
 	decorations: {
 		header_divider: boolean;
 		section_divider: boolean;
-		divider_style: "solid" | "dashed" | "thick";
-		bullet_style: "disc" | "circle" | "square" | "none";
-		sub_bullet_style: "disc" | "circle" | "square" | "none";
+		divider_style: DividerStyle;
+		bullet_style: BulletStyle;
+		sub_bullet_style: BulletStyle;
 	};
 	theme: {
 		typography: TypographyConfig;

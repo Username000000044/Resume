@@ -11,7 +11,7 @@ import {
   InputGroupAddon,
   InputGroupButton,
 } from "#/components/ui/input-group";
-import type { AppRouter } from "../../../../../backend/src/appRouter";
+import type { AppRouter } from "@resume/backend/src/appRouter.js";
 import { Field, FieldLabel } from "#/components/ui/field";
 import { Button } from "#/components/ui/button";
 import type { SectionType } from "#/types/Template";

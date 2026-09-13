@@ -26,13 +26,30 @@ export const debouncedStorage = (
 	if (!baseStorage) return undefined;
 
 	const debouncedSetters = new Map<string, (...args: any[]) => void>();
+	const lastStoredValues = new Map<string, string>();
 
 	return {
 		// Standard synchronous read
-		getItem: (name) => baseStorage.getItem(name),
+		getItem: (name) => {
+			const item = baseStorage.getItem(name);
+
+			if (item && typeof item === "object" && "then" in item) {
+				item.then((val) => {
+					if (val) lastStoredValues.set(name, JSON.stringify(val));
+				});
+			} else if (item) {
+				lastStoredValues.set(name, JSON.stringify(item));
+			}
+			return item;
+		},
 
 		// Debounced write
 		setItem: (name, value) => {
+			const currentStringified = JSON.stringify(value);
+			if (lastStoredValues.get(name) === currentStringified) return;
+
+			lastStoredValues.set(name, currentStringified);
+
 			if (!debouncedSetters.has(name)) {
 				debouncedSetters.set(
 					name,
@@ -53,6 +70,9 @@ export const debouncedStorage = (
 		},
 
 		// Standard sychronous delete
-		removeItem: (name: string) => baseStorage.removeItem(name),
+		removeItem: (name: string) => {
+			lastStoredValues.delete(name);
+			baseStorage.removeItem(name);
+		},
 	};
 };

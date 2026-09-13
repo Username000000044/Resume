@@ -128,11 +128,11 @@ export const useResumeConfigStore = create<ResumeConfigStoreState>()(
 			})),
 			{
 				name: DEFAULT_RESUME_CONFIG_STORE_PERSIST_NAME,
+				partialize: (state) => ({ config: state.config }),
 				storage: debouncedStorage(
 					createJSONStorage(() => localStorage),
 					1500,
 				),
-				partialize: (state) => ({ config: state.config }),
 			},
 		),
 	),

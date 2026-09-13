@@ -1,6 +1,6 @@
 import type { inferRouterOutputs } from "@trpc/server";
 import { X } from "lucide-react";
-import type { AppRouter } from "../../../../../backend/src/appRouter";
+import type { AppRouter } from "@resume/backend/src/appRouter.js";
 import {
   useResumeStore,
   type MainBullet,

@@ -13,39 +13,67 @@ import type { CSSProperties } from "react";
 import { useResumeConfigStore } from "#/store/useResumeConfigStore";
 import { DragDropProvider } from "@dnd-kit/react";
 import { useShallow } from "zustand/react/shallow";
-import { NumberScrubberItem } from "./NumberScrubberItem";
+import { NumberScrubberItem } from "../config_form/NumberScrubberItem";
 
 interface LivePreviewProps {
   templateData: TemplateType;
 }
 
-export const SCALE_CURVES = {
+export const PRESET_MAP = {
   editorial: {
-    h1: 2.5,
-    h2: 1.6,
-    h3: 1.25,
-    h4: 1.05,
-    p: 1,
-    span: 1,
-    line_height: 1.45,
+    scale_curve: {
+      h1: 2.5,
+      h2: 1.6,
+      h3: 1.25,
+      h4: 1.05,
+      p: 1,
+      span: 1,
+    },
+    line_height: {
+      h1: 1.05,
+      h2: 1.1,
+      h3: 1.2,
+      h4: 1.35,
+      p: 1.5,
+      span: 1.5,
+    },
   },
+
   balanced: {
-    h1: 2.0,
-    h2: 1.35,
-    h3: 1.15,
-    h4: 1.0,
-    p: 1,
-    span: 1,
-    line_height: 1.4,
+    scale_curve: {
+      h1: 2.0,
+      h2: 1.35,
+      h3: 1.15,
+      h4: 1.0,
+      p: 1,
+      span: 1,
+    },
+    line_height: {
+      h1: 1.1,
+      h2: 1.15,
+      h3: 1.25,
+      h4: 1.35,
+      p: 1.5,
+      span: 1.5,
+    },
   },
   minimal: {
-    h1: 1.5,
-    h2: 1.15,
-    h3: 1.05,
-    h4: 0.95,
-    p: 1,
-    span: 1,
-    line_height: 1.34,
+    scale_curve: {
+      h1: 1.5,
+      h2: 1.15,
+      h3: 1.05,
+      h4: 0.95,
+      p: 1,
+      span: 1,
+    },
+    line_height: {
+      h1: 1.2,
+      h2: 1.25,
+      h3: 1.3,
+      h4: 1.35,
+      p: 1.5,
+      span: 1.5,
+    },
   },
 } as const;
 
@@ -123,14 +151,11 @@ export const LivePreview = ({ templateData }: LivePreviewProps) => {
 
   //Spacing
   const page_margin = config.templateConfig.spacing.page_margin;
-  const line_height =
-    SCALE_CURVES[config.templateConfig.theme.typography.scale_curve]
-      .line_height;
 
   // Typography
   const font_size_base = config.templateConfig.theme.typography.font_size_base;
   const font_scale_curve =
-    SCALE_CURVES[config.templateConfig.theme.typography.scale_curve];
+    PRESET_MAP[config.templateConfig.theme.typography.preset].scale_curve;
 
   const dynamicPreviewStyles = {
     // Typography
@@ -144,7 +169,6 @@ export const LivePreview = ({ templateData }: LivePreviewProps) => {
     "--divider-gap": `${config.templateConfig.spacing.divider_gap}pt`,
     "--group-gap": `${config.templateConfig.spacing.group_gap}pt`,
     "--bullet-indentation": `${config.templateConfig.spacing.bullet_indentation}pt`,
-    "--line-height": `${font_size_base * line_height}pt`,
 
     // Decorations
     "--bullet-style": config.templateConfig.decorations.bullet_style,
@@ -165,64 +189,53 @@ export const LivePreview = ({ templateData }: LivePreviewProps) => {
   } as CSSProperties;
 
   return (
-    <div className="flex flex-col gap-4 w-full" style={dynamicPreviewStyles}>
-      <LivePaper className="relative flex flex-col text-(length:--font-size-base) leading-[var(--line-height)] !p-[var(--page-margin)]">
-        {/* Config Mode */}
-        {liveMode === "config" && (
-          <div className="absolute top-8 right-8">
-            <NumberScrubberItem
-              defaultValue={templateData.default_config.spacing.page_margin}
-              path={["templateConfig", "spacing", "page_margin"]}
-              config={{ step: 0.01, min: 0, max: 2 }}
-            />
-          </div>
-        )}
+    <LivePaper
+      className="relative flex flex-col text-(length:--font-size-base) !p-[var(--page-margin)]"
+      style={dynamicPreviewStyles}
+    >
+      {/* Header */}
+      <div className="pb-[var(--section-gap)]">
+        {templateData.sections
+          .filter((dbSection) => {
+            const isHeaderSection = dbSection.order === 0;
+            const sectionHasContents = !sectionIsEmpty(dbSection);
 
-        {/* Header */}
-        <div className="pb-[var(--section-gap)]">
+            return isHeaderSection && sectionHasContents;
+          })
+          .map((dbSection) => (
+            <LiveHeaderItem dbSection={dbSection} key={dbSection.id} />
+          ))}
+      </div>
+
+      {/* Sections */}
+      <DragDropProvider
+        onDragEnd={(event) => {
+          const sectionId = event.operation.target?.id;
+
+          if (sectionId) {
+            reorderSections(event);
+          }
+        }}
+      >
+        <ul className="flex flex-col gap-[var(--section-gap)]">
           {templateData.sections
             .filter((dbSection) => {
-              const isHeaderSection = dbSection.order === 0;
+              const isNotHeaderSection = dbSection.order !== 0;
               const sectionHasContents = !sectionIsEmpty(dbSection);
 
-              return isHeaderSection && sectionHasContents;
+              return isNotHeaderSection && sectionHasContents;
             })
-            .map((dbSection) => (
-              <LiveHeaderItem dbSection={dbSection} key={dbSection.id} />
+            .sort((a, b) => sections[a.id].order - sections[b.id].order)
+            .map((dbSection, dbSectionIndex) => (
+              <LiveSortableSectionItem
+                templateData={templateData}
+                dbSection={dbSection}
+                dbSectionIndex={dbSectionIndex}
+                key={dbSection.id}
+              />
             ))}
-        </div>
-
-        {/* Sections */}
-        <DragDropProvider
-          onDragEnd={(event) => {
-            const sectionId = event.operation.target?.id;
-
-            if (sectionId) {
-              reorderSections(event);
-            }
-          }}
-        >
-          <ul className="flex flex-col gap-[var(--section-gap)]">
-            {templateData.sections
-              .filter((dbSection) => {
-                const isNotHeaderSection = dbSection.order !== 0;
-                // const sectionHasContents = !sectionIsEmpty(dbSection);
-
-                return isNotHeaderSection;
-              })
-              .sort((a, b) => sections[a.id].order - sections[b.id].order)
-              .map((dbSection, dbSectionIndex) => (
-                <LiveSortableSectionItem
-                  templateData={templateData}
-                  dbSection={dbSection}
-                  dbSectionIndex={dbSectionIndex}
-                  key={dbSection.id}
-                />
-              ))}
-          </ul>
-        </DragDropProvider>
-      </LivePaper>
-      <LivePaper />
-    </div>
+        </ul>
+      </DragDropProvider>
+    </LivePaper>
   );
 };

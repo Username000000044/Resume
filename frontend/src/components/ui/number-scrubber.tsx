@@ -3,12 +3,21 @@ import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Badge, badgeVariants } from "./badge";
 import type { VariantProps } from "class-variance-authority";
-import { SlidersHorizontal } from "lucide-react";
+import {
+  MoveHorizontal,
+  MoveVertical,
+  SlidersHorizontal,
+  SlidersVertical,
+} from "lucide-react";
 
 export interface NumericScrubberProps extends Omit<
   React.HTMLAttributes<HTMLInputElement>,
   "onChange"
 > {
+  /**
+   * Icon type
+   */
+  orientation?: "horizontal" | "vertical";
   /**
    * Badge variant
    */
@@ -55,7 +64,7 @@ export const NumericScrubber = React.forwardRef<
 >(
   (
     {
-      variant = "default",
+      orientation = "horizontal",
       value,
       onChange,
       min = 0,
@@ -165,7 +174,7 @@ export const NumericScrubber = React.forwardRef<
     }, [value]);
 
     return (
-      <Badge variant={variant} className="relative w-fit">
+      <div className={cn("relative group w-fit")}>
         <Input
           ref={ref}
           type="number"
@@ -176,16 +185,9 @@ export const NumericScrubber = React.forwardRef<
             `[appearance:textfield]
              [&::-webkit-inner-spin-button]:appearance-none
              [&::-webkit-outer-spin-button]:appearance-none
-             pl-4
              pr-0
              hover:cursor-ew-resize
-             active:bg-transparent
              active:cursor-none
-             focus-visible:ring-0
-             focus-visible:outline-none
-             focus-visible:border-none
-             bg-transparent
-             w-12
              `,
             className,
           )}
@@ -197,12 +199,22 @@ export const NumericScrubber = React.forwardRef<
         />
 
         <div
-          className="absolute inset-y-0 left-0 flex items-center px-2 text-gray-400 cursor-ew-resize select-none"
+          className="absolute inset-y-0 right-0 flex items-center px-4 text-gray-400 cursor-ew-resize select-none"
           onPointerDown={handlePointerDown}
         >
-          <SlidersHorizontal stroke="var(--destructive)" size={12} />
+          {orientation === "horizontal" ? (
+            <MoveHorizontal
+              className="size-4 text-muted-foreground"
+              strokeWidth={1.7}
+            />
+          ) : (
+            <MoveVertical
+              className="size-4 text-muted-foreground"
+              strokeWidth={1.7}
+            />
+          )}
         </div>
-      </Badge>
+      </div>
     );
   },
 );
