@@ -65,6 +65,26 @@ interface SpacingConfig {
 	bullet_indentation: number; // space before bullet (pt)
 }
 
+export const FONT_WEIGHTS = [
+	100, 200, 300, 400, 500, 600, 700, 800, 900,
+] as const;
+export type FontWeight = (typeof FONT_WEIGHTS)[number];
+
+interface TypographyConfig {
+	primary_font_family: Font;
+	secondary_font_family: Font;
+	role_font_family: Record<
+		(typeof fieldRenderRoleEnum.enumValues)[number],
+		"primary" | "secondary"
+	>;
+	font_size_base: number; // 11pt (stored as num) so it can be multiplied by scale curve.
+	preset: "editorial" | "balanced" | "minimal";
+	font_weight: Record<
+		(typeof fieldRenderRoleEnum.enumValues)[number],
+		FontWeight
+	>;
+}
+
 export const FONTS_LIST = [
 	"inter",
 	"roboto",
@@ -77,19 +97,7 @@ export const FONTS_LIST = [
 	"rubik",
 	"plus-jakarta-sans",
 ] as const;
-type Font = (typeof FONTS_LIST)[number];
-
-interface TypographyConfig {
-	primary_font_family: Font;
-	secondary_font_family: Font;
-	role_font_family: Record<
-		(typeof fieldRenderRoleEnum.enumValues)[number],
-		"primary" | "secondary"
-	>;
-	font_size_base: number; // 11pt (stored as num) so it can be multiplied by scale curve.
-	preset: "editorial" | "balanced" | "minimal";
-	font_weight: Record<(typeof fieldRenderRoleEnum.enumValues)[number], number>;
-}
+export type Font = (typeof FONTS_LIST)[number];
 
 export const DIVIDER_STYLE = ["solid", "dashed", "thick"] as const;
 export const BULLET_STYLE = ["disc", "circle", "square", "none"] as const;

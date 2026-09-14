@@ -1,3 +1,4 @@
+import { useResumeConfigStore } from "#/store/useResumeConfigStore";
 import type { FieldType, TemplateType } from "#/types/Template";
 import type { PRESET_MAP } from "./LivePreview";
 
@@ -12,6 +13,9 @@ type FieldSize = number; //fix!!!!!!!!!!!!!!!!!!!!!!
 type FieldHeight =
   (typeof PRESET_MAP)[TemplateType["default_config"]["theme"]["typography"]["preset"]]["line_height"][keyof (typeof PRESET_MAP)[TemplateType["default_config"]["theme"]["typography"]["preset"]]["line_height"]];
 
+type FontVariant =
+  TemplateType["default_config"]["theme"]["typography"]["role_font_family"][keyof TemplateType["default_config"]["theme"]["typography"]["role_font_family"]];
+
 type FieldElement =
   TemplateType["default_config"]["elements"][keyof TemplateType["default_config"]["elements"]];
 
@@ -23,11 +27,18 @@ interface LiveFieldProps {
     fieldColor: FieldColor;
     fieldSize: FieldSize;
     fieldHeight: FieldHeight;
+    fontVariant: FontVariant;
     FieldElement: FieldElement;
   };
 }
 
 export const LiveFieldItem = ({ value, properties }: LiveFieldProps) => {
+  const config = useResumeConfigStore((store) => store.config);
+  const fontFamily =
+    properties.fontVariant === "primary"
+      ? config.templateConfig.theme.typography.primary_font_family
+      : config.templateConfig.theme.typography.secondary_font_family;
+
   return (
     <properties.FieldElement
       className="font-[var(--field-weight)] text-[var(--field-color)] leading-[var(--leading)] text-(length:--field-size)"
@@ -37,6 +48,7 @@ export const LiveFieldItem = ({ value, properties }: LiveFieldProps) => {
           "--field-color": properties.fieldColor,
           "--field-size": `${properties.fieldSize}pt`,
           "--leading": properties.fieldHeight, // multiplies by current size
+          fontFamily: `"${fontFamily}", sans-serif`,
         } as React.CSSProperties
       }
     >

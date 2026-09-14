@@ -3,17 +3,21 @@ import type { FieldType, TemplateConfig } from "#/types/Template";
 
 export const getFieldProperties = (
 	field: FieldType,
-	templateConfig: TemplateConfig,
+	config: TemplateConfig,
 ) => {
-	const preset = PRESET_MAP[templateConfig.theme.typography.preset];
+	const preset = PRESET_MAP[config.theme.typography.preset];
 
 	const fieldRole = field.renderRole;
-	const fieldWeight = templateConfig.theme.typography.font_weight[fieldRole];
-	const fieldColor = templateConfig.theme.colors[fieldRole];
-	const FieldElement = templateConfig.elements[fieldRole] ?? "p";
+	const fieldWeight = config.theme.typography.font_weight[fieldRole];
+	const fieldColor = config.theme.colors[fieldRole];
+	const FieldElement = config.elements[fieldRole] ?? "p";
+
+	// Font
+	const fontVariant =
+		config.theme.typography.role_font_family[fieldRole] ?? "primary";
 
 	// Field Size
-	const fontSizeBase = templateConfig.theme.typography.font_size_base;
+	const fontSizeBase = config.theme.typography.font_size_base;
 	const fieldSize = preset.scale_curve[FieldElement] * fontSizeBase;
 
 	// Leading
@@ -25,6 +29,7 @@ export const getFieldProperties = (
 		fieldSize,
 		fieldColor,
 		fieldHeight,
+		fontVariant,
 		FieldElement,
 	};
 };
