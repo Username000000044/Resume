@@ -13,6 +13,7 @@ import { BULLET_STYLE, DIVIDER_STYLE } from "@resume/backend/src/db/schema.js";
 import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { NumberScrubberItem } from "./NumberScrubberItem";
+import { Label } from "#/components/ui/label";
 
 interface Item {
   label: string;
@@ -92,9 +93,9 @@ export const DecorationsConfig = () => {
         </Select>
       </Field>
 
-      <div className="flex flex-col items-center justify-end">
-        <div className="flex items-center gap-2">
-          <p>Header</p>
+      <div className="flex flex-col items-center justify-end gap-1">
+        <div className="flex items-center space-x-2">
+          <Label className="font-normal">Header</Label>
           <Switch
             className="cursor-pointer"
             size="sm"
@@ -108,8 +109,8 @@ export const DecorationsConfig = () => {
             checked={isHeaderDividerVisible}
           />
         </div>
-        <div className="flex items-center gap-2">
-          <p>Section</p>
+        <div className="flex items-center space-x-2">
+          <Label className="font-normal">Sections</Label>
           <Switch
             className="cursor-pointer"
             size="sm"
@@ -191,7 +192,7 @@ export const DecorationsConfig = () => {
         <FieldLabel className="font-normal">Indentation</FieldLabel>
         <NumberScrubberItem
           path={["templateConfig", "spacing", "bullet_indentation"]}
-          config={{ step: 1, min: 0, max: 10 }}
+          config={{ step: 1, min: 0, max: 50 }}
           defaultValue={defualtBulletIndentation}
         />
       </Field>

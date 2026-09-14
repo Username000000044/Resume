@@ -12,7 +12,7 @@ export const SpacingConfig = () => {
       <FieldLabel className="font-normal">Page Margin</FieldLabel>
       <NumberScrubberItem
         path={["templateConfig", "spacing", "page_margin"]}
-        config={{ step: 0.01, min: 0, max: 10 }}
+        config={{ step: 0.01, min: 0, max: 2 }}
         defaultValue={defaultPageMargin}
       />
     </Field>
