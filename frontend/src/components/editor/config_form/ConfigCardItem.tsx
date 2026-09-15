@@ -8,25 +8,23 @@ import {
 } from "#/components/ui/card";
 import type { ReactNode } from "react";
 
-interface ConfigCardTypes {
-  header?: {
-    title: string;
-    description: string;
-    action: ReactNode;
-  };
+interface ConfigCardProps extends Omit<
+  React.ComponentPropsWithoutRef<typeof Card>,
+  "content"
+> {
+  header?: ReactNode;
   content: ReactNode;
 }
 
-export const ConfigCardItem = ({ header, content }: ConfigCardTypes) => {
+export const ConfigCardItem = ({
+  header,
+  content,
+  className,
+  ...props
+}: ConfigCardProps) => {
   return (
-    <Card>
-      {header && (
-        <CardHeader>
-          <CardTitle>{header?.title}</CardTitle>
-          <CardDescription>{header?.description}</CardDescription>
-          <CardAction>{header?.action}</CardAction>
-        </CardHeader>
-      )}
+    <Card className={className} {...props}>
+      {header && <CardHeader className="">{header}</CardHeader>}
       <CardContent className="grid grid-cols-2 w-full gap-3">
         {content}
       </CardContent>

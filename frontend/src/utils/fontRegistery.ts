@@ -1,10 +1,9 @@
-import type { Font } from "@resume/backend/src/db/schema.js";
-
+type FontId = string;
 export interface FontLoaderMap {
 	[weight: number]: () => Promise<{ default: string }>;
 }
 
-export const FONT_REGISTRY: Record<string, () => Promise<{ default: string }>> =
+export const FONT_REGISTRY: Record<FontId, () => Promise<{ default: string }>> =
 	{};
 
 const fontModules = import.meta.glob(

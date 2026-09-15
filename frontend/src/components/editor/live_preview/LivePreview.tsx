@@ -13,7 +13,8 @@ import type { CSSProperties } from "react";
 import { useResumeConfigStore } from "#/store/useResumeConfigStore";
 import { DragDropProvider } from "@dnd-kit/react";
 import { useShallow } from "zustand/react/shallow";
-import { NumberScrubberItem } from "../config_form/NumberScrubberItem";
+import type { FontVariantConfig } from "#/hooks/useDynamicFontStack";
+import { FONT_REGISTRY } from "#/utils/fontRegistery";
 
 interface LivePreviewProps {
   templateData: TemplateType;
@@ -28,6 +29,7 @@ export const PRESET_MAP = {
       h4: 1.05,
       p: 1,
       span: 1,
+      li: 1,
     },
     line_height: {
       h1: 1.05,
@@ -36,9 +38,9 @@ export const PRESET_MAP = {
       h4: 1.35,
       p: 1.5,
       span: 1.5,
+      li: 1.5,
     },
   },
-
   balanced: {
     scale_curve: {
       h1: 2.0,
@@ -47,6 +49,7 @@ export const PRESET_MAP = {
       h4: 1.0,
       p: 1,
       span: 1,
+      li: 1,
     },
     line_height: {
       h1: 1.1,
@@ -55,6 +58,7 @@ export const PRESET_MAP = {
       h4: 1.35,
       p: 1.5,
       span: 1.5,
+      li: 1.5,
     },
   },
   minimal: {
@@ -65,6 +69,7 @@ export const PRESET_MAP = {
       h4: 0.95,
       p: 1,
       span: 1,
+      li: 1,
     },
     line_height: {
       h1: 1.2,
@@ -73,6 +78,7 @@ export const PRESET_MAP = {
       h4: 1.35,
       p: 1.5,
       span: 1.5,
+      li: 1.5,
     },
   },
 } as const;

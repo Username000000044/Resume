@@ -5,7 +5,7 @@ import {
   DEFAULT_RESUME_STORE_PERSIST_NAME,
   useResumeStore,
 } from "#/store/useResumeStore";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { EditorTabs } from "#/components/editor/data_form/EditorTabs";
 
 import { PreviewHeader } from "#/components/editor/live_preview/PreviewHeader";
@@ -17,6 +17,12 @@ import {
 import { useShallow } from "zustand/react/shallow";
 import { ConfigItems } from "#/components/editor/config_form/ConfigItems";
 import { LivePaper } from "#/components/Paper";
+import {
+  useDynamicFontStack,
+  type FontVariantConfig,
+} from "#/hooks/useDynamicFontStack";
+import { FONT_REGISTRY } from "#/utils/fontRegistery";
+import { GlobalFontLoader } from "#/components/GlobalFontLoader";
 
 export const Route = createFileRoute("/create/$templateId")({
   component: RouteComponent,
@@ -53,14 +59,14 @@ function RouteComponent() {
     // {name} = (Captial One Buisness -> captial_one_buisness) or template name
 
     const formatStorageName = (name: string) => {
-      return (
-        name
-          .toLowerCase()
-          // Removes all non alphabetical + numerical charcters
-          .replaceAll(/[^a-zA-Z0-9 ]/g, "")
-          // Converts spaces into _
-          .replaceAll(" ", "_")
-      );
+      const formattedName = name
+        .toLowerCase()
+        // Removes all non alphabetical + numerical charcters
+        .replaceAll(/[^a-zA-Z0-9 ]/g, "")
+        // Converts spaces into _
+        .replaceAll(" ", "_");
+
+      return formattedName;
     };
 
     const templateName = config.templateName
@@ -199,10 +205,13 @@ function RouteComponent() {
   return (
     <div className="pt-12 overflow-x-hidden lg:py-24 print:p-0">
       <div className="grid min-[93rem]:grid-cols-[1fr_auto] gap-12 2xl:gap-24 w-fit mx-auto">
+        {/* Headless Font Loader */}
+        <GlobalFontLoader />
+
         {/* Editor Column */}
         <div className=" flex flex-col w-full px-12 lg:px-0 print:hidden">
           <h1 className="mx-auto min-[93rem]:ml-0 text-4xl pb-8 text-primary font-bold tracking-wide">
-            Untitled Resume
+            {config.templateName || "Untitled Resume"}
           </h1>
 
           {liveMode === "view" ? (

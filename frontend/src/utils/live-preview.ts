@@ -1,13 +1,17 @@
 import { PRESET_MAP } from "#/components/editor/live_preview/LivePreview";
 import type { FieldType, TemplateConfig } from "#/types/Template";
+import type { fieldRenderRoleEnum } from "@resume/backend/src/db/schema.js";
 
+type FieldRole = (typeof fieldRenderRoleEnum.enumValues)[number];
 export const getFieldProperties = (
-	field: FieldType,
 	config: TemplateConfig,
+	field?: FieldType,
 ) => {
+	const fieldRole: FieldRole = field ? field.renderRole : "bullet";
+
 	const preset = PRESET_MAP[config.theme.typography.preset];
 
-	const fieldRole = field.renderRole;
+	// const fieldRole = field.renderRole;
 	const fieldWeight = config.theme.typography.font_weight[fieldRole];
 	const fieldColor = config.theme.colors[fieldRole];
 	const FieldElement = config.elements[fieldRole] ?? "p";

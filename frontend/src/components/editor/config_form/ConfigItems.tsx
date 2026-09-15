@@ -46,6 +46,7 @@ export const ConfigItems = () => {
         .map((configItem) => (
           <ConfigCardItem
             key={configItem.id}
+            header={null}
             content={<configItem.component />}
           />
         ))}

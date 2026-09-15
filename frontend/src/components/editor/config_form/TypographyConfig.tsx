@@ -9,15 +9,10 @@ import {
 } from "#/components/ui/select";
 import { useResumeConfigStore } from "#/store/useResumeConfigStore";
 import { FONTS_LIST } from "@resume/backend/src/db/schema.ts";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import type { PRESET_MAP } from "../live_preview/LivePreview";
 import { cn } from "cn";
-import {
-  useDynamicFontStack,
-  type FontVariantConfig,
-} from "#/hooks/useDynamicFontStack";
-import { FONT_REGISTRY } from "#/utils/fontRegistery";
 
 interface Item {
   label: string;
@@ -42,29 +37,6 @@ export const TypographyConfig = () => {
   );
   const [selectedSecondaryFont, setSelectedSecondaryFont] = useState(
     config.templateConfig.theme.typography.secondary_font_family,
-  );
-
-  const roleWeight = config.templateConfig.theme.typography.font_weight;
-  const allUniqueWeights = useMemo(() => {
-    return new Set(Object.values(roleWeight));
-  }, [roleWeight]);
-
-  const primaryVariants = useMemo(
-    () => getVariantsForFont(selectedPrimaryFont, allUniqueWeights),
-    [selectedPrimaryFont, allUniqueWeights],
-  );
-  const secondaryVariants = useMemo(
-    () => getVariantsForFont(selectedSecondaryFont, allUniqueWeights),
-    [selectedSecondaryFont, allUniqueWeights],
-  );
-
-  const primaryStatus = useDynamicFontStack(
-    selectedPrimaryFont,
-    primaryVariants,
-  );
-  const secondaryStatus = useDynamicFontStack(
-    selectedSecondaryFont,
-    secondaryVariants,
   );
 
   type Preset = keyof typeof PRESET_MAP;
@@ -113,7 +85,6 @@ export const TypographyConfig = () => {
         <Select
           items={items}
           value={selectedPrimaryFont}
-          disabled={primaryStatus === "loading"}
           onValueChange={(value) => {
             if (!value) return;
 
@@ -144,7 +115,6 @@ export const TypographyConfig = () => {
         <Select
           items={items}
           value={selectedSecondaryFont}
-          disabled={secondaryStatus === "loading"}
           onValueChange={(value) => {
             if (!value) return;
 
@@ -185,24 +155,4 @@ export const TypographyConfig = () => {
       </Field>
     </>
   );
-};
-
-const getVariantsForFont = (
-  fontName: string,
-  uniqueWeights: Set<number>,
-): FontVariantConfig[] => {
-  const fontId = fontName.toLowerCase().replace(/\s+/g, "-");
-
-  // Get the single loader file for this variable font
-  const singleFontLoader = FONT_REGISTRY[fontId];
-  if (!singleFontLoader) {
-    console.warn(`Variable Font ID "${fontId}" not found in FONT_REGISTRY.`);
-    return [];
-  }
-
-  // Assign the exact same file loader to every weight requested by the resume
-  return Array.from(uniqueWeights).map((weight) => ({
-    weight,
-    loader: singleFontLoader, // Every weight points to the same asset package!
-  }));
 };

@@ -18,6 +18,7 @@ export const useDynamicFontStack = (
 
 		let isMounted = true;
 
+		// Looks inside document.fonts to skip font download if already exists
 		const unloadedVariants = variants.filter((variant) => {
 			return !Array.from(document.fonts).some(
 				(font) =>

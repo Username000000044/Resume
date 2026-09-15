@@ -47,7 +47,7 @@ export const LiveHeaderItem = ({ dbSection }: HeaderItemProps) => {
               >
                 <LiveFieldItem
                   value={formatFieldValue(field)}
-                  properties={getFieldProperties(field, config.templateConfig)}
+                  properties={getFieldProperties(config.templateConfig, field)}
                 />
               </LiveFieldGroupWrapper>
             ));

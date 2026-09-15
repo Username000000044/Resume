@@ -133,8 +133,8 @@ export const LiveSortableSectionItem = ({
                   <LiveFieldItem
                     value={formatFieldValue(field)}
                     properties={getFieldProperties(
-                      field,
                       config.templateConfig,
+                      field,
                     )}
                   />
                 </LiveFieldGroupWrapper>
@@ -215,16 +215,26 @@ export const LiveSortableSectionItem = ({
                 {/* Section Bullets */}
                 <ul className="list-[var(--bullet-style)] text-[var(--bullet-color)] font-[var(--bullet-weight)] pl-[var(--bullet-indentation)] list-inside">
                   {liveSubSection.bullets.map((bullet) => (
-                    <li key={bullet.id}>
-                      {bullet.text}
+                    <span key={bullet.id}>
+                      <LiveFieldItem
+                        key={bullet.id}
+                        value={bullet.text}
+                        properties={getFieldProperties(config.templateConfig)}
+                      />
 
                       {/* Bullet's Sub Bullets */}
                       <ul className="list-[var(--sub-bullet-style)] pl-[var(--bullet-indentation)] list-inside">
                         {bullet.subBullets.map((subBullet) => (
-                          <li key={subBullet.id}>{subBullet.text}</li>
+                          <LiveFieldItem
+                            key={subBullet.id}
+                            value={subBullet.text}
+                            properties={getFieldProperties(
+                              config.templateConfig,
+                            )}
+                          />
                         ))}
                       </ul>
-                    </li>
+                    </span>
                   ))}
                 </ul>
               </div>

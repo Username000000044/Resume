@@ -45,6 +45,7 @@ export const fieldRenderRoleEnum = pgEnum("render_role", [
 	"role_title",
 	"metadata",
 	"body",
+	"bullet",
 ]);
 export const separatorStyleEnum = pgEnum("separator_style", [
 	"dot", // ·
@@ -124,7 +125,7 @@ export interface TemplateConfig {
 	spacing: SpacingConfig;
 	elements: Record<
 		(typeof fieldRenderRoleEnum.enumValues)[number],
-		"h1" | "h2" | "h3" | "h4" | "p" | "span"
+		"h1" | "h2" | "h3" | "h4" | "p" | "span" | "li"
 	>;
 }
 
