@@ -1,6 +1,6 @@
-import clsx from "clsx";
 import { useTemplateStore } from "#/store/useTemplateStore";
 import type { TemplateListType } from "#/types/Template";
+import { clsx } from "cn";
 
 interface GalleryProps {
   data: TemplateListType;

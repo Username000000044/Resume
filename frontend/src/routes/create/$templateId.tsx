@@ -1,6 +1,6 @@
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { trpc } from "#/utils/trpc";
+import { queryClient, trpc } from "#/utils/trpc";
 import {
   DEFAULT_RESUME_STORE_PERSIST_NAME,
   useResumeStore,
@@ -25,15 +25,26 @@ import { FONT_REGISTRY } from "#/utils/fontRegistery";
 import { GlobalFontLoader } from "#/components/GlobalFontLoader";
 
 export const Route = createFileRoute("/create/$templateId")({
+  loader: async ({ params }) => {
+    const template = await queryClient.query(
+      trpc.templateById.queryOptions(params.templateId, { retry: false }),
+    );
+    return { template };
+  },
+  head: ({ loaderData }) => ({
+    meta: [
+      {
+        // loaderData?.template?.name,
+        title: "Untitled Resume",
+      },
+    ],
+  }),
   component: RouteComponent,
   notFoundComponent: () => <div>Template Not Found</div>,
 });
 
 function RouteComponent() {
-  const { templateId } = useParams({ from: "/create/$templateId" });
-  const templateRequest = useQuery(
-    trpc.templateById.queryOptions(templateId, { retry: false }),
-  );
+  const { template } = Route.useLoaderData();
 
   const initializeSections = useResumeStore(
     (state) => state.initializeSections,
@@ -52,7 +63,7 @@ function RouteComponent() {
   const [isConfigPayloadReady, setIsConfigPayloadReady] = useState(false);
 
   useEffect(() => {
-    if (!templateRequest.data) return;
+    if (!template) return;
 
     // template-{id}-{name}
     // config-{id}-{name}
@@ -71,11 +82,11 @@ function RouteComponent() {
 
     const templateName = config.templateName
       ? formatStorageName(config.templateName)
-      : formatStorageName(templateRequest.data.name);
+      : formatStorageName(template.name);
 
     const handleSectionsInitialization = async () => {
       const persistName = useResumeStore.persist.getOptions().name;
-      const targetName = `template-${templateId}-${templateName}`;
+      const targetName = `template-${template.id}-${templateName}`;
 
       // If Zustand's persist store exists but isn't targetName
       if (persistName && persistName !== targetName) {
@@ -97,8 +108,8 @@ function RouteComponent() {
         const currentSections = useResumeStore.getState().sections;
         if (!currentSections || Object.values(currentSections).length === 0) {
           // Populate zustand store with sections, field, and bullets
-          if (templateRequest.data.sections) {
-            const syncPayload = templateRequest.data.sections.map((s) => ({
+          if (template.sections) {
+            const syncPayload = template.sections.map((s) => ({
               id: s.id,
               fieldIds: s.fields.map((f) => f.id),
               order: s.order,
@@ -119,7 +130,7 @@ function RouteComponent() {
     // Copied logic from handleSectionsInitialization
     const handleConfigInitialization = async () => {
       const persistName = useResumeConfigStore.persist.getOptions().name;
-      const targetName = `config-${templateId}-${templateName}`;
+      const targetName = `config-${template.id}-${templateName}`;
 
       if (persistName && persistName !== targetName) {
         const existingData = localStorage.getItem(persistName);
@@ -158,15 +169,15 @@ function RouteComponent() {
           !config.templateName
         ) {
           // Populate zustand store with db default db config;
-          if (templateRequest.data.sections) {
-            const syncPayload = templateRequest.data.sections.map((s) => ({
+          if (template.sections) {
+            const syncPayload = template.sections.map((s) => ({
               id: s.id,
               config: s.default_config,
             }));
 
             initializeConfig(
               templateName,
-              templateRequest.data.default_config,
+              template.default_config,
               syncPayload,
             );
           }
@@ -182,16 +193,13 @@ function RouteComponent() {
     handleSectionsInitialization();
     handleConfigInitialization();
   }, [
-    templateRequest.data,
+    template,
     config.templateName,
-    templateId,
     defaultConfig.sections,
     defaultConfig.template,
     initializeConfig,
     initializeSections,
   ]);
-
-  if (!templateRequest.data) return <div>{templateRequest.error?.message}</div>;
 
   if (!isSectionsPayloadReady || !isConfigPayloadReady) {
     return (
@@ -211,11 +219,11 @@ function RouteComponent() {
         {/* Editor Column */}
         <div className=" flex flex-col w-full px-12 lg:px-0 print:hidden">
           <h1 className="mx-auto min-[93rem]:ml-0 text-4xl pb-8 text-primary font-bold tracking-wide">
-            {config.templateName || "Untitled Resume"}
+            {"Untitled Resume"}
           </h1>
 
           {liveMode === "view" ? (
-            <EditorTabs templateData={templateRequest.data} />
+            <EditorTabs templateData={template} />
           ) : (
             <ConfigItems />
           )}
@@ -226,7 +234,7 @@ function RouteComponent() {
           <PreviewHeader />
           <div className="bg-linear-to-b from-primary/8 to-primary/12 p-4 rounded-4xl">
             <div className="flex flex-col gap-4">
-              <LivePreview templateData={templateRequest.data} />
+              <LivePreview templateData={template} />
               <LivePaper />
             </div>
           </div>

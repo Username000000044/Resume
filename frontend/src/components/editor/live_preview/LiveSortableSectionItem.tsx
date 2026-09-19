@@ -96,11 +96,10 @@ export const LiveSortableSectionItem = ({
         })}
       >
         {/* Section Title */}
-        <h2
-          className={`text-(length:--section-title-size) text-[var(--section-title-color)] font-[var(--section-title-weight)] ${titleAlignment}`}
-        >
-          {dbSection.title}
-        </h2>
+        <LiveFieldItem
+          value={dbSection.title}
+          properties={getFieldProperties("title", config.templateConfig)}
+        />
 
         {config.templateConfig.decorations.section_divider && (
           <DividerItem template_config={config.templateConfig} />
@@ -133,6 +132,7 @@ export const LiveSortableSectionItem = ({
                   <LiveFieldItem
                     value={formatFieldValue(field)}
                     properties={getFieldProperties(
+                      "field",
                       config.templateConfig,
                       field,
                     )}
@@ -192,7 +192,7 @@ export const LiveSortableSectionItem = ({
                 {/* Row Index */}
                 {matrix.map((_, rowIndex) => (
                   <div
-                    key={crypto.randomUUID()}
+                    key={matrix[rowIndex].map((field) => field.id).join("-")}
                     className="grid grid-cols-[auto_auto_auto] items-top w-full"
                   >
                     {/* Left Aligned */}
@@ -219,7 +219,10 @@ export const LiveSortableSectionItem = ({
                       <LiveFieldItem
                         key={bullet.id}
                         value={bullet.text}
-                        properties={getFieldProperties(config.templateConfig)}
+                        properties={getFieldProperties(
+                          "bullet",
+                          config.templateConfig,
+                        )}
                       />
 
                       {/* Bullet's Sub Bullets */}
@@ -229,6 +232,7 @@ export const LiveSortableSectionItem = ({
                             key={subBullet.id}
                             value={subBullet.text}
                             properties={getFieldProperties(
+                              "bullet",
                               config.templateConfig,
                             )}
                           />

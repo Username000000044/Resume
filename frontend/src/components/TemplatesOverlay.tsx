@@ -28,12 +28,15 @@ import { InputGroup, InputGroupInput, InputGroupAddon } from "./ui/input-group";
 import { useSelectTemplateRedirect } from "#/hooks/useSelectTemplateRedirect";
 import { useTemplateStore } from "#/store/useTemplateStore";
 import { useShallow } from "zustand/react/shallow";
+import { Route } from "#/routes/__root";
 
 export const TemplatesOverlay = ({ trigger }: { trigger: ReactElement }) => {
-  const { data } = useQuery(trpc.templatesList.queryOptions());
+  const { templateList } = Route.useLoaderData();
   const { redirect } = useSelectTemplateRedirect();
 
   const [open, setOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
   const { selectedTemplate, setSelectedTemplate } = useTemplateStore(
     useShallow((state) => ({
       selectedTemplate: state.selectedTemplate,
@@ -44,13 +47,18 @@ export const TemplatesOverlay = ({ trigger }: { trigger: ReactElement }) => {
   const isDesktop = useMediaQuery("(min-width: 1024px)"); // Tailwind lg media query
 
   useEffect(() => {
+    setIsMounted(true);
     // Set a default template once data loads if none is selected yet
-    if (data && data.length > 0 && !selectedTemplate) {
-      return setSelectedTemplate(data[0]);
+    if (templateList && templateList.length > 0 && !selectedTemplate) {
+      return setSelectedTemplate(templateList[0]);
     }
-  }, [data, selectedTemplate, setSelectedTemplate]);
+  }, [templateList, selectedTemplate, setSelectedTemplate]);
 
-  if (!data) {
+  if (!isMounted) {
+    return trigger;
+  }
+
+  if (!templateList) {
     return (
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger render={trigger} />
@@ -101,7 +109,7 @@ export const TemplatesOverlay = ({ trigger }: { trigger: ReactElement }) => {
               </div>
 
               {/* Templates  */}
-              <TemplatesGallery data={data} />
+              <TemplatesGallery data={templateList} />
             </CardContent>
           </Card>
 
@@ -128,7 +136,7 @@ export const TemplatesOverlay = ({ trigger }: { trigger: ReactElement }) => {
         </DrawerHeader>
 
         <div className="mt-8 mb-12">
-          <TemplatesCarousel data={data} />
+          <TemplatesCarousel data={templateList} />
         </div>
 
         <Button

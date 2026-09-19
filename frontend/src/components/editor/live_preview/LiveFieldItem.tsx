@@ -11,10 +11,11 @@ import { useResumeConfigStore } from "#/store/useResumeConfigStore";
 import type { FieldType, TemplateType } from "#/types/Template";
 import { useShallow } from "zustand/react/shallow";
 import type { PRESET_MAP } from "./LivePreview";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ConfigCardItem } from "../config_form/ConfigCardItem";
 import { CardAction, CardTitle } from "#/components/ui/card";
-import { PopoverColorPicker } from "../config_form/PopoverColorPicker";
+import { FieldColorPicker } from "../config_form/FieldColorPicker";
+import { FieldConfig } from "../config_form/FieldConfig";
 
 type FieldRole = FieldType["renderRole"];
 type FieldColor =
@@ -28,7 +29,7 @@ type FieldHeight =
   (typeof PRESET_MAP)[TemplateType["default_config"]["theme"]["typography"]["preset"]]["line_height"][keyof (typeof PRESET_MAP)[TemplateType["default_config"]["theme"]["typography"]["preset"]]["line_height"]];
 
 type FontVariant =
-  TemplateType["default_config"]["theme"]["typography"]["role_font_family"][keyof TemplateType["default_config"]["theme"]["typography"]["role_font_family"]];
+  TemplateType["default_config"]["theme"]["typography"]["font_family"][keyof TemplateType["default_config"]["theme"]["typography"]["font_family"]];
 
 type FieldElement =
   TemplateType["default_config"]["elements"][keyof TemplateType["default_config"]["elements"]];
@@ -78,6 +79,7 @@ export const LiveFieldItem = ({ value, properties }: LiveFieldProps) => {
         if (open && liveMode === "view") {
           return;
         }
+
         setIsOpen(open);
       }}
     >
@@ -108,10 +110,14 @@ export const LiveFieldItem = ({ value, properties }: LiveFieldProps) => {
             </properties.FieldElement>
           </button>
         }
+      />
+      <PopoverContent
+        side="bottom"
+        className="p-0 shadow-none w-80"
+        onPointerDown={(event) => {
+          event.stopPropagation();
+        }}
       >
-        Open Popover
-      </PopoverTrigger>
-      <PopoverContent side="bottom" className="p-0 shadow-none">
         <ConfigCardItem
           header={
             <>
@@ -119,11 +125,11 @@ export const LiveFieldItem = ({ value, properties }: LiveFieldProps) => {
                 {elementNameMap[properties.FieldElement]} Element
               </CardTitle>
               <CardAction>
-                <PopoverColorPicker fieldColor="#ffffff" />
+                <FieldColorPicker fieldRole={properties.fieldRole} />
               </CardAction>
             </>
           }
-          content={<div>hi</div>}
+          content={<FieldConfig fieldRole={properties.fieldRole} />}
         />
       </PopoverContent>
     </Popover>

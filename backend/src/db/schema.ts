@@ -71,12 +71,15 @@ export const FONT_WEIGHTS = [
 ] as const;
 export type FontWeight = (typeof FONT_WEIGHTS)[number];
 
+export const FONT_VARIANTS = ["primary", "secondary"];
+export type FontVariant = (typeof FONT_VARIANTS)[number];
+
 interface TypographyConfig {
 	primary_font_family: Font;
 	secondary_font_family: Font;
-	role_font_family: Record<
+	font_family: Record<
 		(typeof fieldRenderRoleEnum.enumValues)[number],
-		"primary" | "secondary"
+		FontVariant
 	>;
 	font_size_base: number; // 11pt (stored as num) so it can be multiplied by scale curve.
 	preset: "editorial" | "balanced" | "minimal";

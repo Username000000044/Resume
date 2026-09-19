@@ -46,8 +46,13 @@ export const LiveHeaderItem = ({ dbSection }: HeaderItemProps) => {
                 value={liveSubSection.fields[field.id]}
               >
                 <LiveFieldItem
+                  key={field.id}
                   value={formatFieldValue(field)}
-                  properties={getFieldProperties(config.templateConfig, field)}
+                  properties={getFieldProperties(
+                    "field",
+                    config.templateConfig,
+                    field,
+                  )}
                 />
               </LiveFieldGroupWrapper>
             ));
@@ -91,7 +96,7 @@ export const LiveHeaderItem = ({ dbSection }: HeaderItemProps) => {
               {/* Row Index */}
               {matrix.map((_, rowIndex) => (
                 <div
-                  key={crypto.randomUUID()}
+                  key={matrix[rowIndex].map((field) => field.id).join("-")}
                   className="grid grid-cols-[auto_auto_auto] items-top w-full"
                 >
                   {/* Left Aligned */}

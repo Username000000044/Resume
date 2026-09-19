@@ -4,10 +4,18 @@ import type { fieldRenderRoleEnum } from "@resume/backend/src/db/schema.js";
 
 type FieldRole = (typeof fieldRenderRoleEnum.enumValues)[number];
 export const getFieldProperties = (
+	type: "field" | "bullet" | "title",
 	config: TemplateConfig,
 	field?: FieldType,
 ) => {
-	const fieldRole: FieldRole = field ? field.renderRole : "bullet";
+	let fieldRole: FieldRole;
+	if (type === "field") {
+		fieldRole = field?.renderRole ?? "body";
+	} else if (type === "bullet") {
+		fieldRole = "bullet";
+	} else {
+		fieldRole = "section_title";
+	}
 
 	const preset = PRESET_MAP[config.theme.typography.preset];
 
@@ -18,7 +26,7 @@ export const getFieldProperties = (
 
 	// Font
 	const fontVariant =
-		config.theme.typography.role_font_family[fieldRole] ?? "primary";
+		config.theme.typography.font_family[fieldRole] ?? "primary";
 
 	// Field Size
 	const fontSizeBase = config.theme.typography.font_size_base;

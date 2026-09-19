@@ -72,8 +72,6 @@ function Home() {
             <img src={writtenPaper} alt="" className="relative bottom-5"></img>
           </div>
           <div className="flex flex-col gap-4 mt-18 w-75">
-            {/* TODO: Make TemplateOverlay button a child of TemplateOverlay so it can be used in many locations with different button.*/}
-
             <TemplatesOverlay
               trigger={
                 <Button className="shadow-md cursor-pointer w-full" size="lg">
