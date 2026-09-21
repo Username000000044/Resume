@@ -3,7 +3,7 @@ import type { FieldType, TemplateConfig } from "#/types/Template";
 import type { fieldRenderRoleEnum } from "@resume/backend/src/db/schema.js";
 
 type FieldRole = (typeof fieldRenderRoleEnum.enumValues)[number];
-export const getFieldProperties = (
+export const getElementProperties = (
 	type: "field" | "bullet" | "title",
 	config: TemplateConfig,
 	field?: FieldType,

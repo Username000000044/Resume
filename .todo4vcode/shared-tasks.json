@@ -1,0 +1,66 @@
+{
+  "format": "todo4vcode-shared-tasks",
+  "version": "1.0.0",
+  "tasks": [
+    {
+      "id": "r7tzqdmo9",
+      "text": "Export",
+      "description": "Add ability to export resumes",
+      "priority": "Must",
+      "status": "Todo",
+      "completed": false,
+      "createdAt": 1789787682167,
+      "order": 2000
+    },
+    {
+      "id": "m0k3r9y3s",
+      "text": "Resposive",
+      "description": "Fix editor resposive layout for mobile",
+      "priority": "Should",
+      "status": "Todo",
+      "completed": false,
+      "createdAt": 1789787712883,
+      "order": 3000
+    },
+    {
+      "id": "a7vvff91w",
+      "text": "Spacing",
+      "description": "Allow users to drag bars to adjust spacing in config mode",
+      "priority": "Must",
+      "status": "Todo",
+      "completed": false,
+      "createdAt": 1789787807569,
+      "order": 1000
+    },
+    {
+      "id": "k607kg3z8",
+      "text": "Dividers",
+      "description": "Allow users to change divider color",
+      "priority": "Must",
+      "status": "Ready",
+      "completed": false,
+      "createdAt": 1789787834437,
+      "order": 4000
+    },
+    {
+      "id": "iql3joy74",
+      "text": "Resume Name",
+      "description": "Allow users to change name of resume",
+      "priority": "Must",
+      "status": "Todo",
+      "completed": false,
+      "createdAt": 1789788077421,
+      "order": 2500
+    },
+    {
+      "id": "rafeoaf3d",
+      "text": "Seperator",
+      "description": "Allow users to change group seperator",
+      "priority": "Must",
+      "status": "Todo",
+      "completed": false,
+      "createdAt": 1789924842721,
+      "order": 2750
+    }
+  ]
+}

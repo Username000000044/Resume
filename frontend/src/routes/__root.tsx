@@ -4,6 +4,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { queryClient, trpc } from "#/utils/trpc";
 import texturedPaper from "@/assets/textured-paper.webp";
 import "../styles.css";
+import { TooltipProvider } from "#/components/ui/tooltip";
 
 export const Route = createRootRoute({
   loader: async () => {
@@ -25,7 +26,9 @@ function RootComponent() {
           className="min-h-screen w-full bg-cover bg-fixed bg-no-repeat bg-top bg-[#ffffff]"
           style={{ backgroundImage: `url(${texturedPaper})` }}
         >
-          <Outlet />
+          <TooltipProvider>
+            <Outlet />
+          </TooltipProvider>
         </div>
 
         <ReactQueryDevtools initialIsOpen={false} />

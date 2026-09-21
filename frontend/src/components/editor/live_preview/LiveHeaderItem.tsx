@@ -4,7 +4,7 @@ import { DividerItem } from "./DividerItem";
 import { LiveFieldItem } from "./LiveFieldItem";
 import {
   constructLayoutMatrix,
-  getFieldProperties,
+  getElementProperties,
 } from "#/utils/live-preview";
 import { useResumeConfigStore } from "#/store/useResumeConfigStore";
 import { useShallow } from "zustand/react/shallow";
@@ -48,7 +48,7 @@ export const LiveHeaderItem = ({ dbSection }: HeaderItemProps) => {
                 <LiveFieldItem
                   key={field.id}
                   value={formatFieldValue(field)}
-                  properties={getFieldProperties(
+                  properties={getElementProperties(
                     "field",
                     config.templateConfig,
                     field,

@@ -5,7 +5,7 @@ import { LiveFieldItem } from "./LiveFieldItem";
 import type { FieldType, SectionType, TemplateType } from "#/types/Template";
 import {
   constructLayoutMatrix,
-  getFieldProperties,
+  getElementProperties,
 } from "#/utils/live-preview";
 import { cn } from "#/lib/utils";
 import { LiveFieldGroupWrapper } from "./LiveFieldGroupWrapper";
@@ -16,6 +16,8 @@ import { Button } from "#/components/ui/button";
 import { GripHorizontal } from "lucide-react";
 import { useResumeConfigStore } from "#/store/useResumeConfigStore";
 import type { fieldPositionEnum } from "@resume/backend/src/db/schema.js";
+import { useShallow } from "zustand/react/shallow";
+import { BarScrubberItem } from "./BarScrubberItem";
 
 interface SectionItemProps {
   templateData: TemplateType;
@@ -39,7 +41,13 @@ export const LiveSortableSectionItem = ({
   });
 
   const sections = useResumeStore((store) => store.sections);
-  const config = useResumeConfigStore((store) => store.config);
+  const { config, defaultConfig, liveMode } = useResumeConfigStore(
+    useShallow((store) => ({
+      config: store.config,
+      defaultConfig: store.defaultConfig,
+      liveMode: store.liveMode,
+    })),
+  );
 
   const numOfFilledSections = useMemo(() => {
     return templateData.sections
@@ -69,12 +77,22 @@ export const LiveSortableSectionItem = ({
   // Alignment
   const titleAlignment =
     ALIGNMENT_MAP[dbSection.default_config.alignment.title];
-
   return (
     <li
       ref={setElement}
       className="relative text-(length:--font-size-base) text-wrap"
     >
+      {/* Section Gap Adjuster */}
+      {liveMode === "config" && (
+        <div className="absolute -top-[calc(var(--section-gap)/2)] -translate-y-1/2 w-full">
+          <BarScrubberItem
+            defaultValue={defaultConfig.template.spacing.section_gap}
+            path={["templateConfig", "spacing", "section_gap"]}
+            config={{ max: 30, min: 0, step: 1 }}
+          />
+        </div>
+      )}
+
       {/* Section Actions */}
       <div className="absolute top-1/2 -translate-y-1/2 -right-[calc(var(--page-margin)+50px)]">
         <div className="*:text-muted-foreground *:cursor-pointer *:hover:bg-transparent">
@@ -88,7 +106,6 @@ export const LiveSortableSectionItem = ({
           </Button>
         </div>
       </div>
-
       {/* Section Content */}
       <section
         className={cn({
@@ -98,7 +115,7 @@ export const LiveSortableSectionItem = ({
         {/* Section Title */}
         <LiveFieldItem
           value={dbSection.title}
-          properties={getFieldProperties("title", config.templateConfig)}
+          properties={getElementProperties("title", config.templateConfig)}
         />
 
         {config.templateConfig.decorations.section_divider && (
@@ -107,7 +124,7 @@ export const LiveSortableSectionItem = ({
 
         {/* Sub Sections */}
         <div
-          className={cn("flex flex-col", {
+          className={cn("relative flex flex-col", {
             "gap-[var(--instance-gap)]":
               config.templateConfig.spacing.instance_gap,
           })}
@@ -131,7 +148,7 @@ export const LiveSortableSectionItem = ({
                 >
                   <LiveFieldItem
                     value={formatFieldValue(field)}
-                    properties={getFieldProperties(
+                    properties={getElementProperties(
                       "field",
                       config.templateConfig,
                       field,
@@ -187,27 +204,46 @@ export const LiveSortableSectionItem = ({
               return value;
             };
 
+            // Instance Adjuster Conditions
+            const sectionHasManyInstances =
+              sections[dbSection.id].subSections.length > 1;
+            const isNotFirstInstance = liveSubSection.order !== 0;
+
             return (
-              <div key={liveSubSection.id}>
+              <div className="relative" key={liveSubSection.id}>
+                {sectionHasManyInstances &&
+                  isNotFirstInstance &&
+                  liveMode === "config" && (
+                    <div className="absolute -top-[calc(var(--instance-gap)/2)] -translate-y-1/2 w-full">
+                      <BarScrubberItem
+                        defaultValue={
+                          defaultConfig.template.spacing.instance_gap
+                        }
+                        path={["templateConfig", "spacing", "instance_gap"]}
+                        config={{ max: 30, min: 0, step: 1 }}
+                      />
+                    </div>
+                  )}
                 {/* Row Index */}
                 {matrix.map((_, rowIndex) => (
                   <div
                     key={matrix[rowIndex].map((field) => field.id).join("-")}
-                    className="grid grid-cols-[auto_auto_auto] items-top w-full"
                   >
-                    {/* Left Aligned */}
-                    <div className="flex justify-start">
-                      {alignedRowItem(rowIndex, "left")}
-                    </div>
+                    <div className="grid grid-cols-[auto_auto_auto] items-top w-full">
+                      {/* Left Aligned */}
+                      <div className="flex justify-start">
+                        {alignedRowItem(rowIndex, "left")}
+                      </div>
 
-                    {/* Center Aligned */}
-                    <div className="flex justify-center">
-                      {alignedRowItem(rowIndex, "center")}
-                    </div>
+                      {/* Center Aligned */}
+                      <div className="flex justify-center">
+                        {alignedRowItem(rowIndex, "center")}
+                      </div>
 
-                    {/* Right Aligned */}
-                    <div className="flex justify-end">
-                      {alignedRowItem(rowIndex, "right")}
+                      {/* Right Aligned */}
+                      <div className="flex justify-end">
+                        {alignedRowItem(rowIndex, "right")}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -219,7 +255,7 @@ export const LiveSortableSectionItem = ({
                       <LiveFieldItem
                         key={bullet.id}
                         value={bullet.text}
-                        properties={getFieldProperties(
+                        properties={getElementProperties(
                           "bullet",
                           config.templateConfig,
                         )}
@@ -231,7 +267,7 @@ export const LiveSortableSectionItem = ({
                           <LiveFieldItem
                             key={subBullet.id}
                             value={subBullet.text}
-                            properties={getFieldProperties(
+                            properties={getElementProperties(
                               "bullet",
                               config.templateConfig,
                             )}

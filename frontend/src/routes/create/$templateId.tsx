@@ -217,7 +217,7 @@ function RouteComponent() {
         <GlobalFontLoader />
 
         {/* Editor Column */}
-        <div className=" flex flex-col w-full px-12 lg:px-0 print:hidden">
+        <div className=" flex flex-col w-full lg:px-0 print:hidden">
           <h1 className="mx-auto min-[93rem]:ml-0 text-4xl pb-8 text-primary font-bold tracking-wide">
             {"Untitled Resume"}
           </h1>

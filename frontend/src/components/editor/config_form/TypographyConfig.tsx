@@ -79,7 +79,6 @@ export const TypographyConfig = () => {
 
   return (
     <>
-      <p className="col-span-2 text-xs font-extralight">TYPOGRAPHY</p>
       <Field className="gap-0">
         <FieldLabel className="font-normal">Primary Font</FieldLabel>
         <Select

@@ -9,7 +9,7 @@ import { LivePaper } from "../../Paper";
 import { LiveSortableSectionItem } from "./LiveSortableSectionItem";
 import type { SectionType, TemplateType } from "#/types/Template";
 import { LiveHeaderItem } from "./LiveHeaderItem";
-import type { CSSProperties } from "react";
+import { Fragment, type CSSProperties } from "react";
 import { useResumeConfigStore } from "#/store/useResumeConfigStore";
 import { DragDropProvider } from "@dnd-kit/react";
 import { useShallow } from "zustand/react/shallow";
@@ -199,6 +199,11 @@ export const LivePreview = ({ templateData }: LivePreviewProps) => {
       className="relative flex flex-col text-(length:--font-size-base) !p-[var(--page-margin)]"
       style={dynamicPreviewStyles}
     >
+      {/* Page Margin Adjuster */}
+      {liveMode === "config" && (
+        <span className="absolute top-4 right-4 cursor-nesw-resize">_____</span>
+      )}
+
       {/* Header */}
       <div className="pb-[var(--section-gap)]">
         {templateData.sections
@@ -234,10 +239,10 @@ export const LivePreview = ({ templateData }: LivePreviewProps) => {
             .sort((a, b) => sections[a.id].order - sections[b.id].order)
             .map((dbSection, dbSectionIndex) => (
               <LiveSortableSectionItem
+                key={dbSection.id}
                 templateData={templateData}
                 dbSection={dbSection}
                 dbSectionIndex={dbSectionIndex}
-                key={dbSection.id}
               />
             ))}
         </ul>
