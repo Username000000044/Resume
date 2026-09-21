@@ -47,6 +47,7 @@ export const BarScrubberItem = ({
       step={step}
       min={min}
       max={max}
+      className={className}
     />
   );
 };

@@ -1,15 +1,5 @@
+import { cn } from "#/lib/utils";
 import * as React from "react";
-import { cn } from "@/lib/utils";
-import { Input } from "@/components/ui/input";
-import { Badge, badgeVariants } from "./badge";
-import type { VariantProps } from "class-variance-authority";
-import {
-  MoveHorizontal,
-  MoveVertical,
-  SlidersHorizontal,
-  SlidersVertical,
-} from "lucide-react";
-
 export interface BarScrubberProps extends Omit<
   React.HTMLAttributes<HTMLInputElement>,
   "onChange"
@@ -163,19 +153,21 @@ export const BarScrubber = React.forwardRef<HTMLInputElement, BarScrubberProps>(
 
     return (
       <div
-        className={cn(
-          "flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-200 bg-red-200",
-          className,
-        )}
+        className="flex items-center justify-center h-[var(--bar-height)] bg-destructive/12 opacity-0 hover:opacity-100 transition-color duration-200"
+        style={
+          {
+            "--bar-height": `${value}pt`,
+          } as React.CSSProperties
+        }
       >
-        <MoveVertical className="size-4 text-destructive" strokeWidth={1.7} />
         <input
           ref={ref}
           type="number"
           /**
            * Hide the default spinners in Chrome/Edge/Safari
            */
-          className={`
+          className={cn(
+            `
              hover:cursor-row-resize
              [appearance:textfield]
              [&::-webkit-inner-spin-button]:appearance-none
@@ -186,13 +178,13 @@ export const BarScrubber = React.forwardRef<HTMLInputElement, BarScrubberProps>(
 
              m-0
              p-0
-             h-6
-             w-4
+             h-5
+             w-full
              leading-none
-             text-center
-
-             text-destructive
-             `}
+             text-center                 
+             `,
+            className,
+          )}
           step={step}
           value={internalValue}
           onChange={handleInputChange}
