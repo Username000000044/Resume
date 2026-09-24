@@ -9,7 +9,11 @@ import {
 } from "#/components/ui/select";
 import { Switch } from "#/components/ui/switch";
 import { useResumeConfigStore } from "#/store/useResumeConfigStore";
-import { BULLET_STYLE, DIVIDER_STYLE } from "@resume/backend/src/db/schema.js";
+import {
+  BULLET_STYLE,
+  DIVIDER_STYLE,
+  separatorStyleEnum,
+} from "@resume/backend/src/db/schema.js";
 import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Label } from "#/components/ui/label";
@@ -26,6 +30,11 @@ const dividerItems: Item[] = DIVIDER_STYLE.map((style) => ({
 }));
 
 const bulletItems: Item[] = BULLET_STYLE.map((style) => ({
+  label: style.replace(/\b\w/g, (char) => char.toUpperCase()),
+  value: style,
+}));
+
+const seperatorItems: Item[] = separatorStyleEnum.enumValues.map((style) => ({
   label: style.replace(/\b\w/g, (char) => char.toUpperCase()),
   value: style,
 }));
@@ -54,6 +63,9 @@ export const DecorationsConfig = () => {
   const [isSectionDividerVisible, setIsSectionDividerVisible] = useState(
     config.templateConfig.decorations.section_divider,
   );
+  // const [selectedSeperator, setSelectedSeperator] = useState(
+  //   config.
+  // );
 
   const defualtBulletIndentation =
     defaultConfig.template.spacing.bullet_indentation;
@@ -198,6 +210,38 @@ export const DecorationsConfig = () => {
           defaultValue={defualtBulletIndentation}
         />
       </Field>
+
+      {/* Group Config */}
+      {/* <p className="col-span-2 text-xs font-extralight mt-2">GROUP</p>
+      <Field className="gap-0">
+        <FieldLabel className="font-normal">Group Seperator Style</FieldLabel>
+        <Select
+          items={seperatorItems}
+          value={selectedSeperator}
+          onValueChange={(value) => {
+            if (!value) return;
+
+            setSlectedBulletStyle(value);
+            updateProperty(
+              ["templateConfig", "decorations", "bullet_style"],
+              value,
+            );
+          }}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {bulletItems.map((item) => (
+                <SelectItem key={item.value} value={item.value}>
+                  {item.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      </Field> */}
     </>
   );
 };
