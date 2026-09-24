@@ -12,7 +12,6 @@ import { ConfigCardItem } from "./ConfigCardItem";
 import { Card, CardContent } from "#/components/ui/card";
 import { Avatar, AvatarFallback, AvatarGroup } from "#/components/ui/avatar";
 import { Field, FieldLabel } from "#/components/ui/field";
-import { NumberScrubberItem } from "./NumberScrubberItem";
 import { Input } from "#/components/ui/input";
 
 type FieldRole = FieldType["renderRole"];

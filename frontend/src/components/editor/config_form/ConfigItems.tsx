@@ -28,12 +28,12 @@ interface ConfigItem {
 }
 
 const configItems: ConfigItem[] = [
-  // {
-  //   id: "global_spacing",
-  //   name: "Global Spacing",
-  //   component: SpacingConfig,
-  //   order: 1,
-  // },
+  {
+    id: "global_spacing",
+    name: "Global Spacing",
+    component: SpacingConfig,
+    order: 1,
+  },
   {
     id: "typography",
     name: "Typography",

@@ -1,6 +1,6 @@
 import { Field, FieldLabel } from "#/components/ui/field";
 import { useResumeConfigStore } from "#/store/useResumeConfigStore";
-import { NumberScrubberItem } from "./NumberScrubberItem";
+import { NumberScrubberInputItem } from "./NumberScrubberInputItem";
 
 export const SpacingConfig = () => {
   const defaultPageMargin = useResumeConfigStore(
@@ -10,7 +10,9 @@ export const SpacingConfig = () => {
   return (
     <Field className="col-span-full gap-0">
       <FieldLabel className="font-normal">Page Margin</FieldLabel>
-      <NumberScrubberItem
+      <NumberScrubberInputItem
+        hasIcon={true}
+        iconOrientation="horizontal"
         path={["templateConfig", "spacing", "page_margin"]}
         config={{ step: 0.01, min: 0, max: 2 }}
         defaultValue={defaultPageMargin}

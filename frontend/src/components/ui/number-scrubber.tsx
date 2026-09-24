@@ -3,25 +3,20 @@ import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Badge, badgeVariants } from "./badge";
 import type { VariantProps } from "class-variance-authority";
-import {
-  MoveHorizontal,
-  MoveVertical,
-  SlidersHorizontal,
-  SlidersVertical,
-} from "lucide-react";
+import { MoveHorizontal, MoveVertical } from "lucide-react";
 
-export interface NumericScrubberProps extends Omit<
+interface BaseNumericScrubberProps extends Omit<
   React.HTMLAttributes<HTMLInputElement>,
   "onChange"
 > {
   /**
-   * Icon type
+   * Scrubber style | styled: shadcn | default: HTML default
    */
-  orientation?: "horizontal" | "vertical";
+  variant?: "styled" | "default";
   /**
-   * Badge variant
+   * Direction mouse scroll
    */
-  variant?: VariantProps<typeof badgeVariants>["variant"];
+  scrollDirection: "vertical" | "horizontal";
   /**
    * Current numeric value
    */
@@ -58,148 +53,191 @@ export interface NumericScrubberProps extends Omit<
   scrubSensitivity?: number;
 }
 
+// Has Icon
+export type IconOrientation = "horizontal" | "vertical";
+interface HasIconProps extends BaseNumericScrubberProps {
+  hasIcon: true;
+  iconOrientation: IconOrientation;
+}
+
+// No Icon
+interface NoIconProps extends BaseNumericScrubberProps {
+  hasIcon?: false;
+  iconOrientation?: never;
+}
+
+export type NumericScrubberProps = NoIconProps | HasIconProps;
+
 export const NumericScrubber = React.forwardRef<
   HTMLInputElement,
   NumericScrubberProps
->(
-  (
-    {
-      orientation = "horizontal",
+>((props, ref) => {
+  const {
+    value,
+    onChange,
+    min = 0,
+    max = 100,
+    step = 1,
+    className,
+    scrubSensitivity = 0.5,
+    hasIcon,
+    scrollDirection,
+    variant = "styled",
+    ...rest
+  } = props;
+  const orientation: IconOrientation = hasIcon
+    ? props.iconOrientation
+    : "horizontal";
+
+  // Use a ref for values that change constantly to avoid breaking closure scopes
+  const stateRef = React.useRef({
+    value,
+    min,
+    max,
+    step,
+    scrubSensitivity,
+    scrollDirection,
+  });
+
+  // Keep the ref up to date on every render without triggering re-renders
+  React.useEffect(() => {
+    stateRef.current = {
       value,
-      onChange,
-      min = 0,
-      max = 100,
-      step = 1,
-      className,
-      scrubSensitivity = 0.5,
-      ...rest
-    },
-    ref,
-  ) => {
-    // Internal state
-    const [internalValue, setInternalValue] = React.useState<number>(value);
+      min,
+      max,
+      step,
+      scrubSensitivity,
+      scrollDirection,
+    };
+  }, [value, min, max, step, scrubSensitivity, scrollDirection]);
 
-    // Refs to track dragging
-    const isDraggingRef = React.useRef(false);
-    const initialXRef = React.useRef(0);
-    const initialValueRef = React.useRef(value);
+  // Determine how many decimals to keep based on `step`
+  const decimals = React.useMemo(() => {
+    if (!Number.isFinite(step)) return 0;
+    const stepString = step.toString();
+    const decimalPart = stepString.split(".")[1];
+    return decimalPart ? decimalPart.length : 0;
+  }, [step]);
 
-    // Determine how many decimals to keep based on `step`
-    const decimals = React.useMemo(() => {
-      if (!Number.isFinite(step)) return 0;
-      const stepString = step.toString();
-      const decimalPart = stepString.split(".")[1];
-      return decimalPart ? decimalPart.length : 0;
-    }, [step]);
-
-    /**
-     * Clamp and quantize the given number
-     */
-    function clampAndQuantize(n: number) {
-      // First quantize to nearest step
-      const quantized = Math.round(n / step) * step;
-      // Then clamp between min and max
-      const clamped = Math.max(min, Math.min(quantized, max));
+  /** Clamp and quantize helper */
+  const clampAndQuantize = React.useCallback(
+    (
+      n: number,
+      currentStep: number,
+      currentMin: number,
+      currentMax: number,
+    ) => {
+      const quantized = Math.round(n / currentStep) * currentStep;
+      const clamped = Math.max(currentMin, Math.min(quantized, currentMax));
       return parseFloat(clamped.toFixed(decimals));
-    }
+    },
+    [decimals],
+  );
 
-    /**
-     * On pointer down: start dragging
-     */
-    function handlePointerDown(e: React.PointerEvent) {
-      // Only left-click
-      if (e.button !== 0) return;
+  /** On pointer down: start dragging */
+  function handlePointerDown(e: React.PointerEvent) {
+    if (e.button !== 0) return; // Only left-click
 
-      isDraggingRef.current = true;
-      initialXRef.current = e.clientX;
-      initialValueRef.current = internalValue;
+    const { scrollDirection: dir, value: startVal } = stateRef.current;
+    const initialPos = dir === "horizontal" ? e.clientX : e.clientY;
 
-      document.addEventListener("pointermove", handlePointerMove);
-      document.addEventListener("pointerup", handlePointerUp);
-    }
+    e.currentTarget.setPointerCapture(e.pointerId);
 
-    /**
-     * On pointer move: compute distance from initial pointer down
-     * and update value accordingly
-     */
-    function handlePointerMove(e: PointerEvent) {
-      if (!isDraggingRef.current) return;
+    const handlePointerMove = (moveEvent: PointerEvent) => {
+      const {
+        step: s,
+        min: mn,
+        max: mx,
+        scrubSensitivity: sens,
+        scrollDirection: currentDir,
+      } = stateRef.current;
 
-      const deltaX = e.clientX - initialXRef.current;
-      // Apply sensitivity factor to make scrubbing slower
-      let newValue = initialValueRef.current + deltaX * step * scrubSensitivity;
-      newValue = clampAndQuantize(newValue);
+      let newValue: number;
+      if (currentDir === "horizontal") {
+        const deltaX = moveEvent.clientX - initialPos;
+        newValue = startVal + deltaX * s * sens;
+      } else {
+        const deltaY = initialPos - moveEvent.clientY; // Up is positive
+        newValue = startVal + deltaY * s * sens;
+      }
 
-      setInternalValue(newValue);
-      onChange(newValue);
-    }
+      onChange(clampAndQuantize(newValue, s, mn, mx));
+    };
 
-    /**
-     * On pointer up: stop dragging
-     */
-    function handlePointerUp() {
-      isDraggingRef.current = false;
+    const handlePointerUp = (upEvent: PointerEvent) => {
+      // Clean up listeners from document safely
       document.removeEventListener("pointermove", handlePointerMove);
       document.removeEventListener("pointerup", handlePointerUp);
+    };
+
+    document.addEventListener("pointermove", handlePointerMove);
+    document.addEventListener("pointerup", handlePointerUp);
+  }
+
+  /** Handlers for manual text inputs */
+  function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const inputVal = e.target.value;
+    if (inputVal === "") {
+      onChange(min);
+      return;
     }
 
-    /**
-     * When user types in the input
-     */
-    function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
-      const inputVal = e.target.value;
-      if (inputVal === "") {
-        setInternalValue(min);
-        onChange(min);
-        return;
-      }
-
-      const parsed = parseFloat(inputVal);
-      if (Number.isNaN(parsed)) {
-        setInternalValue(min);
-        onChange(min);
-        return;
-      }
-
-      const newValue = clampAndQuantize(parsed);
-      setInternalValue(newValue);
-      onChange(newValue);
+    const parsed = parseFloat(inputVal);
+    if (Number.isNaN(parsed)) {
+      onChange(min);
+      return;
     }
 
-    /**
-     * Sync internalValue with external `value` if it changes
-     */
-    React.useEffect(() => {
-      setInternalValue(value);
-    }, [value]);
+    onChange(clampAndQuantize(parsed, step, min, max));
+  }
 
-    return (
-      <div className={cn("relative group w-fit")}>
+  // Choose styling depending on scroll orientation
+  const cursorClass =
+    scrollDirection === "horizontal"
+      ? "hover:cursor-col-resize"
+      : "hover:cursor-row-resize";
+
+  const iconCursorClass =
+    orientation === "horizontal" ? "cursor-ew-resize" : "cursor-ns-resize";
+
+  const sharedClasses = cn(
+    "[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none pr-8 active:cursor-none",
+    cursorClass,
+    className,
+  );
+
+  return (
+    <div className="relative group w-full">
+      {variant === "styled" ? (
         <Input
           ref={ref}
           type="number"
-          /**
-           * Hide the default spinners in Chrome/Edge/Safari
-           */
-          className={cn(
-            `[appearance:textfield]
-             [&::-webkit-inner-spin-button]:appearance-none
-             [&::-webkit-outer-spin-button]:appearance-none
-             pr-0
-             hover:cursor-ew-resize
-             active:cursor-none
-             `,
-            className,
-          )}
+          className={sharedClasses}
           step={step}
-          value={internalValue}
+          value={value}
           onChange={handleInputChange}
           onPointerDown={handlePointerDown}
           {...rest}
         />
+      ) : (
+        <input
+          ref={ref}
+          type="number"
+          className={sharedClasses}
+          step={step}
+          value={value}
+          onChange={handleInputChange}
+          onPointerDown={handlePointerDown}
+          {...rest}
+        />
+      )}
 
+      {hasIcon && (
         <div
-          className="absolute inset-y-0 right-0 flex items-center px-4 text-gray-400 cursor-ew-resize select-none"
+          className={cn(
+            "absolute inset-y-0 right-0 flex items-center px-2 text-gray-400 select-none",
+            iconCursorClass,
+          )}
           onPointerDown={handlePointerDown}
         >
           {orientation === "horizontal" ? (
@@ -214,9 +252,9 @@ export const NumericScrubber = React.forwardRef<
             />
           )}
         </div>
-      </div>
-    );
-  },
-);
+      )}
+    </div>
+  );
+});
 
 NumericScrubber.displayName = "NumericScrubber";

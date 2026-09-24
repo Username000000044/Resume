@@ -12,7 +12,7 @@ import { FONT_VARIANTS } from "@resume/backend/src/db/schema.js";
 import { useState, type Dispatch, type SetStateAction } from "react";
 import type { FieldType } from "#/types/Template";
 import { useShallow } from "zustand/react/shallow";
-import { NumberScrubberItem } from "./NumberScrubberItem";
+import { NumberScrubberInputItem } from "./NumberScrubberInputItem";
 
 interface Item {
   label: string;
@@ -83,7 +83,9 @@ export const FieldConfig = ({ fieldRole }: FieldConfigProps) => {
       </Field>
       <Field className="gap-0">
         <FieldLabel className="font-normal">Font Weight</FieldLabel>
-        <NumberScrubberItem
+        <NumberScrubberInputItem
+          hasIcon={true}
+          iconOrientation="horizontal"
           path={[
             "templateConfig",
             "theme",

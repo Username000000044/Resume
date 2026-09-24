@@ -27,8 +27,8 @@
       "text": "Spacing",
       "description": "Allow users to drag bars to adjust spacing in config mode",
       "priority": "Must",
-      "status": "Todo",
-      "completed": false,
+      "status": "Done",
+      "completed": true,
       "createdAt": 1789787807569,
       "order": 1000
     },

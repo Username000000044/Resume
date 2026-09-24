@@ -13,9 +13,6 @@ import { Fragment, type CSSProperties } from "react";
 import { useResumeConfigStore } from "#/store/useResumeConfigStore";
 import { DragDropProvider } from "@dnd-kit/react";
 import { useShallow } from "zustand/react/shallow";
-import type { FontVariantConfig } from "#/hooks/useDynamicFontStack";
-import { FONT_REGISTRY } from "#/utils/fontRegistery";
-import { BarScrubberItem } from "./BarScrubberItem";
 
 interface LivePreviewProps {
   templateData: TemplateType;
@@ -201,18 +198,6 @@ export const LivePreview = ({ templateData }: LivePreviewProps) => {
       className="relative flex flex-col text-(length:--font-size-base) !p-[var(--page-margin)]"
       style={dynamicPreviewStyles}
     >
-      {/* Page Margin Adjuster */}
-      {liveMode === "config" && (
-        <div className="absolute top-2 right-0 w-full">
-          <BarScrubberItem
-            className="text-right"
-            defaultValue={defaultConfig.template.spacing.page_margin}
-            path={["templateConfig", "spacing", "page_margin"]}
-            config={{ max: 2, min: 0, step: 0.1 }}
-          />
-        </div>
-      )}
-
       {/* Header */}
       <div className="pb-[var(--section-gap)]">
         {templateData.sections

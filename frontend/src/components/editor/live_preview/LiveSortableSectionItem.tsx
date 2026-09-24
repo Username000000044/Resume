@@ -249,7 +249,7 @@ export const LiveSortableSectionItem = ({
                 ))}
 
                 {/* Section Bullets */}
-                <ul className="list-[var(--bullet-style)] text-[var(--bullet-color)] font-[var(--bullet-weight)] pl-[var(--bullet-indentation)] list-inside">
+                <ul className="relative list-[var(--bullet-style)] text-[var(--bullet-color)] font-[var(--bullet-weight)] pl-[var(--bullet-indentation)] list-inside">
                   {liveSubSection.bullets.map((bullet) => (
                     <span key={bullet.id}>
                       <LiveFieldItem

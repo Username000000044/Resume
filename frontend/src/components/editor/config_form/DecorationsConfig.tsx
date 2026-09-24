@@ -12,8 +12,8 @@ import { useResumeConfigStore } from "#/store/useResumeConfigStore";
 import { BULLET_STYLE, DIVIDER_STYLE } from "@resume/backend/src/db/schema.js";
 import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
-import { NumberScrubberItem } from "./NumberScrubberItem";
 import { Label } from "#/components/ui/label";
+import { NumberScrubberInputItem } from "./NumberScrubberInputItem";
 
 interface Item {
   label: string;
@@ -190,7 +190,9 @@ export const DecorationsConfig = () => {
 
       <Field className="col-span-2 gap-0">
         <FieldLabel className="font-normal">Indentation</FieldLabel>
-        <NumberScrubberItem
+        <NumberScrubberInputItem
+          hasIcon={true}
+          iconOrientation="horizontal"
           path={["templateConfig", "spacing", "bullet_indentation"]}
           config={{ step: 1, min: 0, max: 50 }}
           defaultValue={defualtBulletIndentation}

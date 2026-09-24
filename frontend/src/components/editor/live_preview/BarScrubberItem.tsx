@@ -3,7 +3,8 @@ import {
   useResumeConfigStore,
   type ValueType,
 } from "#/store/useResumeConfigStore";
-import { BarScrubber } from "#/components/ui/bar-scrubber";
+import { NumericScrubber } from "#/components/ui/number-scrubber";
+import { cn } from "#/lib/utils";
 
 interface ScrubberInputProps {
   defaultValue: number;
@@ -40,14 +41,28 @@ export const BarScrubberItem = ({
   };
 
   return (
-    <BarScrubber
-      value={value ?? 0}
-      onChange={handleChange}
-      onDoubleClick={handleReset}
-      step={step}
-      min={min}
-      max={max}
-      className={className}
-    />
+    <div
+      className="flex items-center justify-center h-[var(--bar-height)] bg-destructive/12 opacity-0 hover:opacity-100 transition-color duration-200"
+      style={
+        {
+          "--bar-height": `${value}pt`,
+        } as React.CSSProperties
+      }
+    >
+      <NumericScrubber
+        variant="default"
+        scrollDirection="vertical"
+        value={value ?? 0}
+        onChange={handleChange}
+        onDoubleClick={handleReset}
+        step={step}
+        min={min}
+        max={max}
+        className={cn(
+          "m-0 p-0 h-5 w-full leading-none text-center focus:outline-none",
+          className,
+        )}
+      />
+    </div>
   );
 };
