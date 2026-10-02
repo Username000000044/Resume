@@ -81,12 +81,13 @@ export const NumericScrubber = React.forwardRef<
     className,
     scrubSensitivity = 0.5,
     hasIcon,
+    iconOrientation,
     scrollDirection,
     variant = "styled",
     ...rest
   } = props;
   const orientation: IconOrientation = hasIcon
-    ? props.iconOrientation
+    ? iconOrientation
     : "horizontal";
 
   // Use a ref for values that change constantly to avoid breaking closure scopes
@@ -206,10 +207,11 @@ export const NumericScrubber = React.forwardRef<
     className,
   );
 
+  const InputComponent = variant === "styled" ? Input : "input";
+
   return (
     <div className="relative group w-full">
-      {variant === "styled" ? (
-        <Input
+      <InputComponent
           ref={ref}
           type="number"
           className={sharedClasses}
@@ -219,18 +221,6 @@ export const NumericScrubber = React.forwardRef<
           onPointerDown={handlePointerDown}
           {...rest}
         />
-      ) : (
-        <input
-          ref={ref}
-          type="number"
-          className={sharedClasses}
-          step={step}
-          value={value}
-          onChange={handleInputChange}
-          onPointerDown={handlePointerDown}
-          {...rest}
-        />
-      )}
 
       {hasIcon && (
         <div

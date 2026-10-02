@@ -4,41 +4,31 @@ import {
   PopoverTrigger,
 } from "#/components/ui/popover";
 import { useResumeConfigStore } from "#/store/useResumeConfigStore";
-import type { FieldType } from "#/types/Template";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { HexColorInput, HexColorPicker } from "react-colorful";
-import { useShallow } from "zustand/react/shallow";
-import { ConfigCardItem } from "./ConfigCardItem";
-import { Card, CardContent } from "#/components/ui/card";
-import { Avatar, AvatarFallback, AvatarGroup } from "#/components/ui/avatar";
-import { Field, FieldLabel } from "#/components/ui/field";
-import { Input } from "#/components/ui/input";
+import { Avatar, AvatarGroup } from "#/components/ui/avatar";
+import { Field } from "#/components/ui/field";
+import { cn } from "#/lib/utils";
 
-type FieldRole = FieldType["renderRole"];
-interface ColorPickerProps {
-  fieldRole: FieldRole;
+export interface ColorPickerProps {
+  inputColor: string;
+  defaultColor: string;
+  handleColorChange: (newColor: string) => void;
+  className?: string
 }
 
-export const FieldColorPicker = ({ fieldRole }: ColorPickerProps) => {
-  const { colors, defaultColors, updateProperty } = useResumeConfigStore(
-    useShallow((store) => ({
-      colors: store.config.templateConfig.theme.colors,
-      defaultColors: store.defaultConfig.template.theme.colors,
-      updateProperty: store.updateProperty,
-    })),
-  );
+export const SquareColorPicker = ({ className, inputColor, defaultColor, handleColorChange }: ColorPickerProps) => {
+  const colors = useResumeConfigStore((store) => store.config.templateConfig.theme.colors,);
 
   const uninqueColors = useMemo(() => {
     return [...new Set(Object.values(colors))];
   }, [colors]);
 
-  const fieldColor = colors[fieldRole];
-  const defaultColor = defaultColors[fieldRole];
-  const [color, setColor] = useState(fieldColor);
+  const [color, setColor] = useState(inputColor);
 
-  const handleColorChange = (newColor: string) => {
+  const handleLocalColorChange = (newColor: string) => {
+    handleColorChange(newColor);
     setColor(newColor);
-    updateProperty(["templateConfig", "theme", "colors", fieldRole], newColor);
   };
 
   return (
@@ -47,10 +37,10 @@ export const FieldColorPicker = ({ fieldRole }: ColorPickerProps) => {
         render={
           <button
             type="button"
-            className="size-8 rounded-md ring-3 ring-input/20 shadow-md cursor-pointer"
+            className={cn("size-8 rounded-md ring-3 ring-input/20 shadow-md cursor-pointer", className)}
             style={
               {
-                background: fieldColor,
+                background: inputColor,
               } as React.CSSProperties
             }
           />
@@ -60,14 +50,14 @@ export const FieldColorPicker = ({ fieldRole }: ColorPickerProps) => {
         <HexColorPicker
           color={color}
           onChange={setColor}
-          onChangeEnd={handleColorChange}
+          onChangeEnd={handleLocalColorChange}
         />
         <Field className="gap-0">
           <HexColorInput
             prefixed={true}
             color={color}
-            onChange={handleColorChange}
-            onDoubleClick={() => handleColorChange(defaultColor)}
+            onChange={handleLocalColorChange}
+            onDoubleClick={() => handleLocalColorChange(defaultColor)}
             className="h-8 w-full min-w-0 rounded-2xl border border-transparent bg-input/50 px-2.5 py-1 text-base transition-[color,box-shadow] duration-200 outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40"
           />
         </Field>
@@ -77,7 +67,7 @@ export const FieldColorPicker = ({ fieldRole }: ColorPickerProps) => {
             <Avatar
               key={color}
               className="after:border-0 bg-[var(--avatar-color)]"
-              onClick={() => handleColorChange(color)}
+              onClick={() => handleLocalColorChange(color)}
               style={
                 {
                   "--avatar-color": color,

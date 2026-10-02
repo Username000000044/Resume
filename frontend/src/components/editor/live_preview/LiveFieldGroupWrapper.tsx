@@ -1,7 +1,6 @@
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "#/components/ui/tooltip";
 import { useResumeConfigStore } from "#/store/useResumeConfigStore";
@@ -13,6 +12,7 @@ interface LiveGroupProps {
   field: FieldType;
   value: string;
   children: ReactNode;
+  showSeparator: boolean;
 }
 
 const seperatorMap = {
@@ -21,43 +21,42 @@ const seperatorMap = {
   pipe: "|",
   comma: ",",
   slash: "/",
-  none: "",
+  none: " ",
 };
 
 export const LiveFieldGroupWrapper = ({
   field,
   value,
   children,
+  showSeparator
 }: LiveGroupProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { groupGap, liveMode } = useResumeConfigStore(
+
+  const { separator, groupGap, liveMode } = useResumeConfigStore(
     useShallow((store) => ({
+      separator: store.config.templateConfig.decorations.group_separator,
       liveMode: store.liveMode,
       groupGap: store.config.templateConfig.spacing.group_gap,
     })),
   );
 
-  if (!value) return;
+  if (!value || value.trim() === "") return null;
 
-  const group = field.group;
-  if (!group || group.separator === "none") return <>{children}</>;
-
-  const isNotLastFieldInGroup =
-    group.fields.length - 1 !== (field.alignment?.itemOrder ?? 0);
+  if (!field.group) return <>{children}</>;
 
   return (
     <span key={field.id} className="inline-flex items-center">
       {children}
 
       {/* View Mode */}
-      {liveMode === "view" && isNotLastFieldInGroup && (
+      {liveMode === "view" && showSeparator && (
         <span className="px-[var(--group-gap)] text-muted-foreground hover:text-foreground transition-colors">
-          {seperatorMap[group.separator]}
+          {seperatorMap[separator]}
         </span>
       )}
 
       {/* Live Mode */}
-      {liveMode === "config" && isNotLastFieldInGroup && (
+      {liveMode === "config" && showSeparator && (
         <Tooltip
           open={isOpen}
           onOpenChange={(nextOpen, event) => {
@@ -84,7 +83,7 @@ export const LiveFieldGroupWrapper = ({
                 }
               }}
             >
-              {seperatorMap[group.separator]}
+              {seperatorMap[separator]}
             </span>
           </TooltipTrigger>
 

@@ -28,25 +28,34 @@ export const LiveHeaderItem = ({ dbSection }: HeaderItemProps) => {
     <section className={`text-(length:--font-size-base) text-wrap`}>
       {/* Sub Sections */}
       <div className="flex flex-col gap-[var(--instance-gap)]">
-        {sections[dbSection.id].subSections.map((liveSubSection) => {
+        {sections[dbSection.id].subSections.map((subSection) => {
           const matrix = constructLayoutMatrix(dbSection.fields);
 
           const alignedRowItem = (
             rowIndex: number,
             alignment: (typeof fieldPositionEnum.enumValues)[number],
           ) => {
-            const items = matrix[rowIndex].filter(
+            const rawItems = matrix[rowIndex].filter(
               (field) => field.alignment?.position === alignment,
             );
 
-            return items.map((field) => (
-              <LiveFieldGroupWrapper
+            const visibleItems = rawItems.filter((field) => {
+              const value = subSection.fields[field.id];
+              return value && value.trim() !== "";
+            })
+
+            return visibleItems.map((field, index) => {
+              const value = subSection.fields[field.id];
+
+              const showSeparator = index < visibleItems.length - 1;
+
+              return <LiveFieldGroupWrapper
                 key={field.id}
                 field={field}
-                value={liveSubSection.fields[field.id]}
+                value={value}
+                showSeparator={showSeparator}
               >
                 <LiveFieldItem
-                  key={field.id}
                   value={formatFieldValue(field)}
                   properties={getElementProperties(
                     "field",
@@ -55,12 +64,14 @@ export const LiveHeaderItem = ({ dbSection }: HeaderItemProps) => {
                   )}
                 />
               </LiveFieldGroupWrapper>
-            ));
+            })
+
+
           };
 
           // Formats Input Field Value
           const formatFieldValue = (field: FieldType) => {
-            const value = liveSubSection.fields[field.id];
+            const value = subSection.fields[field.id];
 
             const currrentRowIndex = field.alignment?.rowIndex ?? 0;
             const currentItemOrder = field.alignment?.itemOrder ?? 0;
@@ -81,8 +92,8 @@ export const LiveHeaderItem = ({ dbSection }: HeaderItemProps) => {
               if (
                 previousFieldInRow &&
                 previousFieldInRow.alignment?.position ===
-                  field.alignment?.position &&
-                liveSubSection.fields[previousFieldInRow.id]
+                field.alignment?.position &&
+                subSection.fields[previousFieldInRow.id]
               ) {
                 return `,\u00A0${value}`;
               }
@@ -92,7 +103,7 @@ export const LiveHeaderItem = ({ dbSection }: HeaderItemProps) => {
           };
 
           return (
-            <div key={liveSubSection.id}>
+            <div key={subSection.id}>
               {/* Row Index */}
               {matrix.map((_, rowIndex) => (
                 <div

@@ -13,11 +13,25 @@
 	"files": {
 		"ignoreUnknown": false
 	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true
+		}
+	},
 	"formatter": {
 		"enabled": true,
-		"indentStyle": "tab"
+		"lineWidth": 120,
+		"indentStyle": "space",
+		"indentWidth": 6
 	},
-	"assist": { "actions": { "source": { "organizeImports": "on" } } },
+	"assist": {
+		"actions": {
+			"source": {
+				"organizeImports": "on"
+			}
+		}
+	},
 	"javascript": {
 		"formatter": {
 			"quoteStyle": "double"

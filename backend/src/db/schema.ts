@@ -47,14 +47,34 @@ export const fieldRenderRoleEnum = pgEnum("render_role", [
 	"body",
 	"bullet",
 ]);
-export const separatorStyleEnum = pgEnum("separator_style", [
-	"dot", // ·
-	"bullet", // •
-	"pipe", // |
-	"comma", // ,
-	"slash", // /
-	"none",
-]);
+
+
+export const FONT_WEIGHTS = [
+	100, 200, 300, 400, 500, 600, 700, 800, 900,
+] as const;
+export const FONT_VARIANTS = ["primary", "secondary"];
+export const FONTS_LIST = [
+	"inter",
+	"roboto",
+	"open-sans",
+	"montserrat",
+	"arimo",
+	"noto-sans",
+	"libre-franklin",
+	"source-sans-3",
+	"rubik",
+	"plus-jakarta-sans",
+] as const;
+export const DIVIDER_STYLE = ["solid", "dashed", "thick"] as const;
+export const BULLET_STYLE = ["disc", "circle", "square", "none"] as const;
+export const GROUP_SEPARATOR = ["dot", "bullet", "pipe", "comma", "slash", "none"] as const;
+
+type GroupSeparator = (typeof GROUP_SEPARATOR)[number];
+type DividerStyle = (typeof DIVIDER_STYLE)[number];
+type BulletStyle = (typeof BULLET_STYLE)[number];
+type Font = (typeof FONTS_LIST)[number];
+type FontWeight = (typeof FONT_WEIGHTS)[number];
+type FontVariant = (typeof FONT_VARIANTS)[number];
 
 // TEMPLATE
 interface SpacingConfig {
@@ -65,14 +85,6 @@ interface SpacingConfig {
 	group_gap: number; // space to the left + right of each group item (pt)
 	bullet_indentation: number; // space before bullet (pt)
 }
-
-export const FONT_WEIGHTS = [
-	100, 200, 300, 400, 500, 600, 700, 800, 900,
-] as const;
-export type FontWeight = (typeof FONT_WEIGHTS)[number];
-
-export const FONT_VARIANTS = ["primary", "secondary"];
-export type FontVariant = (typeof FONT_VARIANTS)[number];
 
 interface TypographyConfig {
 	primary_font_family: Font;
@@ -89,26 +101,6 @@ interface TypographyConfig {
 	>;
 }
 
-export const FONTS_LIST = [
-	"inter",
-	"roboto",
-	"open-sans",
-	"montserrat",
-	"arimo",
-	"noto-sans",
-	"libre-franklin",
-	"source-sans-3",
-	"rubik",
-	"plus-jakarta-sans",
-] as const;
-export type Font = (typeof FONTS_LIST)[number];
-
-export const DIVIDER_STYLE = ["solid", "dashed", "thick"] as const;
-export const BULLET_STYLE = ["disc", "circle", "square", "none"] as const;
-
-type DividerStyle = (typeof DIVIDER_STYLE)[number];
-type BulletStyle = (typeof BULLET_STYLE)[number];
-
 export interface TemplateConfig {
 	// decorations, typography/fontsizes, colors
 	decorations: {
@@ -117,6 +109,7 @@ export interface TemplateConfig {
 		divider_style: DividerStyle;
 		bullet_style: BulletStyle;
 		sub_bullet_style: BulletStyle;
+		group_separator: GroupSeparator;
 	};
 	theme: {
 		typography: TypographyConfig;
@@ -192,7 +185,6 @@ export const fieldGroupsTable = pgTable("field_groups", {
 		})
 		.notNull(),
 	name: varchar({ length: 50 }),
-	separator: separatorStyleEnum("separator").notNull().default("dot"),
 });
 
 export const fieldAlignmentsTable = pgTable("field_alignments", {

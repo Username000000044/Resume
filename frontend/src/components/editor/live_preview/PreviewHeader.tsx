@@ -9,7 +9,6 @@ import {
 import { Switch } from "#/components/ui/switch";
 import { useSaveStatusStore } from "#/store/uesSaveStatusStore";
 import { useResumeConfigStore } from "#/store/useResumeConfigStore";
-import { useResumeStore } from "#/store/useResumeStore";
 import { Download, Folder, FolderX, icons, RefreshCcw } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
 

@@ -14,8 +14,8 @@ import type { PRESET_MAP } from "./LivePreview";
 import { useEffect, useState } from "react";
 import { ConfigCardItem } from "../config_form/ConfigCardItem";
 import { CardAction, CardTitle } from "#/components/ui/card";
-import { FieldColorPicker } from "../config_form/FieldColorPicker";
 import { FieldConfig } from "../config_form/FieldConfig";
+import { SquareColorPicker } from "../config_form/SquareColorPicker";
 
 type FieldRole = FieldType["renderRole"];
 type FieldColor =
@@ -58,19 +58,29 @@ const elementNameMap: Record<FieldElement, string> = {
 };
 
 export const LiveFieldItem = ({ value, properties }: LiveFieldProps) => {
-  const { config, liveMode } = useResumeConfigStore(
+  const { typographyConfig, colors, defaultColors, liveMode, updateProperty } = useResumeConfigStore(
     useShallow((store) => ({
-      config: store.config,
+      colors: store.config.templateConfig.theme.colors,
+      defaultColors: store.defaultConfig.template.theme.colors,
+      typographyConfig: store.config.templateConfig.theme.typography,
       liveMode: store.liveMode,
+      updateProperty: store.updateProperty,
     })),
   );
 
   const [isOpen, setIsOpen] = useState(false);
 
+  const fieldColor = colors[properties.fieldRole];
+  const defaultColor = defaultColors[properties.fieldRole];
+
+  const handleColorChange = (newColor: string) => {
+    updateProperty(["templateConfig", "theme", "colors", properties.fieldRole], newColor);
+  };
+
   const fontFamily =
     properties.fontVariant === "primary"
-      ? config.templateConfig.theme.typography.primary_font_family
-      : config.templateConfig.theme.typography.secondary_font_family;
+      ? typographyConfig.primary_font_family
+      : typographyConfig.secondary_font_family;
 
   return (
     <Popover
@@ -125,7 +135,10 @@ export const LiveFieldItem = ({ value, properties }: LiveFieldProps) => {
                 {elementNameMap[properties.FieldElement]} Element
               </CardTitle>
               <CardAction>
-                <FieldColorPicker fieldRole={properties.fieldRole} />
+                <SquareColorPicker
+                  inputColor={fieldColor}
+                  defaultColor={defaultColor}
+                  handleColorChange={handleColorChange} />
               </CardAction>
             </>
           }

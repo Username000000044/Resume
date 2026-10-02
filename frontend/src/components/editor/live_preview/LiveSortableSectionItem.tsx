@@ -129,22 +129,32 @@ export const LiveSortableSectionItem = ({
               config.templateConfig.spacing.instance_gap,
           })}
         >
-          {sections[dbSection.id].subSections.map((liveSubSection) => {
+          {sections[dbSection.id].subSections.map((subSection) => {
             const matrix = constructLayoutMatrix(dbSection.fields);
 
             const alignedRowItem = (
               rowIndex: number,
               alignment: (typeof fieldPositionEnum.enumValues)[number],
             ) => {
-              const items = matrix[rowIndex].filter(
+              const rawItems = matrix[rowIndex].filter(
                 (field) => field.alignment?.position === alignment,
               );
 
-              return items.map((field) => (
-                <LiveFieldGroupWrapper
+              const visibleItems = rawItems.filter((field) => {
+                const value = subSection.fields[field.id];
+                return value && value.trim() !== "";
+              })
+
+              return visibleItems.map((field, index) => {
+                const value = subSection.fields[field.id];
+
+                const showSeparator = index < visibleItems.length - 1;
+
+                return <LiveFieldGroupWrapper
                   key={field.id}
                   field={field}
-                  value={liveSubSection.fields[field.id]}
+                  value={value}
+                  showSeparator={showSeparator}
                 >
                   <LiveFieldItem
                     value={formatFieldValue(field)}
@@ -155,12 +165,14 @@ export const LiveSortableSectionItem = ({
                     )}
                   />
                 </LiveFieldGroupWrapper>
-              ));
+              })
+
+
             };
 
             // Formats Input Field Value
             const formatFieldValue = (field: FieldType) => {
-              const value = liveSubSection.fields[field.id];
+              const value = subSection.fields[field.id];
 
               const currrentRowIndex = field.alignment?.rowIndex ?? 0;
               const currentItemOrder = field.alignment?.itemOrder ?? 0;
@@ -174,8 +186,8 @@ export const LiveSortableSectionItem = ({
                 if (
                   previousFieldInRow &&
                   previousFieldInRow.alignment?.position ===
-                    field.alignment?.position &&
-                  liveSubSection.fields[previousFieldInRow.id]
+                  field.alignment?.position &&
+                  subSection.fields[previousFieldInRow.id]
                 ) {
                   return `, ${value}`;
                 }
@@ -188,9 +200,9 @@ export const LiveSortableSectionItem = ({
                 const formattedInputDate = formatDate(rawInputDate);
 
                 if (
-                  previousFieldInRow && // ✨ Safe check
+                  previousFieldInRow &&
                   previousFieldInRow.type === "date" &&
-                  liveSubSection.fields[previousFieldInRow.id]
+                  subSection.fields[previousFieldInRow.id]
                 ) {
                   return rawInputDate.valueOf() > rawTodayDate.valueOf()
                     ? "—Present"
@@ -207,10 +219,10 @@ export const LiveSortableSectionItem = ({
             // Instance Adjuster Conditions
             const sectionHasManyInstances =
               sections[dbSection.id].subSections.length > 1;
-            const isNotFirstInstance = liveSubSection.order !== 0;
+            const isNotFirstInstance = subSection.order !== 0;
 
             return (
-              <div className="relative" key={liveSubSection.id}>
+              <div className="relative" key={subSection.id}>
                 {sectionHasManyInstances &&
                   isNotFirstInstance &&
                   liveMode === "config" && (
@@ -250,7 +262,7 @@ export const LiveSortableSectionItem = ({
 
                 {/* Section Bullets */}
                 <ul className="relative list-[var(--bullet-style)] text-[var(--bullet-color)] font-[var(--bullet-weight)] pl-[var(--bullet-indentation)] list-inside">
-                  {liveSubSection.bullets.map((bullet) => (
+                  {subSection.bullets.map((bullet) => (
                     <span key={bullet.id}>
                       <LiveFieldItem
                         key={bullet.id}

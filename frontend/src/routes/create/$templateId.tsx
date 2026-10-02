@@ -1,11 +1,10 @@
-import { createFileRoute, useParams } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
 import { queryClient, trpc } from "#/utils/trpc";
 import {
   DEFAULT_RESUME_STORE_PERSIST_NAME,
   useResumeStore,
 } from "#/store/useResumeStore";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { EditorTabs } from "#/components/editor/data_form/EditorTabs";
 
 import { PreviewHeader } from "#/components/editor/live_preview/PreviewHeader";
@@ -17,11 +16,7 @@ import {
 import { useShallow } from "zustand/react/shallow";
 import { ConfigItems } from "#/components/editor/config_form/ConfigItems";
 import { LivePaper } from "#/components/Paper";
-import {
-  useDynamicFontStack,
-  type FontVariantConfig,
-} from "#/hooks/useDynamicFontStack";
-import { FONT_REGISTRY } from "#/utils/fontRegistery";
+
 import { GlobalFontLoader } from "#/components/GlobalFontLoader";
 
 export const Route = createFileRoute("/create/$templateId")({

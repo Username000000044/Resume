@@ -1,11 +1,12 @@
 {
 	"scripts": {
-		"dev": "pnpm --filter frontend --filter backend dev",
+		"dev": "pnpm --recursive --parallel dev",
 		"format": "biome format",
 		"lint": "biome lint",
 		"check": "biome check"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.5.1"
+		"@biomejs/biome": "2.5.1",
+		"@types/node": "^26.6.3"
 	}
 }
