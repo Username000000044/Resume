@@ -50,9 +50,9 @@ export const TypographyConfig = () => {
     <button
       type="button"
       className={cn(
-        "flex h-14 w-full cursor-pointer hover:bg-input select-none items-center justify-center whitespace-nowrap rounded-2xl bg-input/50 outline-none transition-all focus:border-ring focus:ring-3 focus:ring-ring/30",
+        "flex h-14 w-full cursor-pointer hover:bg-muted select-none items-center justify-center whitespace-nowrap rounded-2xl outline-none transition-all focus:border-ring focus:ring-3 focus:ring-ring/30",
         {
-          "bg-input": config.templateConfig.theme.typography.preset === preset,
+          "bg-input/50 hover:bg-input/50": config.templateConfig.theme.typography.preset === preset,
         },
       )}
       onClick={() =>

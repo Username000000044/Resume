@@ -103,7 +103,7 @@ export const DecorationsConfig = () => {
         </Select>
       </Field>
 
-      <LocalSeparator value="BULLETS" />
+      <LocalSeparator value="Bullets" />
 
       {/* Bullet Config */}
       <Field className="gap-0">
@@ -178,7 +178,7 @@ export const DecorationsConfig = () => {
       </Field>
 
       {/* Divider Separator */}
-      <LocalSeparator value="DIVIDERS" />
+      <LocalSeparator value="Dividers" />
 
       {/* Divider Config */}
       <ColorPickerField
@@ -264,7 +264,7 @@ const LocalSeparator = ({ value, hasMargin = true }: { value: string, hasMargin?
       "mt-3": hasMargin
     })}>
       <Separator className="flex-1 bg-muted-foreground/10" />
-      <p className="text-xs text-muted-foreground/20">{value}</p>
+      <p className="text-xs text-muted-foreground/50">{value}</p>
       <Separator className="flex-1 bg-muted-foreground/20" />
     </div>
   )

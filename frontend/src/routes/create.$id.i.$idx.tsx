@@ -1,10 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { queryClient, trpc } from "#/utils/trpc";
 import {
   DEFAULT_RESUME_STORE_PERSIST_NAME,
   useResumeStore,
 } from "#/store/useResumeStore";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ChangeEvent } from "react";
 import { EditorTabs } from "#/components/editor/data_form/EditorTabs";
 
 import { PreviewHeader } from "#/components/editor/live_preview/PreviewHeader";
@@ -18,19 +18,34 @@ import { ConfigItems } from "#/components/editor/config_form/ConfigItems";
 import { LivePaper } from "#/components/Paper";
 
 import { GlobalFontLoader } from "#/components/GlobalFontLoader";
+import { firstAvaibleStorageIndex, storageTargetName } from "#/utils/template";
 
-export const Route = createFileRoute("/create/$templateId")({
+export const Route = createFileRoute("/create/$id/i/$idx")({
+  beforeLoad: async ({ params }) => {
+    const firstAvaibleIndex = firstAvaibleStorageIndex(params.id);
+    const targetIdx = parseInt(params.idx, 10);
+
+    if (targetIdx > firstAvaibleIndex) {
+      throw redirect({
+        to: '/create/$id/i/$idx',
+        params: { id: params.id, idx: firstAvaibleIndex.toString() }
+      })
+    } else {
+      return;
+    }
+  },
   loader: async ({ params }) => {
     const template = await queryClient.query(
-      trpc.templateById.queryOptions(params.templateId, { retry: false }),
+      trpc.templateById.queryOptions(params.id, { retry: false }),
     );
-    return { template };
+    const templateIdx = params.idx;
+    const templateConfigName = useResumeConfigStore.getState().config.templateName;
+    return { template, templateIdx, templateConfigName };
   },
   head: ({ loaderData }) => ({
     meta: [
       {
-        // loaderData?.template?.name,
-        title: "Untitled Resume",
+        title: loaderData?.templateConfigName,
       },
     ],
   }),
@@ -39,49 +54,47 @@ export const Route = createFileRoute("/create/$templateId")({
 });
 
 function RouteComponent() {
-  const { template } = Route.useLoaderData();
+  const { template, templateIdx } = Route.useLoaderData();
 
   const initializeSections = useResumeStore(
     (state) => state.initializeSections,
   );
-  const { config, defaultConfig, liveMode, initializeConfig } =
+  const { defaultConfig, liveMode, templateConfigName, updateProperty, initializeConfig } =
     useResumeConfigStore(
       useShallow((state) => ({
-        config: state.config,
         defaultConfig: state.defaultConfig,
         liveMode: state.liveMode,
+        templateConfigName: state.config.templateName,
         initializeConfig: state.initializeConfig,
+        updateProperty: state.updateProperty
       })),
     );
 
   const [isSectionsPayloadReady, setIsSectionsPayloadReady] = useState(false);
   const [isConfigPayloadReady, setIsConfigPayloadReady] = useState(false);
+  const [localName, setLocalName] = useState(templateConfigName || "Untitled Resume");
+
+  // Update document title on load
+  useEffect(() => {
+    if (templateConfigName) {
+      setLocalName(templateConfigName);
+      document.title = templateConfigName;
+    } else {
+      document.title = localName;
+    }
+  }, [templateConfigName]);
+
 
   useEffect(() => {
-    if (!template) return;
+    if (!template.id) return;
 
-    // template-{id}-{name}
-    // config-{id}-{name}
-    // {name} = (Captial One Buisness -> captial_one_buisness) or template name
-
-    const formatStorageName = (name: string) => {
-      const formattedName = name
-        .toLowerCase()
-        // Removes all non alphabetical + numerical charcters
-        .replaceAll(/[^a-zA-Z0-9 ]/g, "")
-        // Converts spaces into _
-        .replaceAll(" ", "_");
-
-      return formattedName;
-    };
-
-    const templateName = config.templateName
-      ? formatStorageName(config.templateName)
-      : formatStorageName(template.name);
+    // template-{id}-{index}
+    // config-{id}-{index}
+    // name is anything. Stored into config storage as templateName
 
     const handleSectionsInitialization = async () => {
       const persistName = useResumeStore.persist.getOptions().name;
-      const targetName = `template-${template.id}-${templateName}`;
+      const targetName = storageTargetName(template.id, templateIdx, "sections");
 
       // If Zustand's persist store exists but isn't targetName
       if (persistName && persistName !== targetName) {
@@ -125,7 +138,7 @@ function RouteComponent() {
     // Copied logic from handleSectionsInitialization
     const handleConfigInitialization = async () => {
       const persistName = useResumeConfigStore.persist.getOptions().name;
-      const targetName = `config-${template.id}-${templateName}`;
+      const targetName = storageTargetName(template.id, templateIdx, "config");
 
       if (persistName && persistName !== targetName) {
         const existingData = localStorage.getItem(persistName);
@@ -171,10 +184,11 @@ function RouteComponent() {
             }));
 
             initializeConfig(
-              templateName,
+              config.templateName,
               template.default_config,
               syncPayload,
             );
+
           }
         }
 
@@ -188,8 +202,8 @@ function RouteComponent() {
     handleSectionsInitialization();
     handleConfigInitialization();
   }, [
-    template,
-    config.templateName,
+    template.id,
+    templateIdx,
     defaultConfig.sections,
     defaultConfig.template,
     initializeConfig,
@@ -213,9 +227,24 @@ function RouteComponent() {
 
         {/* Editor Column */}
         <div className=" flex flex-col w-full lg:px-0 print:hidden">
-          <h1 className="mx-auto min-[93rem]:ml-0 text-4xl pb-8 text-primary font-bold tracking-wide">
-            {"Untitled Resume"}
-          </h1>
+          <input
+            type="text"
+            name="templateName"
+            value={localName}
+            onChange={(e) => setLocalName(e.currentTarget.value)}
+            onBlur={(e) => {
+              const trimmedValue = e.currentTarget.value.trim();
+              if (trimmedValue.length === 0) {
+                setLocalName("Untitled Resume");
+                updateProperty(["templateName"], "Untitled Resume");
+              } else {
+                updateProperty(["templateName"], trimmedValue);
+              }
+            }}
+            maxLength={24}
+            className="text-center min-[93rem]:text-start text-4xl mb-8 text-primary font-bold tracking-wide border-none outline-none"
+          />
+
 
           {liveMode === "view" ? (
             <EditorTabs templateData={template} />

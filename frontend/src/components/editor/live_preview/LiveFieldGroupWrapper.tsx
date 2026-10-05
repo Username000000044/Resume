@@ -7,6 +7,7 @@ import { useResumeConfigStore } from "#/store/useResumeConfigStore";
 import type { FieldType } from "#/types/Template";
 import { useState, type ReactNode } from "react";
 import { useShallow } from "zustand/react/shallow";
+import { GroupScrubberItem } from "./GroupScrubberItem";
 
 interface LiveGroupProps {
   field: FieldType;
@@ -30,13 +31,11 @@ export const LiveFieldGroupWrapper = ({
   children,
   showSeparator
 }: LiveGroupProps) => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const { separator, groupGap, liveMode } = useResumeConfigStore(
+  const { separator, defaultGroupGap, liveMode } = useResumeConfigStore(
     useShallow((store) => ({
       separator: store.config.templateConfig.decorations.group_separator,
+      defaultGroupGap: store.defaultConfig.template.spacing.group_gap,
       liveMode: store.liveMode,
-      groupGap: store.config.templateConfig.spacing.group_gap,
     })),
   );
 
@@ -50,49 +49,58 @@ export const LiveFieldGroupWrapper = ({
 
       {/* View Mode */}
       {liveMode === "view" && showSeparator && (
-        <span className="px-[var(--group-gap)] text-muted-foreground hover:text-foreground transition-colors">
+        <span className="px-[var(--group-gap)] text-[var(--separator-color)]">
           {seperatorMap[separator]}
         </span>
       )}
 
       {/* Live Mode */}
       {liveMode === "config" && showSeparator && (
-        <Tooltip
-          open={isOpen}
-          onOpenChange={(nextOpen, event) => {
-            if (!nextOpen && event.reason === "trigger-press") {
-              setIsOpen(nextOpen);
-              return;
-            }
+        <GroupScrubberItem
+          trigger={<span className="px-[var(--group-gap)] text-[var(--separator-color)]">{seperatorMap[separator]}</span>}
+          config={{ max: 15, min: 0, step: 1 }}
+          defaultValue={defaultGroupGap}
+          path={["templateConfig", "spacing", "group_gap"]}
+        />
 
-            setIsOpen(nextOpen);
-          }}
-        >
-          <TooltipTrigger>
-            {/** biome-ignore lint/a11y/noStaticElementInteractions: other sematic elements dont work (TODO: FIX) */}
-            <span
-              className="px-[var(--group-gap)] cursor-col-resize text-muted-foreground hover:text-foreground transition-colors"
-              onClick={(e) => {
-                e.preventDefault();
-                setIsOpen(true);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === "") {
-                  e.preventDefault();
-                  setIsOpen(true);
-                }
-              }}
-            >
-              {seperatorMap[separator]}
-            </span>
-          </TooltipTrigger>
-
-          {/* TooltipContent accepts standard shadcn animation/color styling parameters */}
-          <TooltipContent side="top" align="center" sideOffset={-2}>
-            {groupGap}pt
-          </TooltipContent>
-        </Tooltip>
       )}
     </span>
   );
 };
+
+
+//     <Tooltip
+//       open={isOpen}
+//       onOpenChange={(nextOpen, event) => {
+//         if (!nextOpen && event.reason === "trigger-press") {
+//           setIsOpen(nextOpen);
+//           return;
+//         }
+
+//         setIsOpen(nextOpen);
+//       }}
+//     >
+//       <TooltipTrigger>
+//         {/** biome-ignore lint/a11y/noStaticElementInteractions: other sematic elements dont work (TODO: FIX) */}
+//         <span
+//           className="px-[var(--group-gap)] cursor-col-resize text-muted-foreground hover:text-foreground transition-colors"
+//           onClick={(e) => {
+//             e.preventDefault();
+//             setIsOpen(true);
+//           }}
+//           onKeyDown={(e) => {
+//             if (e.key === "Enter" || e.key === "") {
+//               e.preventDefault();
+//               setIsOpen(true);
+//             }
+//           }}
+//         >
+//           {seperatorMap[separator]}
+//         </span>
+//       </TooltipTrigger>
+
+//       {/* TooltipContent accepts standard shadcn animation/color styling parameters */}
+//       <TooltipContent side="top" align="center" sideOffset={-2}>
+//         {groupGap}pt
+//       </TooltipContent>
+//     </Tooltip>

@@ -42,7 +42,7 @@ export const BarScrubberItem = ({
 
   return (
     <div
-      className="flex items-center justify-center h-[var(--bar-height)] bg-destructive/12 opacity-0 hover:opacity-100 transition-color duration-200"
+      className="flex items-center justify-center h-[var(--bar-height)] bg-destructive/12 rounded-md opacity-0 hover:opacity-100 transition-color duration-200"
       style={
         {
           "--bar-height": `${value}pt`,

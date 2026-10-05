@@ -184,6 +184,7 @@ export const LivePreview = ({ templateData }: LivePreviewProps) => {
     "--header-color": config.templateConfig.theme.colors.heading,
     "--section-title_color": config.templateConfig.theme.colors.section_title,
     "--bullet-color": config.templateConfig.theme.colors.body,
+    "--separator-color": config.templateConfig.theme.colors.body,
 
     //Weight (Field weight are handled dynamically in the LiveFieldItem componet)
     "--header-weight":
