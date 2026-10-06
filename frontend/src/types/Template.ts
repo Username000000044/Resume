@@ -1,8 +1,8 @@
 import type { AppRouter } from "@resume/backend/src/appRouter.ts";
 import type { inferRouterOutputs } from "@trpc/server";
 
-export type TemplateListType = inferRouterOutputs<AppRouter>["templatesList"];
-export type TemplateType = inferRouterOutputs<AppRouter>["templateById"];
+export type TemplateListType = inferRouterOutputs<AppRouter>["template"]["templatesList"];
+export type TemplateType = inferRouterOutputs<AppRouter>["template"]["templateById"];
 
 export type TemplateConfig = TemplateType["default_config"];
 export type SectionConfig = TemplateType["sections"][number]["default_config"];

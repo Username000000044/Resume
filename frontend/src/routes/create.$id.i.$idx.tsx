@@ -36,7 +36,7 @@ export const Route = createFileRoute("/create/$id/i/$idx")({
   },
   loader: async ({ params }) => {
     const template = await queryClient.query(
-      trpc.templateById.queryOptions(params.id, { retry: false }),
+      trpc.template.templateById.queryOptions(params.id, { retry: false }),
     );
     const templateIdx = params.idx;
     const templateConfigName = useResumeConfigStore.getState().config.templateName;

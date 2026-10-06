@@ -9,7 +9,7 @@ import { TooltipProvider } from "#/components/ui/tooltip";
 export const Route = createRootRoute({
   loader: async () => {
     const templateList = await queryClient.query(
-      trpc.templatesList.queryOptions(),
+      trpc.template.templatesList.queryOptions(),
     );
     return { templateList };
   },

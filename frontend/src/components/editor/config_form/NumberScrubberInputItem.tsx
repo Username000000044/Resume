@@ -1,9 +1,9 @@
-import { useShallow } from "zustand/react/shallow";
 import { useResumeConfigStore } from "#/store/useResumeConfigStore";
 import {
   NumericScrubber,
   type IconOrientation,
 } from "#/components/ui/number-scrubber";
+import { useGetProperty } from "#/hooks/useGetProperty";
 
 interface ScrubberInputProps {
   defaultValue: number;
@@ -28,14 +28,9 @@ export const NumberScrubberInputItem = (props: HasIconProps | NoIconProps) => {
   const { defaultValue, path, config } = props;
   const { step, min, max } = config;
 
-  const { updateProperty, getProperty } = useResumeConfigStore(
-    useShallow((state) => ({
-      updateProperty: state.updateProperty,
-      getProperty: state.getProperty,
-    })),
-  );
+  const updateProperty = useResumeConfigStore((state) => state.updateProperty);
 
-  const value = getProperty<number>(path);
+  const value = useGetProperty<number>(path, defaultValue);
 
   const handleChange = (value: number) => {
     updateProperty(path, value);

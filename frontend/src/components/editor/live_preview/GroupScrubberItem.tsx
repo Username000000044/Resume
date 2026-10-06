@@ -24,14 +24,16 @@ export const GroupScrubberItem = ({
     config: { step, min, max },
     className,
 }: ScrubberInputProps) => {
-    const { updateProperty, getProperty } = useResumeConfigStore(
-        useShallow((state) => ({
-            updateProperty: state.updateProperty,
-            getProperty: state.getProperty,
-        })),
-    );
+    const updateProperty = useResumeConfigStore((state) => state.updateProperty);
 
-    const value = getProperty<number>(path);
+    const value = useResumeConfigStore((state) => {
+        let target = state.config as any;
+        for (let i = 0; i < path.length; i++) {
+            if (target == null) return defaultValue;
+            target = target[path[i]];
+        }
+        return (target ?? defaultValue) as number;
+    });
 
     const handleChange = (value: number) => {
         updateProperty(path, value);

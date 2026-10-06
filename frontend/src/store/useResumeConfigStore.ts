@@ -4,6 +4,7 @@ import { debouncedStorage } from "#/utils/debouncedStorage";
 import { create } from "zustand";
 import { createJSONStorage, devtools, persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
+import { useShallow } from "zustand/react/shallow";
 
 interface DefaultConfig {
 	template: TemplateConfig;
@@ -37,7 +38,6 @@ interface ResumeConfigStoreState {
 	) => void;
 
 	updateProperty: (path: string[], value: ValueType) => void;
-	getProperty: <T = ConfigValue>(path: string[]) => T | undefined;
 
 	resetConfig: () => void;
 }
@@ -48,7 +48,7 @@ export const DEFAULT_RESUME_CONFIG_STORE_PERSIST_NAME =
 export const useResumeConfigStore = create<ResumeConfigStoreState>()(
 	devtools(
 		persist(
-			immer((set, get) => ({
+			immer((set) => ({
 				liveMode: "view",
 				setLiveMode: (mode) => set({ liveMode: mode }),
 
@@ -108,17 +108,6 @@ export const useResumeConfigStore = create<ResumeConfigStoreState>()(
 
 						target[path[path.length - 1]] = value;
 					}),
-
-				getProperty: <T = ConfigData>(path: string[]): T | undefined => {
-					let target = get().config as unknown as ConfigObject;
-
-					for (let i = 0; i < path.length; i++) {
-						if (target == null || target === undefined) return undefined;
-						target = target[path[i]] as unknown as ConfigObject;
-					}
-
-					return target as unknown as T;
-				},
 
 				resetConfig: () =>
 					set((state) => {
