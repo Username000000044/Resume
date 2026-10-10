@@ -8,13 +8,14 @@ import {
 import { LivePaper } from "../../Paper";
 import { LiveSortableSectionItem } from "./LiveSortableSectionItem";
 import type { SectionType, TemplateType } from "#/types/Template";
-import { LiveHeaderItem } from "./LiveHeaderItem";
-import { Fragment, type CSSProperties } from "react";
+import { useMemo, type CSSProperties } from "react";
 import { useResumeConfigStore } from "#/store/useResumeConfigStore";
-import { DragDropProvider } from "@dnd-kit/react";
 import { useShallow } from "zustand/react/shallow";
+import { LiveHeaderItem } from "./LiveHeaderItem";
+import { useResumeDimensionsStore } from "#/store/useResumeDimensionsStore";
 
 interface LivePreviewProps {
+  pageSectionsId: string[]; // ["sectionId", "sectionId"]
   templateData: TemplateType;
 }
 
@@ -87,18 +88,12 @@ export const ALIGNMENT_MAP = {
   right: "text-right",
 } as const;
 
-export const LivePreview = ({ templateData }: LivePreviewProps) => {
-  const { config, liveMode, defaultConfig } = useResumeConfigStore(
-    useShallow((state) => ({
-      config: state.config,
-      defaultConfig: state.defaultConfig,
-      liveMode: state.liveMode,
-    })),
-  );
-  const { sections, reorderSections } = useResumeStore(
+export const LivePagePreview = ({ templateData, pageSectionsId }: LivePreviewProps) => {
+  // Stores
+  const config = useResumeConfigStore((store) => store.config);
+  const { sections } = useResumeStore(
     useShallow((state) => ({
       sections: state.sections,
-      reorderSections: state.reorderSections,
     })),
   );
 
@@ -199,49 +194,29 @@ export const LivePreview = ({ templateData }: LivePreviewProps) => {
       className="relative flex flex-col text-(length:--font-size-base) !p-[var(--page-margin)]"
       style={dynamicPreviewStyles}
     >
-      {/* Header */}
-      <div className="pb-[var(--section-gap)]">
-        {templateData.sections
-          .filter((dbSection) => {
-            const isHeaderSection = dbSection.order === 0;
-            const sectionHasContents = !sectionIsEmpty(dbSection);
+      <ul className="flex flex-col gap-[var(--section-gap)]">
+        {pageSectionsId
+          .filter((sectionId) => {
+            const dbSection = templateData.sections.find(s => s.id === sectionId) || templateData.sections[0];
 
-            return isHeaderSection && sectionHasContents;
+            if (!dbSection) return false;
+            return !sectionIsEmpty(dbSection);
           })
-          .map((dbSection) => (
-            <LiveHeaderItem dbSection={dbSection} key={dbSection.id} />
-          ))}
-      </div>
+          .map((sectionId) => {
+            const dbSection = templateData.sections.find(s => s.id === sectionId) || templateData.sections[0];
+            const dbSectionIndex = templateData.sections.findIndex(s => s.id === sectionId);
 
-      {/* Sections */}
-      <DragDropProvider
-        onDragEnd={(event) => {
-          const sectionId = event.operation.target?.id;
+            if (!dbSection) return null;
+            if (dbSection.isHeader) return <LiveHeaderItem dbSection={dbSection} key={sectionId} />
 
-          if (sectionId) {
-            reorderSections(event);
-          }
-        }}
-      >
-        <ul className="flex flex-col gap-[var(--section-gap)]">
-          {templateData.sections
-            .filter((dbSection) => {
-              const isNotHeaderSection = dbSection.order !== 0;
-              const sectionHasContents = !sectionIsEmpty(dbSection);
-
-              return isNotHeaderSection && sectionHasContents;
-            })
-            .sort((a, b) => sections[a.id].order - sections[b.id].order)
-            .map((dbSection, dbSectionIndex) => (
-              <LiveSortableSectionItem
-                key={dbSection.id}
-                templateData={templateData}
-                dbSection={dbSection}
-                dbSectionIndex={dbSectionIndex}
-              />
-            ))}
-        </ul>
-      </DragDropProvider>
+            return <LiveSortableSectionItem
+              key={sectionId}
+              templateData={templateData}
+              dbSection={dbSection}
+              dbSectionIndex={dbSectionIndex}
+            />;
+          })}
+      </ul>
     </LivePaper>
   );
 };

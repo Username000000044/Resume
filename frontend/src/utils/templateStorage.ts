@@ -11,7 +11,6 @@ export const firstAvaibleStorageIndex = (templateId: string) => {
     return templateIdx;
 }
 
-
 export const storageTargetName = (templateId: string, templateIdx: string, targetType: "sections" | "config") => {
     const sectionsTargetName = `template-${templateId}-${templateIdx}`;
     const configTargetName = `config-${templateId}-${templateIdx}`;

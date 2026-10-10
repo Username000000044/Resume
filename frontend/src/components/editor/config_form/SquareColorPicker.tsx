@@ -37,7 +37,7 @@ export const SquareColorPicker = ({ className, inputColor, defaultColor, handleC
         render={
           <button
             type="button"
-            className={cn("size-8 rounded-md ring-3 ring-input/20 shadow-md cursor-pointer", className)}
+            className={cn("size-8 rounded-2xl ring-3 ring-input/20 shadow-md cursor-pointer", className)}
             style={
               {
                 background: inputColor,

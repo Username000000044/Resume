@@ -5,27 +5,32 @@ import { LiveFieldItem } from "./LiveFieldItem";
 import {
   constructLayoutMatrix,
   getElementProperties,
-} from "#/utils/live-preview";
+} from "#/utils/livePreview";
 import { useResumeConfigStore } from "#/store/useResumeConfigStore";
-import { useShallow } from "zustand/react/shallow";
 import { LiveFieldGroupWrapper } from "./LiveFieldGroupWrapper";
 import type { fieldPositionEnum } from "@resume/backend/src/db/schema.js";
+import { useResizeObserver } from "#/hooks/useResizeObserver";
+import { useResumeDimensionsStore } from "#/store/useResumeDimensionsStore";
 
 interface HeaderItemProps {
   dbSection: SectionType;
 }
 
 export const LiveHeaderItem = ({ dbSection }: HeaderItemProps) => {
+
+  // Pagination
+  const setSectionDimensions = useResumeDimensionsStore((store) => store.setSectionDimensions);
+
+  const { targetRef } = useResizeObserver((width, height) => {
+    setSectionDimensions(dbSection.id, { width, height });
+  })
+
+  // Sections & Config
   const sections = useResumeStore((store) => store.sections);
-  const { config, defaultTemplateConfig } = useResumeConfigStore(
-    useShallow((store) => ({
-      config: store.config,
-      defaultTemplateConfig: store.defaultConfig.template,
-    })),
-  );
+  const config = useResumeConfigStore((store) => store.config);
 
   return (
-    <section className={`text-(length:--font-size-base) text-wrap`}>
+    <section ref={targetRef} className={`text-(length:--font-size-base) text-wrap`}>
       {/* Sub Sections */}
       <div className="flex flex-col gap-[var(--instance-gap)]">
         {sections[dbSection.id].subSections.map((subSection) => {

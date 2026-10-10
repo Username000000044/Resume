@@ -11,7 +11,7 @@ import { useResumeConfigStore } from "#/store/useResumeConfigStore";
 import { FONTS_LIST } from "@resume/backend/src/db/schema.ts";
 import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
-import type { PRESET_MAP } from "../live_preview/LivePreview";
+import type { PRESET_MAP } from "../live_preview/LivePagePreview";
 import { cn } from "cn";
 
 interface Item {

@@ -157,6 +157,7 @@ export const sectionsTable = pgTable("sections", {
 	order: integer().notNull().unique(),
 	default_config: jsonb("default_config").$type<SectionConfig>().notNull(),
 	manyInstances: boolean("many_instances").notNull(), // False: Ensures only one instance of sectionsTable in UI
+	isHeader: boolean("is_header").default(false).notNull(),
 });
 
 // FIELDS

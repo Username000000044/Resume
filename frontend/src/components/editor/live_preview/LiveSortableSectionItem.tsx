@@ -1,15 +1,15 @@
 import { useResumeStore } from "#/store/useResumeStore";
-import { ALIGNMENT_MAP } from "./LivePreview";
+import { ALIGNMENT_MAP } from "./LivePagePreview";
 import { DividerItem } from "./DividerItem";
 import { LiveFieldItem } from "./LiveFieldItem";
 import type { FieldType, SectionType, TemplateType } from "#/types/Template";
 import {
   constructLayoutMatrix,
   getElementProperties,
-} from "#/utils/live-preview";
+} from "#/utils/livePreview";
 import { cn } from "#/lib/utils";
 import { LiveFieldGroupWrapper } from "./LiveFieldGroupWrapper";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSortable } from "@dnd-kit/react/sortable";
 import { RestrictToVerticalAxis } from "@dnd-kit/abstract/modifiers";
 import { Button } from "#/components/ui/button";
@@ -18,6 +18,8 @@ import { useResumeConfigStore } from "#/store/useResumeConfigStore";
 import type { fieldPositionEnum } from "@resume/backend/src/db/schema.js";
 import { useShallow } from "zustand/react/shallow";
 import { BarScrubberItem } from "./BarScrubberItem";
+import { useResizeObserver } from "#/hooks/useResizeObserver";
+import { useResumeDimensionsStore } from "#/store/useResumeDimensionsStore";
 
 interface SectionItemProps {
   templateData: TemplateType;
@@ -30,6 +32,7 @@ export const LiveSortableSectionItem = ({
   dbSectionIndex,
   templateData,
 }: SectionItemProps) => {
+  // Dragable
   const [element, setElement] = useState<Element | null>(null);
   const handleRef = useRef<HTMLButtonElement | null>(null);
   const { isDragging } = useSortable({
@@ -40,6 +43,14 @@ export const LiveSortableSectionItem = ({
     modifiers: [RestrictToVerticalAxis],
   });
 
+  // Pagination
+  const setSectionDimensions = useResumeDimensionsStore((store) => store.setSectionDimensions);
+
+  const { targetRef } = useResizeObserver((width, height) => {
+    setSectionDimensions(dbSection.id, { width, height })
+  })
+
+  // Config & Section
   const sections = useResumeStore((store) => store.sections);
   const { config, defaultConfig, liveMode } = useResumeConfigStore(
     useShallow((store) => ({
@@ -49,9 +60,10 @@ export const LiveSortableSectionItem = ({
     })),
   );
 
+
   const numOfFilledSections = useMemo(() => {
     return templateData.sections
-      .filter((section) => section.order !== 0)
+      .filter((section) => !section.isHeader)
       .reduce((count, dbSection) => {
         const liveSection = sections[dbSection.id] || { subSections: [] };
 
@@ -75,11 +87,19 @@ export const LiveSortableSectionItem = ({
   }, [templateData, sections]);
 
   // Alignment
-  const titleAlignment =
-    ALIGNMENT_MAP[dbSection.default_config.alignment.title];
+  // const titleAlignment =
+  //   ALIGNMENT_MAP[dbSection.default_config.alignment.title];
+
+  const handleRefCombination = (node: HTMLElement | null) => {
+    // dnd kit (dragging)
+    setElement(node);
+    // resize observer (page pagination)
+    targetRef(node);
+  }
+
   return (
     <li
-      ref={setElement}
+      ref={handleRefCombination}
       className="relative text-(length:--font-size-base) text-wrap"
     >
       {/* Section Gap Adjuster */}
@@ -106,6 +126,7 @@ export const LiveSortableSectionItem = ({
           </Button>
         </div>
       </div>
+
       {/* Section Content */}
       <section
         className={cn({

@@ -41,7 +41,7 @@ export const EditorTabs = ({ templateData }: EditorTabsProps) => {
             </TabsTrigger>
           ))}
         </TabsList>
-        {/* <ScrollBar orientation="horizontal" className="px-4 !h-[6px] " /> */}
+        <ScrollBar orientation="horizontal" className="px-4 !h-[6px] [&>div]:bg-input/50" />
       </ScrollArea>
       {templateData.sections.map((section, sectionIndex) => (
         <TabsContent

@@ -1,5 +1,7 @@
+import { useResumeConfigStore } from "#/store/useResumeConfigStore";
+import { useResumeDimensionsStore } from "#/store/useResumeDimensionsStore";
 import type React from "react";
-import type { ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
 
 export const LivePaper = ({
   className,
@@ -11,6 +13,7 @@ export const LivePaper = ({
   style?: React.CSSProperties;
   children?: ReactNode;
 }) => {
+
   return (
     <div
       className={`${className} aspect-[8.5/11] shrink-0 bg-white shadow-[0_0_10px_2px_rgba(0,0,0,0.1)] p-[72px] wrap-anywhere lg:w-220 print:block print:border-0 print:[print-color-adjust:exact] print:[webkit-print-color-adjust:exact]`}

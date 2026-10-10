@@ -10,7 +10,7 @@ import { cn } from "#/lib/utils";
 import { useResumeConfigStore } from "#/store/useResumeConfigStore";
 import type { FieldType, TemplateType } from "#/types/Template";
 import { useShallow } from "zustand/react/shallow";
-import type { PRESET_MAP } from "./LivePreview";
+import type { PRESET_MAP } from "./LivePagePreview";
 import { useEffect, useState } from "react";
 import { ConfigCardItem } from "../config_form/ConfigCardItem";
 import { CardAction, CardTitle } from "#/components/ui/card";

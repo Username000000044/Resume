@@ -4,21 +4,22 @@ import {
   DEFAULT_RESUME_STORE_PERSIST_NAME,
   useResumeStore,
 } from "#/store/useResumeStore";
-import { useEffect, useState, type ChangeEvent } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { EditorTabs } from "#/components/editor/data_form/EditorTabs";
-
-import { PreviewHeader } from "#/components/editor/live_preview/PreviewHeader";
-import { LivePreview } from "#/components/editor/live_preview/LivePreview";
+import { LivePagePreview } from "#/components/editor/live_preview/LivePagePreview";
 import {
   DEFAULT_RESUME_CONFIG_STORE_PERSIST_NAME,
   useResumeConfigStore,
 } from "#/store/useResumeConfigStore";
 import { useShallow } from "zustand/react/shallow";
-import { ConfigItems } from "#/components/editor/config_form/ConfigItems";
-import { LivePaper } from "#/components/Paper";
-
+import { firstAvaibleStorageIndex, storageTargetName } from "#/utils/templateStorage";
+import { constructPagesMatrix } from "#/utils/livePreview";
+import { useResumeDimensionsStore } from "#/store/useResumeDimensionsStore";
+import { useResizeObserver } from "#/hooks/useResizeObserver";
+import { DragDropProvider } from "@dnd-kit/react"; // Imported for global tracking context
 import { GlobalFontLoader } from "#/components/GlobalFontLoader";
-import { firstAvaibleStorageIndex, storageTargetName } from "#/utils/template";
+import { PreviewHeader } from "#/components/editor/live_preview/PreviewHeader";
+import { ConfigItems } from "#/components/editor/config_form/ConfigItems";
 
 export const Route = createFileRoute("/create/$id/i/$idx")({
   beforeLoad: async ({ params }) => {
@@ -56,17 +57,23 @@ export const Route = createFileRoute("/create/$id/i/$idx")({
 function RouteComponent() {
   const { template, templateIdx } = Route.useLoaderData();
 
-  const initializeSections = useResumeStore(
-    (state) => state.initializeSections,
+  // Stores
+  const sectionDimensions = useResumeDimensionsStore((store) => store.sectionDimensions);
+  const { initializeSections, reorderSections } = useResumeStore(
+    useShallow((store) => ({
+      initializeSections: store.initializeSections,
+      reorderSections: store.reorderSections,
+    }))
   );
-  const { defaultConfig, liveMode, templateConfigName, updateProperty, initializeConfig } =
+  const { config, defaultConfig, templateConfigName, liveMode, initializeConfig, updateProperty } =
     useResumeConfigStore(
-      useShallow((state) => ({
-        defaultConfig: state.defaultConfig,
-        liveMode: state.liveMode,
-        templateConfigName: state.config.templateName,
-        initializeConfig: state.initializeConfig,
-        updateProperty: state.updateProperty
+      useShallow((store) => ({
+        config: store.config,
+        defaultConfig: store.defaultConfig,
+        liveMode: store.liveMode,
+        templateConfigName: store.config.templateName,
+        initializeConfig: store.initializeConfig,
+        updateProperty: store.updateProperty
       })),
     );
 
@@ -84,7 +91,7 @@ function RouteComponent() {
     }
   }, [templateConfigName]);
 
-
+  // Storage Population
   useEffect(() => {
     if (!template.id) return;
 
@@ -98,10 +105,12 @@ function RouteComponent() {
 
       // If Zustand's persist store exists but isn't targetName
       if (persistName && persistName !== targetName) {
+
         const existingData = localStorage.getItem(persistName);
 
         // Zustand's persist name is still default and there is data
         if (persistName === DEFAULT_RESUME_STORE_PERSIST_NAME && existingData) {
+
           // Push data from default name into targetName
           localStorage.setItem(targetName, existingData);
           localStorage.removeItem(persistName);
@@ -109,12 +118,18 @@ function RouteComponent() {
 
         // Tell Zustand to change where its looking for persist data
         useResumeStore.persist.setOptions({ name: targetName });
+
       }
+
+      const hasExistingLocalStorage = localStorage.getItem(targetName);
 
       const unsub = useResumeStore.persist.onFinishHydration(() => {
         // Only fills store will new data if doesn't exist.
         const currentSections = useResumeStore.getState().sections;
-        if (!currentSections || Object.values(currentSections).length === 0) {
+        const hasInMemorySections = currentSections && Object.values(currentSections).length > 0;
+
+        if (!hasExistingLocalStorage && !hasInMemorySections) {
+
           // Populate zustand store with sections, field, and bullets
           if (template.sections) {
             const syncPayload = template.sections.map((s) => ({
@@ -154,6 +169,8 @@ function RouteComponent() {
         useResumeConfigStore.persist.setOptions({ name: targetName });
       }
 
+      const hasExistingLocalStorage = localStorage.getItem(targetName);
+
       const unsub = useResumeConfigStore.persist.onFinishHydration(() => {
         const config = useResumeConfigStore.getState().config;
 
@@ -169,7 +186,7 @@ function RouteComponent() {
         const emptySectionsConfig =
           Object.values(config.sectionConfigs).length === 0;
 
-        if (
+        if (hasExistingLocalStorage &&
           emptyDefaultTemplateConfig ||
           emptyDefaultSectionsConfig ||
           emptyTemplateConfig ||
@@ -210,13 +227,62 @@ function RouteComponent() {
     initializeSections,
   ]);
 
+  const [containerWidth, setContainerWidth] = useState(0);
+
+  // Monitor ONLY the overall scrollbox layout column width to stay immune to page splitting variations
+  const { targetRef } = useResizeObserver((width) => {
+    setContainerWidth(width);
+  });
+
+  // Completed metrics calculation engine
+  const layoutMetrics = useMemo(() => {
+    const baseWidth = containerWidth || 844;
+    const totalPageHeight = baseWidth * (11 / 8.5); // US Letter Aspect Ratio
+
+    const spacingConfig = config?.templateConfig?.spacing;
+    const targetMargin = spacingConfig?.page_margin ?? 0.75;
+
+    const sectionGapPt = spacingConfig?.section_gap;
+    const sectionGapPx = sectionGapPt * (96 / 72) // (1pt = 1.333px)
+
+    // Scale padding pixels proportionally so margins contract accurately on smaller screens
+    const verticalPaddingPx = (targetMargin / 11) * totalPageHeight;
+
+    const maxPageContentHeight = totalPageHeight - (verticalPaddingPx * 2);
+
+    return { maxPageContentHeight, sectionGapPx };
+  }, [containerWidth, config]);
+
+  // Generate page-segmented data grids dynamically
+  const pagesMatrix = useMemo(() => {
+    if (!template.sections) return [];
+
+    const orderedSectionIds = template.sections.map((s) => s.id);
+
+    // Guard: Change from !height to explicit checking for undefined
+    const dimensionsLoading = orderedSectionIds.some((id) => sectionDimensions[id]?.height === undefined);
+
+    if (dimensionsLoading) {
+      return [orderedSectionIds];
+    }
+
+    return constructPagesMatrix(
+      layoutMetrics.maxPageContentHeight,
+      sectionDimensions,
+      orderedSectionIds,
+      layoutMetrics.sectionGapPx
+    );
+  }, [layoutMetrics.maxPageContentHeight, sectionDimensions, template.sections]);
+
+
+  // Status Display
   if (!isSectionsPayloadReady || !isConfigPayloadReady) {
     return (
       <div>
         {!isSectionsPayloadReady && <div>Loading template data...</div>}
         {!isConfigPayloadReady && <div>Loading config data...</div>}
       </div>
-    );
+    )
   }
 
   return (
@@ -244,8 +310,6 @@ function RouteComponent() {
             maxLength={24}
             className="text-center min-[93rem]:text-start text-4xl mb-8 text-primary font-bold tracking-wide border-none outline-none"
           />
-
-
           {liveMode === "view" ? (
             <EditorTabs templateData={template} />
           ) : (
@@ -253,16 +317,32 @@ function RouteComponent() {
           )}
         </div>
 
-        {/* Live Resume Column */}
-        <div className="flex flex-col mx-12 lg:m-0">
-          <PreviewHeader />
-          <div className="bg-linear-to-b from-primary/8 to-primary/12 p-4 rounded-4xl">
-            <div className="flex flex-col gap-4">
-              <LivePreview templateData={template} />
-              <LivePaper />
+        <DragDropProvider
+          onDragEnd={(event) => {
+            const sectionId = event.operation.target?.id;
+            if (sectionId) {
+              reorderSections(event);
+            }
+          }}
+        >
+          {/* Live Resume Column */}
+          <div className="flex flex-col mx-12 lg:m-0">
+            <PreviewHeader />
+            <div className="bg-linear-to-b from-primary/8 to-primary/12 p-4 rounded-4xl">
+              <div className="flex flex-col gap-4">
+                {pagesMatrix.map((pageSectionIds, pageIndex) => (
+                  <div key={`page-${pageIndex}`} ref={targetRef}>
+                    <LivePagePreview
+                      templateData={template}
+                      pageSectionsId={pageSectionIds}
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
+
+        </DragDropProvider>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { firstAvaibleStorageIndex } from '#/utils/template';
+import { firstAvaibleStorageIndex } from '#/utils/templateStorage';
 import { createFileRoute, redirect } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/create/$id')({
