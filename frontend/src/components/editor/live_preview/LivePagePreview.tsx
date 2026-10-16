@@ -8,11 +8,10 @@ import {
 import { LivePaper } from "../../Paper";
 import { LiveSortableSectionItem } from "./LiveSortableSectionItem";
 import type { SectionType, TemplateType } from "#/types/Template";
-import { useMemo, type CSSProperties } from "react";
+import { type CSSProperties } from "react";
 import { useResumeConfigStore } from "#/store/useResumeConfigStore";
 import { useShallow } from "zustand/react/shallow";
 import { LiveHeaderItem } from "./LiveHeaderItem";
-import { useResumeDimensionsStore } from "#/store/useResumeDimensionsStore";
 
 interface LivePreviewProps {
   pageSectionsId: string[]; // ["sectionId", "sectionId"]
@@ -99,24 +98,6 @@ export const LivePagePreview = ({ templateData, pageSectionsId }: LivePreviewPro
 
   if (!sections) return <div>Loading template live preview...</div>;
 
-  const templateIsEmpty = templateData.sections.every((dbSection) => {
-    const liveMainSection = sections[dbSection.id] || [];
-
-    return liveMainSection.subSections.every((subSection) => {
-      const fieldsEmpty = dbSection.fields.every(
-        (field) => subSection.fields[field.id] === "",
-      );
-
-      const bulletsEmpty = subSection.bullets.every(
-        (bullet) =>
-          bullet.text === "" &&
-          bullet.subBullets.every((subBullet) => subBullet.text === ""),
-      );
-
-      return fieldsEmpty && bulletsEmpty;
-    });
-  });
-
   const sectionIsEmpty = (dbSection: SectionType) => {
     const liveMainSection = sections[dbSection.id] || { subSections: [] };
 
@@ -134,20 +115,6 @@ export const LivePagePreview = ({ templateData, pageSectionsId }: LivePreviewPro
       return fieldsEmpty && bulletsEmpty;
     });
   };
-
-  if (templateIsEmpty)
-    return (
-      <LivePaper className="flex justify-center items-center">
-        <Empty>
-          <EmptyHeader>
-            <EmptyTitle>Empty Template</EmptyTitle>
-            <EmptyDescription>
-              Begin completing each section to populate the live preview.
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
-      </LivePaper>
-    );
 
   //Spacing
   const page_margin = config.templateConfig.spacing.page_margin;
@@ -201,6 +168,15 @@ export const LivePagePreview = ({ templateData, pageSectionsId }: LivePreviewPro
 
             if (!dbSection) return false;
             return !sectionIsEmpty(dbSection);
+          })
+          .sort((a, b) => {
+            const sectionA = templateData.sections.find(s => s.id === a) || templateData.sections[0];
+            const sectionB = templateData.sections.find(s => s.id === b) || templateData.sections[0];
+
+            const orderA = sectionA.isHeader ? 0 : sections[sectionA.id].order;
+            const orderB = sectionB.isHeader ? 0 : sections[sectionB.id].order;
+
+            return orderA - orderB;
           })
           .map((sectionId) => {
             const dbSection = templateData.sections.find(s => s.id === sectionId) || templateData.sections[0];

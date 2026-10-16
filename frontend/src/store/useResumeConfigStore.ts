@@ -65,36 +65,21 @@ export const useResumeConfigStore = create<ResumeConfigStoreState>()(
 					incomingSectionsConfig,
 				) =>
 					set((state) => {
-						// No localsorage config? Create it.
-						if (
-							!state.config.templateName ||
-							!state.config.templateConfig ||
-							!state.config.sectionConfigs
-						) {
-							state.defaultConfig.template = defaultConfig;
+						//  Always create default config
+						state.defaultConfig.template = defaultConfig;
+						state.defaultConfig.sections = Object.fromEntries(
+							incomingSectionsConfig.map(({ id, config }) => [id, config])
+						);
+
+						// Only initalize config if it doesn't exist.
+						if (!state.config.templateName) {
 							state.config = {
-								templateName: templateName,
+								templateName,
 								templateConfig: defaultConfig,
 								sectionConfigs: Object.fromEntries(
-									incomingSectionsConfig.map(({ id, config }) => [id, config]),
+									incomingSectionsConfig.map(({ id, config }) => [id, config])
 								),
 							};
-						}
-
-						// No default config? Create it.
-						const emptyDefaultTemplateConfig =
-							Object.values(state.defaultConfig.template).length === 0;
-						const emptyDefaultSectionsConfig =
-							Object.values(state.defaultConfig.sections).length === 0;
-
-						if (emptyDefaultTemplateConfig || emptyDefaultSectionsConfig) {
-							if (emptyDefaultTemplateConfig) {
-								state.defaultConfig.template = defaultConfig;
-							} else {
-								state.defaultConfig.sections = Object.fromEntries(
-									incomingSectionsConfig.map(({ id, config }) => [id, config]),
-								);
-							}
 						}
 					}),
 

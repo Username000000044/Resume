@@ -64,7 +64,7 @@ export const DecorationsConfig = () => {
 
   // Color Picker Field
   const handleColorChange = (newColor: string) => {
-    updateProperty(["templateConfig", "theme", "colors", "divider"], newColor)
+    updateProperty(["templateConfig", "theme", "colors", "divider"], newColor);
   }
 
   return (

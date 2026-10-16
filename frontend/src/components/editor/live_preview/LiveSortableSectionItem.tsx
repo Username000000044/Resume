@@ -282,7 +282,7 @@ export const LiveSortableSectionItem = ({
                 ))}
 
                 {/* Section Bullets */}
-                <ul className="relative list-[var(--bullet-style)] text-[var(--bullet-color)] font-[var(--bullet-weight)] pl-[var(--bullet-indentation)] list-inside">
+                <ul className="list-[var(--bullet-style)] text-[var(--bullet-color)] font-[var(--bullet-weight)] pl-[var(--bullet-indentation)] list-inside">
                   {subSection.bullets.map((bullet) => (
                     <span key={bullet.id}>
                       <LiveFieldItem
@@ -295,7 +295,7 @@ export const LiveSortableSectionItem = ({
                       />
 
                       {/* Bullet's Sub Bullets */}
-                      <ul className="list-[var(--sub-bullet-style)] pl-[var(--bullet-indentation)] list-inside">
+                      <ul className="flex flex-col list-[var(--sub-bullet-style)] pl-[var(--bullet-indentation)] list-inside">
                         {bullet.subBullets.map((subBullet) => (
                           <LiveFieldItem
                             key={subBullet.id}

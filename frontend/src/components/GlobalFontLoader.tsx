@@ -27,13 +27,11 @@ const getVariantsForFont = (
 };
 
 export const GlobalFontLoader = () => {
-  const config = useResumeConfigStore((store) => store.config);
+  const typography = useResumeConfigStore((store) => store.config.templateConfig.theme.typography);
 
-  const primaryFontFamily =
-    config.templateConfig.theme.typography.primary_font_family;
-  const secondaryFontFamily =
-    config.templateConfig.theme.typography.secondary_font_family;
-  const roleWeight = config.templateConfig.theme.typography.font_weight;
+  const primaryFontFamily = typography.primary_font_family;
+  const secondaryFontFamily = typography.secondary_font_family;
+  const roleWeight = typography.font_weight;
 
   const allUniqueWeights = useMemo(() => {
     return new Set(Object.values(roleWeight));

@@ -20,6 +20,9 @@ import { DragDropProvider } from "@dnd-kit/react"; // Imported for global tracki
 import { GlobalFontLoader } from "#/components/GlobalFontLoader";
 import { PreviewHeader } from "#/components/editor/live_preview/PreviewHeader";
 import { ConfigItems } from "#/components/editor/config_form/ConfigItems";
+import type { SectionType } from "#/types/Template";
+import { LivePaper } from "#/components/Paper";
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "#/components/ui/empty";
 
 export const Route = createFileRoute("/create/$id/i/$idx")({
   beforeLoad: async ({ params }) => {
@@ -59,10 +62,11 @@ function RouteComponent() {
 
   // Stores
   const sectionDimensions = useResumeDimensionsStore((store) => store.sectionDimensions);
-  const { initializeSections, reorderSections } = useResumeStore(
+  const { sections, initializeSections, reorderSections } = useResumeStore(
     useShallow((store) => ({
       initializeSections: store.initializeSections,
       reorderSections: store.reorderSections,
+      sections: store.sections,
     }))
   );
   const { config, defaultConfig, templateConfigName, liveMode, initializeConfig, updateProperty } =
@@ -79,7 +83,7 @@ function RouteComponent() {
 
   const [isSectionsPayloadReady, setIsSectionsPayloadReady] = useState(false);
   const [isConfigPayloadReady, setIsConfigPayloadReady] = useState(false);
-  const [localName, setLocalName] = useState(templateConfigName || "Untitled Resume");
+  const [localName, setLocalName] = useState(templateConfigName);
 
   // Update document title on load
   useEffect(() => {
@@ -121,14 +125,12 @@ function RouteComponent() {
 
       }
 
-      const hasExistingLocalStorage = localStorage.getItem(targetName);
+      const storedSections = localStorage.getItem(targetName);
+      const hasStoredSections = storedSections !== null;
 
       const unsub = useResumeStore.persist.onFinishHydration(() => {
         // Only fills store will new data if doesn't exist.
-        const currentSections = useResumeStore.getState().sections;
-        const hasInMemorySections = currentSections && Object.values(currentSections).length > 0;
-
-        if (!hasExistingLocalStorage && !hasInMemorySections) {
+        if (!hasStoredSections) {
 
           // Populate zustand store with sections, field, and bullets
           if (template.sections) {
@@ -169,44 +171,21 @@ function RouteComponent() {
         useResumeConfigStore.persist.setOptions({ name: targetName });
       }
 
-      const hasExistingLocalStorage = localStorage.getItem(targetName);
-
       const unsub = useResumeConfigStore.persist.onFinishHydration(() => {
         const config = useResumeConfigStore.getState().config;
 
-        // Default Config
-        const emptyDefaultTemplateConfig =
-          Object.values(defaultConfig.template).length === 0;
-        const emptyDefaultSectionsConfig =
-          Object.values(defaultConfig.sections).length === 0;
+        // Populate zustand store with db default db config;
+        if (template.sections) {
+          const syncPayload = template.sections.map((s) => ({
+            id: s.id,
+            config: s.default_config,
+          }));
 
-        // User Config
-        const emptyTemplateConfig =
-          Object.values(config.templateConfig).length === 0;
-        const emptySectionsConfig =
-          Object.values(config.sectionConfigs).length === 0;
-
-        if (hasExistingLocalStorage &&
-          emptyDefaultTemplateConfig ||
-          emptyDefaultSectionsConfig ||
-          emptyTemplateConfig ||
-          emptySectionsConfig ||
-          !config.templateName
-        ) {
-          // Populate zustand store with db default db config;
-          if (template.sections) {
-            const syncPayload = template.sections.map((s) => ({
-              id: s.id,
-              config: s.default_config,
-            }));
-
-            initializeConfig(
-              config.templateName,
-              template.default_config,
-              syncPayload,
-            );
-
-          }
+          initializeConfig(
+            config.templateName || "Untitled Resume",
+            template.default_config,
+            syncPayload,
+          );
         }
 
         setIsConfigPayloadReady(true);
@@ -221,8 +200,8 @@ function RouteComponent() {
   }, [
     template.id,
     templateIdx,
-    defaultConfig.sections,
-    defaultConfig.template,
+    template.default_config,
+    template.sections,
     initializeConfig,
     initializeSections,
   ]);
@@ -234,15 +213,69 @@ function RouteComponent() {
     setContainerWidth(width);
   });
 
+  const sectionIsEmpty = (dbSection: SectionType) => {
+    const liveMainSection = sections[dbSection.id];
+
+    // If the section doesn't exist in the live state store yet, treat it as empty
+    if (!liveMainSection) return true;
+
+    // If there are zero sub-sections explicitly allocated, it has no printable context
+    if (!liveMainSection.subSections || liveMainSection.subSections.length === 0) {
+      return true;
+    }
+
+    // A section is empty if EVERY sub-section inside it is empty
+    return liveMainSection.subSections.every((subSection) => {
+
+      // 1. Check all text field input values inside this specific sub-section
+      const fieldsEmpty = !subSection.fields || Object.values(subSection.fields).every((value) => {
+        return typeof value === "string" ? value.trim() === "" : !value;
+      });
+
+      // 2. Check all lists, bullets, and child sub-bullets inside this sub-section
+      const bulletsEmpty = !subSection.bullets || subSection.bullets.every((bullet) => {
+        const textBlank = !bullet.text || bullet.text.trim() === "";
+
+        const subBulletsBlank = !bullet.subBullets || bullet.subBullets.every((subBullet) => {
+          return !subBullet.text || subBullet.text.trim() === "";
+        });
+
+        return textBlank && subBulletsBlank;
+      });
+
+      // The sub-section is empty only if BOTH fields and bullet points are empty strings
+      return fieldsEmpty && bulletsEmpty;
+    });
+  };
+
+  const templateIsEmpty = template.sections.every((dbSection) => {
+    const liveMainSection = sections[dbSection.id];
+    if (!liveMainSection?.subSections) return true;
+
+    return liveMainSection.subSections.every((subSection) => {
+      const fieldsEmpty = Object.values(subSection.fields || {}).every(
+        (value) => value === "",
+      );
+
+      const bulletsEmpty = (subSection.bullets || []).every(
+        (bullet) =>
+          bullet.text === "" &&
+          (bullet.subBullets || []).every((subBullet) => subBullet.text === ""),
+      );
+
+      return fieldsEmpty && bulletsEmpty;
+    });
+  });
+
   // Completed metrics calculation engine
   const layoutMetrics = useMemo(() => {
     const baseWidth = containerWidth || 844;
     const totalPageHeight = baseWidth * (11 / 8.5); // US Letter Aspect Ratio
 
     const spacingConfig = config?.templateConfig?.spacing;
-    const targetMargin = spacingConfig?.page_margin ?? 0.75;
 
-    const sectionGapPt = spacingConfig?.section_gap;
+    const targetMargin = spacingConfig?.page_margin ?? 0.75;
+    const sectionGapPt = spacingConfig?.section_gap ?? 0;
     const sectionGapPx = sectionGapPt * (96 / 72) // (1pt = 1.333px)
 
     // Scale padding pixels proportionally so margins contract accurately on smaller screens
@@ -255,24 +288,32 @@ function RouteComponent() {
 
   // Generate page-segmented data grids dynamically
   const pagesMatrix = useMemo(() => {
-    if (!template.sections) return [];
+    if (!sections || Object.keys(sections).length === 0) return [];
 
-    const orderedSectionIds = template.sections.map((s) => s.id);
+    const orderedSectionIds = Object.keys(sections).sort((a, b) => {
+      return (sections[a].order || 0) - (sections[b].order || 0);
+    });
 
-    // Guard: Change from !height to explicit checking for undefined
-    const dimensionsLoading = orderedSectionIds.some((id) => sectionDimensions[id]?.height === undefined);
+    const visibleOrderedSectionIds = orderedSectionIds.filter((id) => {
+      const dbSection = template.sections.find((s) => s.id === id);
+      if (!dbSection) return false;
+
+      return !sectionIsEmpty(dbSection);
+    });
+
+    const dimensionsLoading = visibleOrderedSectionIds.some((id) => sectionDimensions[id]?.height === undefined);
 
     if (dimensionsLoading) {
-      return [orderedSectionIds];
+      return [visibleOrderedSectionIds];
     }
 
     return constructPagesMatrix(
       layoutMetrics.maxPageContentHeight,
       sectionDimensions,
-      orderedSectionIds,
+      visibleOrderedSectionIds,
       layoutMetrics.sectionGapPx
     );
-  }, [layoutMetrics.maxPageContentHeight, sectionDimensions, template.sections]);
+  }, [sections, layoutMetrics.maxPageContentHeight, sectionDimensions, template.sections]);
 
 
   // Status Display
@@ -330,14 +371,28 @@ function RouteComponent() {
             <PreviewHeader />
             <div className="bg-linear-to-b from-primary/8 to-primary/12 p-4 rounded-4xl">
               <div className="flex flex-col gap-4">
-                {pagesMatrix.map((pageSectionIds, pageIndex) => (
-                  <div key={`page-${pageIndex}`} ref={targetRef}>
-                    <LivePagePreview
-                      templateData={template}
-                      pageSectionsId={pageSectionIds}
-                    />
-                  </div>
-                ))}
+                {templateIsEmpty ? (
+                  <LivePaper className="flex justify-center items-center">
+                    <Empty>
+                      <EmptyHeader>
+                        <EmptyTitle>Empty Template</EmptyTitle>
+                        <EmptyDescription>
+                          Begin completing each section to populate the live preview.
+                        </EmptyDescription>
+                      </EmptyHeader>
+                    </Empty>
+                  </LivePaper>
+                ) : (
+                  pagesMatrix.map((pageSectionIds) => (
+                    <div key={`page-${pageSectionIds.join('-')}`} ref={targetRef}>
+                      <LivePagePreview
+                        templateData={template}
+                        pageSectionsId={pageSectionIds}
+                      />
+                    </div>
+                  ))
+                )
+                }
               </div>
             </div>
           </div>

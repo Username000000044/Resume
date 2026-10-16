@@ -82,8 +82,6 @@ export const constructPagesMatrix = (
 	let currentPage: string[] = [];
 	let currentPageHeight = 0;
 
-	// GUARD: If the store hasn't captured dimensions for all visible sections yet,
-	// treat it as an initial loading state to avoid calculating broken layout matrices.
 	const missingDimensions = sectionIds.some(id => !sectionDimensions[id] || sectionDimensions[id].height === 0);
 	if (missingDimensions) {
 		return [sectionIds]; // Return everything on a single provisional page while dimensions load
@@ -92,11 +90,9 @@ export const constructPagesMatrix = (
 	for (const sectionId of sectionIds) {
 		const sectionHeight = sectionDimensions[sectionId].height;
 
-		const sectionGapTotal = sectionGap * (Object.values(sectionDimensions).length - 1);
+		const sectionGaps = sectionGap * (Object.values(sectionDimensions).length - 1);
 
-		// If a single section is naturally taller than the maximum page boundary, 
-		// it must force a page split immediately if there are previous items on the current page.
-		if ((sectionHeight + sectionGapTotal + currentPageHeight) > maxPageHeight && currentPage.length > 0) {
+		if ((sectionHeight + sectionGaps + currentPageHeight) > maxPageHeight && currentPage.length > 0) {
 			matrix.push(currentPage);
 			currentPage = [];
 			currentPageHeight = 0;

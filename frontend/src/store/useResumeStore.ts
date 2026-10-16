@@ -144,7 +144,7 @@ export const useResumeStore = create<ResumeStoreState>()(
 					// Assign new placement order based on idx of the new reorderedIds array
 					reorderedIds.forEach((id, idx) => {
 						if (state.sections[id]) {
-							state.sections[id].order = idx; // + 1 to account for header section.
+							state.sections[id].order = idx + 1;
 						}
 					});
 				}),
