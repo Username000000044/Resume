@@ -1,0 +1,96 @@
+import { useResumeSectionsStore } from "#/store/useResumeSectionsStore";
+import { useShallow } from "zustand/react/shallow";
+import { DragDropProvider } from "@dnd-kit/react";
+import { Plus } from "lucide-react";
+import { SortableSubSectionItem } from "./SortableSubSectionItem";
+import { ScrollArea, ScrollBar } from "#/components/ui/scroll-area";
+import { Button } from "#/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
+import type { TemplateType } from "#/types/template";
+
+export const MAX_BULLET_COUNT = 10;
+export const MAX_SUB_BULLET_COUNT = 5;
+const MAX_SUB_SECTION_COUNT = 5;
+
+interface EditorTabsProps {
+  templateData: TemplateType;
+}
+
+export const EditorTabs = ({ templateData }: EditorTabsProps) => {
+  const { sections, addSubSection, reorderSubSections } = useResumeSectionsStore(
+    useShallow((state) => ({
+      sections: state.sections,
+      addMainBullet: state.addMainBullet,
+      addSubSection: state.addSubSection,
+      reorderSubSections: state.reorderSubSections,
+    })),
+  );
+
+  return (
+    <Tabs className="min-w-full lg:max-w-120 gap-0">
+      <ScrollArea className="w-full max-w-full overflow-hidden max-auto px-4">
+        <TabsList className="bg-transparent py-0 overflow-y-hidden overflow-x-auto justify-start gap-2 md:gap-3">
+          {/* Tabs */}
+          {templateData.sections.map((section) => (
+            <TabsTrigger
+              className="cursor-pointer px-2 rounded-b-none font-normal data-active:bg-primary data-active:text-primary-foreground data-active:hover:text-primary-foreground"
+              value={section.title}
+              key={section.id}
+            >
+              {section.title}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        <ScrollBar orientation="horizontal" className="px-4 !h-[6px] [&>div]:bg-input/50" />
+      </ScrollArea>
+      {templateData.sections.map((section, sectionIndex) => (
+        <TabsContent
+          value={section.title}
+          key={section.id}
+          className="flex flex-col gap-4"
+        >
+          {/* Enable Cards to Be Dragable */}
+          <DragDropProvider
+            onDragEnd={(event) => {
+              reorderSubSections(section.id, event);
+            }}
+          >
+            {/* Map main sections to expose sections*/}
+            <ul className="flex flex-col gap-4">
+              {sections[section.id].subSections.map(
+                (subSection, subSectionIndex) => (
+                  <SortableSubSectionItem
+                    key={subSection.id}
+                    section={section}
+                    sectionIndex={sectionIndex}
+                    subSection={subSection}
+                    subSectionIndex={subSectionIndex}
+                    templateData={templateData}
+                  />
+                ),
+              )}
+            </ul>
+          </DragDropProvider>
+
+          {/* Add Section */}
+          {section.manyInstances && (
+            <div className="flex justify-center mt-4">
+              <Button
+                size="icon-lg"
+                variant="outline"
+                className="border-none shadow-sm ring-1 ring-foreground/5 cursor-pointer"
+                onClick={() => addSubSection(section.id)}
+                disabled={
+                  sections[section.id].subSections.length >=
+                  MAX_SUB_SECTION_COUNT
+                }
+              >
+                <Plus />
+              </Button>
+            </div>
+          )}
+        </TabsContent>
+      ))}
+    </Tabs>
+  );
+};
