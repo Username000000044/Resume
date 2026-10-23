@@ -99,8 +99,7 @@ export const LiveSortableSectionItem = ({
 
   return (
     <li
-      ref={handleRefCombination}
-      className="relative text-(length:--font-size-base) text-wrap"
+      ref={handleRefCombination} className="relative"
     >
       {/* Section Gap Adjuster */}
       {liveMode === "config" && (
@@ -144,12 +143,7 @@ export const LiveSortableSectionItem = ({
         )}
 
         {/* Sub Sections */}
-        <div
-          className={cn("relative flex flex-col", {
-            "gap-[var(--instance-gap)]":
-              config.templateConfig.spacing.instance_gap,
-          })}
-        >
+        <div className="relative flex flex-col gap-[var(--instance-gap)]">
           {sections[dbSection.id].subSections.map((subSection) => {
             const matrix = constructLayoutMatrix(dbSection.fields);
 

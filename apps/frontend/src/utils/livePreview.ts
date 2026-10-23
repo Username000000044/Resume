@@ -1,6 +1,6 @@
 import { PRESET_MAP } from "#/components/editor/live_preview/LivePagePreview";
 import type { Dimensions } from "#/store/useResumeDimensionsStore";
-import type { FieldType } from "#/types/template";
+import type { FieldType } from "#/types/trpc";
 import type { fieldRenderRoleEnum, TemplateConfig } from "@resume/backend/src/db/schema.js";
 
 type FieldRole = (typeof fieldRenderRoleEnum.enumValues)[number];

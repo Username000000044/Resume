@@ -30,7 +30,7 @@ export const LiveHeaderItem = ({ dbSection }: HeaderItemProps) => {
   const config = useResumeConfigStore((store) => store.config);
 
   return (
-    <section ref={targetRef} className={`text-(length:--font-size-base) text-wrap`}>
+    <section ref={targetRef}>
       {/* Sub Sections */}
       <div className="flex flex-col gap-[var(--instance-gap)]">
         {sections[dbSection.id].subSections.map((subSection) => {

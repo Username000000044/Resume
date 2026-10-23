@@ -1,1 +1,0 @@
-export type Format = "jpg" | "png" | "pdf-s" | "pdf-p" | "docx";

@@ -1,10 +1,5 @@
 import { useResumeSectionsStore } from "#/store/useResumeSectionsStore";
-import {
-  Empty,
-  EmptyHeader,
-  EmptyTitle,
-  EmptyDescription,
-} from "../../ui/empty";
+
 import { LivePaper } from "../../Paper";
 import { LiveSortableSectionItem } from "./LiveSortableSectionItem";
 import type { SectionType, TemplateType } from "#/types/template";
@@ -98,24 +93,6 @@ export const LivePagePreview = ({ templateData, pageSectionsId }: LivePreviewPro
 
   if (!sections) return <div>Loading template live preview...</div>;
 
-  const sectionIsEmpty = (dbSection: SectionType) => {
-    const liveMainSection = sections[dbSection.id] || { subSections: [] };
-
-    return liveMainSection.subSections.every((subSection) => {
-      const fieldsEmpty = dbSection.fields.every(
-        (field) => subSection.fields[field.id] === "",
-      );
-
-      const bulletsEmpty = subSection.bullets.every(
-        (bullet) =>
-          bullet.text === "" &&
-          bullet.subBullets.every((subBullet) => subBullet.text === ""),
-      );
-
-      return fieldsEmpty && bulletsEmpty;
-    });
-  };
-
   //Spacing
   const page_margin = config.templateConfig.spacing.page_margin;
 
@@ -158,39 +135,20 @@ export const LivePagePreview = ({ templateData, pageSectionsId }: LivePreviewPro
 
   return (
     <LivePaper
-      className="relative flex flex-col text-(length:--font-size-base) !p-[var(--page-margin)]"
+      className="text-(length:--font-size-base) !p-[var(--page-margin)]"
       style={dynamicPreviewStyles}
     >
       <ul className="flex flex-col gap-[var(--section-gap)]">
         {pageSectionsId
-          .filter((sectionId) => {
-            const dbSection = templateData.sections.find(s => s.id === sectionId) || templateData.sections[0];
-
-            if (!dbSection) return false;
-            return !sectionIsEmpty(dbSection);
-          })
-          .sort((a, b) => {
-            const sectionA = templateData.sections.find(s => s.id === a) || templateData.sections[0];
-            const sectionB = templateData.sections.find(s => s.id === b) || templateData.sections[0];
-
-            const orderA = sectionA.isHeader ? 0 : sections[sectionA.id].order;
-            const orderB = sectionB.isHeader ? 0 : sections[sectionB.id].order;
-
-            return orderA - orderB;
-          })
           .map((sectionId) => {
-            const dbSection = templateData.sections.find(s => s.id === sectionId) || templateData.sections[0];
             const dbSectionIndex = templateData.sections.findIndex(s => s.id === sectionId);
+            const dbSection = templateData.sections[dbSectionIndex];
 
             if (!dbSection) return null;
+
             if (dbSection.isHeader) return <LiveHeaderItem dbSection={dbSection} key={sectionId} />
 
-            return <LiveSortableSectionItem
-              key={sectionId}
-              templateData={templateData}
-              dbSection={dbSection}
-              dbSectionIndex={dbSectionIndex}
-            />;
+            return <LiveSortableSectionItem dbSectionIndex={dbSectionIndex} templateData={templateData} dbSection={dbSection} key={sectionId} />;
           })}
       </ul>
     </LivePaper>

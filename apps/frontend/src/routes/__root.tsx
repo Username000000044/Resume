@@ -10,7 +10,7 @@ import { Toaster } from "#/components/ui/toast";
 export const Route = createRootRoute({
   loader: async () => {
     const templateList = await queryClient.query(
-      trpc.template.templatesList.queryOptions(),
+      trpc.templatesList.queryOptions(),
     );
     return { templateList };
   },

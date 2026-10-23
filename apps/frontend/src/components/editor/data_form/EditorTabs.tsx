@@ -6,7 +6,7 @@ import { SortableSubSectionItem } from "./SortableSubSectionItem";
 import { ScrollArea, ScrollBar } from "#/components/ui/scroll-area";
 import { Button } from "#/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
-import type { TemplateType } from "#/types/template";
+import type { TemplateType } from "#/types/trpc";
 
 export const MAX_BULLET_COUNT = 10;
 export const MAX_SUB_BULLET_COUNT = 5;

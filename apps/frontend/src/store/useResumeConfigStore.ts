@@ -1,4 +1,4 @@
-import type { ConfigObject, SectionConfig, TemplateConfig } from "#/types/template-config";
+import type { ConfigObject, SectionConfig, TemplateConfig } from "#/types/trpc";
 import { debouncedStorage } from "#/utils/debouncedStorage";
 import { create } from "zustand";
 import { createJSONStorage, devtools, persist } from "zustand/middleware";
@@ -11,8 +11,8 @@ interface DefaultConfig {
 
 export interface ConfigData {
 	templateName: string;
-	templateConfig: TemplateConfig;
-	sectionConfigs: Record<string, SectionConfig>; // uuid : config
+	template: TemplateConfig;
+	sections: Record<string, SectionConfig>; // uuid : config
 }
 
 interface SectionConfigInitialization {
@@ -20,11 +20,11 @@ interface SectionConfigInitialization {
 	config: SectionConfig;
 }
 
-type LiveMode = "view" | "config";
+export type Mode = "preview" | "editor";
 export type ValueType = string | number | boolean;
 interface ResumeConfigStoreState {
-	liveMode: LiveMode;
-	setLiveMode: (mode: LiveMode) => void;
+	mode: Mode;
+	setMode: (mode: Mode) => void;
 
 	defaultConfig: DefaultConfig;
 	config: ConfigData;
@@ -47,14 +47,14 @@ export const useResumeConfigStore = create<ResumeConfigStoreState>()(
 	devtools(
 		persist(
 			immer((set) => ({
-				liveMode: "view",
-				setLiveMode: (mode) => set({ liveMode: mode }),
+				mode: "preview",
+				setMode: (mode) => set({ mode: mode }),
 
 				defaultConfig: { template: {}, sections: {} } as DefaultConfig,
 				config: {
 					templateName: "",
-					templateConfig: {},
-					sectionConfigs: {},
+					template: {},
+					sections: {},
 				} as ConfigData,
 
 				initializeConfig: (
@@ -73,8 +73,8 @@ export const useResumeConfigStore = create<ResumeConfigStoreState>()(
 						if (!state.config.templateName) {
 							state.config = {
 								templateName,
-								templateConfig: defaultConfig,
-								sectionConfigs: Object.fromEntries(
+								template: defaultConfig,
+								sections: Object.fromEntries(
 									incomingSectionsConfig.map(({ id, config }) => [id, config])
 								),
 							};
@@ -94,8 +94,8 @@ export const useResumeConfigStore = create<ResumeConfigStoreState>()(
 
 				resetConfig: () =>
 					set((state) => {
-						state.config.templateConfig = state.defaultConfig.template;
-						state.config.sectionConfigs = state.defaultConfig.sections;
+						state.config.template = state.defaultConfig.template;
+						state.config.sections = state.defaultConfig.sections;
 					}),
 			})),
 			{

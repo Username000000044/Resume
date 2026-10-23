@@ -26,12 +26,14 @@ export interface SubSectionData {
 export interface SectionData {
 	id: string;
 	subSections: SubSectionData[];
+	isHeader: boolean;
 	order: number;
 }
 
 interface SectionInitialization {
 	id: string;
 	fieldIds: string[];
+	isHeader: boolean;
 	order: number;
 }
 
@@ -93,11 +95,12 @@ export const useResumeSectionsStore = create<ResumeSectionsStoreState>()(
 
 			initializeSections: (incommingSections) =>
 				set((state) => {
-					incommingSections.forEach(({ id, fieldIds, order }) => {
+					incommingSections.forEach(({ id, isHeader, fieldIds, order }) => {
 						// Initialize main section if doesn't exist
 						if (!state.sections[id]) {
 							state.sections[id] = {
 								id,
+								isHeader,
 								subSections: [
 									{
 										id: crypto.randomUUID(),

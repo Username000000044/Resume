@@ -1,5 +1,3 @@
-import type { inferRouterOutputs } from "@trpc/server";
-import type { AppRouter } from "../../../backend/src/appRouter";
 import {
   Carousel,
   CarouselContent,
@@ -12,6 +10,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { WheelGesturesPlugin } from "embla-carousel-wheel-gestures";
 import _ from "lodash";
 import { useTemplateStore } from "#/store/useTemplateStore";
+import type { TemplateType } from "#/types/template";
 
 const TWEEN_FACTOR_BASE = 0.3;
 
@@ -19,7 +18,7 @@ const numberWithinRange = (number: number, min: number, max: number): number =>
   Math.min(Math.max(number, min), max);
 
 interface CarouselProps {
-  data: inferRouterOutputs<AppRouter>["templatesList"];
+  data: TemplateType[],
 }
 
 export const TemplatesCarousel = ({ data }: CarouselProps) => {

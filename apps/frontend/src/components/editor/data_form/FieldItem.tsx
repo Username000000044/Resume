@@ -5,8 +5,8 @@ import { useEffect, useMemo, type ChangeEvent } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Field, FieldLabel } from "#/components/ui/field";
 import { Input } from "#/components/ui/input";
-import type { FieldType, SectionType } from "#/types/template";
 import { Textarea } from "#/components/ui/textarea";
+import type { FieldType, SectionType } from "#/types/trpc";
 
 interface FieldInputProps {
   field: FieldType;

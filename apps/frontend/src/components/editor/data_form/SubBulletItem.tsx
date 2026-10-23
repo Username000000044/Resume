@@ -1,14 +1,11 @@
-import type { inferRouterOutputs } from "@trpc/server";
 import { X } from "lucide-react";
-import type { AppRouter } from "@resume/backend/src/appRouter.js";
 import {
   useResumeSectionsStore,
   type MainBullet,
   type SubBullet,
 } from "#/store/useResumeSectionsStore";
 import { useShallow } from "zustand/react/shallow";
-import { useEffect, useMemo, type ChangeEvent } from "react";
-import { debounce } from "lodash";
+import { type ChangeEvent } from "react";
 import { Field, FieldLabel } from "#/components/ui/field";
 import {
   InputGroup,
@@ -16,7 +13,7 @@ import {
   InputGroupAddon,
   InputGroupButton,
 } from "#/components/ui/input-group";
-import type { SectionType } from "#/types/template";
+import type { SectionType } from "#/types/trpc";
 
 interface FieldInputProps {
   section: SectionType;

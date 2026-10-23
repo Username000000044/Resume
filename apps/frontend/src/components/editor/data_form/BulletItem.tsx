@@ -1,8 +1,6 @@
 import { X } from "lucide-react";
-import type { inferRouterOutputs } from "@trpc/server";
 import { useResumeSectionsStore, type MainBullet } from "#/store/useResumeSectionsStore";
-import { useEffect, useMemo, type ChangeEvent } from "react";
-import { debounce } from "lodash";
+import { type ChangeEvent } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { MAX_SUB_BULLET_COUNT } from "./EditorTabs";
 import {
@@ -11,10 +9,9 @@ import {
   InputGroupAddon,
   InputGroupButton,
 } from "#/components/ui/input-group";
-import type { AppRouter } from "@resume/backend/src/appRouter.js";
 import { Field, FieldLabel } from "#/components/ui/field";
 import { Button } from "#/components/ui/button";
-import type { SectionType } from "#/types/template";
+import type { SectionType } from "#/types/trpc";
 
 interface FieldInputProps {
   mainBullet: MainBullet;

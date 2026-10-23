@@ -13,7 +13,7 @@ import { Button } from "#/components/ui/button";
 import { Card, CardContent } from "#/components/ui/card";
 import { FieldGroup } from "#/components/ui/field";
 import { FieldInput } from "./FieldItem";
-import type { SectionType, TemplateType } from "#/types/template";
+import type { SectionType, TemplateType } from "#/types/trpc";
 
 interface SectionCardTypes {
   section: SectionType;

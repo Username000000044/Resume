@@ -8,20 +8,22 @@ import {
 import { Switch } from "#/components/ui/switch";
 import { useSaveStatusStore } from "#/store/uesSaveStatusStore";
 import { useResumeConfigStore } from "#/store/useResumeConfigStore";
-import { useResumeSectionsStore } from "#/store/useResumeSectionsStore";
 import { Download, Folder, FolderX, RefreshCcw } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
-import { DownloadResume } from "./DownloadResume";
+import { DownloadResume } from "../export/ExportResume";
+import type { TemplateType } from "#/types/trpc";
 
+interface PreviewHeaderProps {
+  pagesMatrix: string[][],
+  templateData: TemplateType,
+}
 
-export const PreviewHeader = ({ pagesMatrix }: { pagesMatrix: string[][] }) => {
-  const config = useResumeConfigStore((store) => store.config);
-  const sections = useResumeSectionsStore((store) => store.sections);
+export const PreviewHeader = ({ pagesMatrix, templateData }: PreviewHeaderProps) => {
   const status = useSaveStatusStore((store) => store.status);
-  const { liveMode, setLiveMode } = useResumeConfigStore(
+  const { mode, setMode } = useResumeConfigStore(
     useShallow((state) => ({
-      liveMode: state.liveMode,
-      setLiveMode: state.setLiveMode,
+      mode: state.mode,
+      setMode: state.setMode,
     })),
   );
 
@@ -42,7 +44,7 @@ export const PreviewHeader = ({ pagesMatrix }: { pagesMatrix: string[][] }) => {
           Open Popover
         </PopoverTrigger>
         <PopoverContent className="flex flex-col gap-0 p-0 overflow-hidden cursor-pointer">
-          <DownloadResume config={config} sections={sections} pagesMatrix={pagesMatrix} />
+          <DownloadResume pagesMatrix={pagesMatrix} templateData={templateData} />
         </PopoverContent>
       </Popover>
 
@@ -78,7 +80,7 @@ export const PreviewHeader = ({ pagesMatrix }: { pagesMatrix: string[][] }) => {
 
       <div className="flex gap-2 items-center">
         <Label htmlFor="view-mode" className="font-normal cursor-pointer">
-          {liveMode === "view" ? (
+          {mode === "preview" ? (
             <span>View Mode</span>
           ) : (
             <span>Config Mode</span>
@@ -89,7 +91,7 @@ export const PreviewHeader = ({ pagesMatrix }: { pagesMatrix: string[][] }) => {
           id="view-mode"
           size="sm"
           onCheckedChange={() =>
-            liveMode === "view" ? setLiveMode("config") : setLiveMode("view")
+            mode === "preview" ? setMode("editor") : setMode("preview")
           }
         />
       </div>

@@ -10,9 +10,9 @@ import {
 import { useResumeConfigStore } from "#/store/useResumeConfigStore";
 import { FONT_VARIANTS } from "@resume/backend/src/db/schema.js";
 import { useState, type Dispatch, type SetStateAction } from "react";
-import type { FieldType } from "#/types/template";
 import { useShallow } from "zustand/react/shallow";
 import { NumberScrubberInputItem } from "./NumberScrubberInputItem";
+import type { FieldType } from "#/types/trpc";
 
 interface Item {
   label: string;
@@ -38,7 +38,7 @@ export const FieldConfig = ({ fieldRole }: FieldConfigProps) => {
   );
 
   const fontVariant =
-    config.templateConfig.theme.typography.font_family[fieldRole];
+    config.template.theme.typography.font_family[fieldRole];
   const defaultFontWeight =
     defaultConfig.template.theme.typography.font_weight[fieldRole];
 

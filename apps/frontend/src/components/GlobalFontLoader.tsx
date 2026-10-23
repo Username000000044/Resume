@@ -27,7 +27,7 @@ const getVariantsForFont = (
 };
 
 export const GlobalFontLoader = () => {
-  const typography = useResumeConfigStore((store) => store.config.templateConfig.theme.typography);
+  const typography = useResumeConfigStore((store) => store.config.template.theme.typography);
 
   const primaryFontFamily = typography.primary_font_family;
   const secondaryFontFamily = typography.secondary_font_family;

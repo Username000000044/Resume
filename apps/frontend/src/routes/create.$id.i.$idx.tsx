@@ -1,12 +1,10 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { queryClient, trpc } from "#/utils/trpc";
 import {
   DEFAULT_RESUME_STORE_PERSIST_NAME,
   useResumeSectionsStore,
 } from "#/store/useResumeSectionsStore";
 import { useEffect, useMemo, useState } from "react";
 import { EditorTabs } from "#/components/editor/data_form/EditorTabs";
-import { LivePagePreview } from "#/components/editor/live_preview/LivePagePreview";
 import {
   DEFAULT_RESUME_CONFIG_STORE_PERSIST_NAME,
   useResumeConfigStore,
@@ -15,14 +13,16 @@ import { useShallow } from "zustand/react/shallow";
 import { firstAvaibleStorageIndex, storageTargetName } from "#/utils/templateStorage";
 import { useResumeDimensionsStore } from "#/store/useResumeDimensionsStore";
 import { useResizeObserver } from "#/hooks/useResizeObserver";
-import { DragDropProvider } from "@dnd-kit/react"; // Imported for global tracking context
 import { GlobalFontLoader } from "#/components/GlobalFontLoader";
 import { PreviewHeader } from "#/components/editor/live_preview/PreviewHeader";
 import { ConfigItems } from "#/components/editor/config_form/ConfigItems";
-import type { SectionType } from "#/types/template";
-import { LivePaper } from "#/components/Paper";
-import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "#/components/ui/empty";
 import { constructPagesMatrix } from "#/utils/livePreview";
+import { queryClient, trpc } from "#/utils/trpc";
+import { ResumeRenderEngine } from "@resume/renderer";
+import { pageSizeMap, type PageSize } from "@resume/renderer/constants";
+
+
+import type { SectionType } from "#/types/trpc";
 
 export const Route = createFileRoute("/create/$id/i/$idx")({
   beforeLoad: async ({ params }) => {
@@ -40,7 +40,7 @@ export const Route = createFileRoute("/create/$id/i/$idx")({
   },
   loader: async ({ params }) => {
     const template = await queryClient.query(
-      trpc.template.templateById.queryOptions(params.id, { retry: false }),
+      trpc.templateById.queryOptions(params.id, { retry: false }),
     );
     const templateIdx = params.idx;
     const templateConfigName = useResumeConfigStore.getState().config.templateName;
@@ -69,11 +69,12 @@ function RouteComponent() {
       sections: store.sections,
     }))
   );
-  const { config, templateConfigName, liveMode, initializeConfig, updateProperty } =
+  const { config, defaultConfig, templateConfigName, mode, initializeConfig, updateProperty } =
     useResumeConfigStore(
       useShallow((store) => ({
         config: store.config,
-        liveMode: store.liveMode,
+        mode: store.mode,
+        defaultConfig: store.defaultConfig,
         templateConfigName: store.config.templateName,
         initializeConfig: store.initializeConfig,
         updateProperty: store.updateProperty
@@ -136,6 +137,7 @@ function RouteComponent() {
             const syncPayload = template.sections.map((s) => ({
               id: s.id,
               fieldIds: s.fields.map((f) => f.id),
+              isHeader: s.isHeader,
               order: s.order,
             }));
 
@@ -266,24 +268,31 @@ function RouteComponent() {
     });
   });
 
+  const pageSize: PageSize = "letter";
+
   // Completed metrics calculation engine
   const layoutMetrics = useMemo(() => {
-    const baseWidth = containerWidth || 844;
-    const totalPageHeight = baseWidth * (11 / 8.5); // US Letter Aspect Ratio
+    const { w: pageWidthIn, h: pageHeightIn } = pageSizeMap[pageSize];
 
-    const spacingConfig = config?.templateConfig?.spacing;
+    const spacingConfig = config?.template?.spacing;
 
-    const targetMargin = spacingConfig?.page_margin ?? 0.75;
+    const pageMarginIn = spacingConfig?.page_margin ?? 0.75;
     const sectionGapPt = spacingConfig?.section_gap ?? 0;
-    const sectionGapPx = sectionGapPt * (96 / 72) // (1pt = 1.333px)
 
-    // Scale padding pixels proportionally so margins contract accurately on smaller screens
-    const verticalPaddingPx = (targetMargin / 11) * totalPageHeight;
+    const pageWidthPx = pageWidthIn * 96;
+    const pageHeightPx = pageHeightIn * 96;
+    const pageMarginPx = pageMarginIn * 96;
+    const sectionGapPx = sectionGapPt * (96 / 72);
 
-    const maxPageContentHeight = totalPageHeight - (verticalPaddingPx * 2);
+    const maxPageContentHeight = pageHeightPx - (pageMarginPx * 2);
 
-    return { maxPageContentHeight, sectionGapPx };
-  }, [containerWidth, config]);
+    return {
+      pageWidthPx,
+      pageHeightPx,
+      maxPageContentHeight,
+      sectionGapPx
+    }
+  }, [pageSize, config]);
 
   // Generate page-segmented data grids dynamically
   const pagesMatrix = useMemo(() => {
@@ -325,14 +334,16 @@ function RouteComponent() {
     )
   }
 
+
   return (
-    <div className="pt-12 overflow-x-hidden lg:py-24 print:p-0">
-      <div className="grid min-[93rem]:grid-cols-[1fr_auto] gap-12 2xl:gap-24 w-fit mx-auto">
+
+    <div className="pt-12 overflow-x-hidden lg:py-24">
+      <div className="grid min-[93rem]:grid-cols-[auto_1fr] gap-12 2xl:gap-24 w-fit mx-auto">
         {/* Headless Font Loader */}
         <GlobalFontLoader />
 
         {/* Editor Column */}
-        <div className=" flex flex-col w-full lg:px-0 print:hidden">
+        <div className=" flex flex-col w-full lg:px-0">
           <input
             type="text"
             name="templateName"
@@ -350,53 +361,39 @@ function RouteComponent() {
             maxLength={24}
             className="text-center min-[93rem]:text-start text-4xl mb-8 text-primary font-bold tracking-wide border-none outline-none"
           />
-          {liveMode === "view" ? (
+          {mode === "preview" ? (
             <EditorTabs templateData={template} />
           ) : (
             <ConfigItems />
           )}
         </div>
 
-        <DragDropProvider
-          onDragEnd={(event) => {
-            const sectionId = event.operation.target?.id;
-            if (sectionId) {
-              reorderSections(event);
-            }
-          }}
-        >
-          {/* Live Resume Column */}
-          <div className="flex flex-col mx-12 lg:m-0">
-            <PreviewHeader pagesMatrix={pagesMatrix} />
-            <div className="bg-linear-to-b from-primary/8 to-primary/12 p-4 rounded-4xl">
-              <div className="flex flex-col gap-4">
-                {templateIsEmpty ? (
-                  <LivePaper className="flex justify-center items-center">
-                    <Empty>
-                      <EmptyHeader>
-                        <EmptyTitle>Empty Template</EmptyTitle>
-                        <EmptyDescription>
-                          Begin completing each section to populate the live preview.
-                        </EmptyDescription>
-                      </EmptyHeader>
-                    </Empty>
-                  </LivePaper>
-                ) : (
-                  pagesMatrix.map((pageSectionIds) => (
-                    <div key={`page-${pageSectionIds.join('-')}`} ref={targetRef}>
-                      <LivePagePreview
-                        templateData={template}
-                        pageSectionsId={pageSectionIds}
-                      />
-                    </div>
-                  ))
-                )
-                }
-              </div>
-            </div>
+        {/* Live Resume Column */}
+        <div className="flex flex-col mx-12 lg:m-0 w-max min-w-max">
+          <PreviewHeader pagesMatrix={pagesMatrix} templateData={template} />
+          <div className="bg-linear-to-b from-primary/8 to-primary/12 p-4 rounded-4xl">
+            <ResumeRenderEngine
+              config={{
+                template: { ...config.template },
+                sections: { ...config.sections }
+              }}
+              defaultConfig={{
+                template: { ...defaultConfig.template },
+                sections: { ...defaultConfig.sections }
+              }}
+              dbSections={template.sections}
+              sections={sections}
+              pageSize="letter"
+              mode={mode}
+              pages={pagesMatrix}
+              sectionControls
+              onConfigChange={(path, value) => {
+                updateProperty(path, value);
+              }}
+            />
           </div>
+        </div>
 
-        </DragDropProvider>
       </div>
     </div>
   );
