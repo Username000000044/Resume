@@ -33,10 +33,10 @@ export const TypographyConfig = () => {
   );
 
   const [selectedPrimaryFont, setSelectedPrimaryFont] = useState(
-    config.templateConfig.theme.typography.primary_font_family,
+    config.template.theme.typography.primary_font_family,
   );
   const [selectedSecondaryFont, setSelectedSecondaryFont] = useState(
-    config.templateConfig.theme.typography.secondary_font_family,
+    config.template.theme.typography.secondary_font_family,
   );
 
   type Preset = keyof typeof PRESET_MAP;
@@ -52,7 +52,7 @@ export const TypographyConfig = () => {
       className={cn(
         "flex h-14 w-full cursor-pointer hover:bg-muted select-none items-center justify-center whitespace-nowrap rounded-2xl outline-none transition-all focus:border-ring focus:ring-3 focus:ring-ring/30",
         {
-          "bg-input/50 hover:bg-input/50": config.templateConfig.theme.typography.preset === preset,
+          "bg-input/50 hover:bg-input/50": config.template.theme.typography.preset === preset,
         },
       )}
       onClick={() =>

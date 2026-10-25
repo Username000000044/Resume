@@ -47,8 +47,8 @@ const seperatorItems: Item[] = GROUP_SEPARATOR.map((separator) => ({
 export const DecorationsConfig = () => {
   const { decorationsConfig, colorConfig, defaultColorConfig, defaultSpacingConfig, updateProperty } = useResumeConfigStore(
     useShallow((store) => ({
-      decorationsConfig: store.config.templateConfig.decorations,
-      colorConfig: store.config.templateConfig.theme.colors,
+      decorationsConfig: store.config.template.decorations,
+      colorConfig: store.config.template.theme.colors,
       defaultColorConfig: store.defaultConfig.template.theme.colors,
       defaultSpacingConfig: store.defaultConfig.template.spacing,
       updateProperty: store.updateProperty,

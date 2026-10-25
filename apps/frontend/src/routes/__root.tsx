@@ -3,9 +3,11 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { queryClient, trpc } from "#/utils/trpc";
 import texturedPaper from "@/assets/textured-paper.webp";
-import "../styles.css";
 import { TooltipProvider } from "#/components/ui/tooltip";
 import { Toaster } from "#/components/ui/toast";
+
+import "../styles.css";
+import "@resume/renderer/styles.css";
 
 export const Route = createRootRoute({
   loader: async () => {

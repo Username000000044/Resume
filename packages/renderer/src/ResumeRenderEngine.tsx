@@ -78,9 +78,10 @@ export const ResumeRenderEngine = (props: RenderEngineProps) => {
     return (
         <TooltipProvider>
             <ConfigChangeContext value={onConfigChange}>
+                {pages.length === 0 && <ResumePage style={pageStyles} hasContent={false} />}
+
                 {pages.map(sectionIds => (
                     <ResumePage key={sectionIds.join("-")} style={pageStyles} hasContent={true}>
-
                         {sectionIds.map(sectionId => {
                             const dbSectionIdx = dbSections.findIndex(s => s.id === sectionId);
                             const dbSection = dbSections[dbSectionIdx];
@@ -100,7 +101,9 @@ export const ResumeRenderEngine = (props: RenderEngineProps) => {
                                 key={sectionId}
                                 section={sections[dbSection.id]}
                                 dbSection={dbSection}
+                                defaultConfig={defaultConfig}
                                 config={config}
+                                mode={mode}
                             />
                         })}
                     </ResumePage>

@@ -4,8 +4,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build:css": "mkdir -p dist && tailwindcss -i ./components/src/styles.css -o ./dist/styles.css --minify",
-    "watch:css": "mkdir -p dist && tailwindcss -i ./components/src/styles.css -o ./dist/styles.css --watch"
+    "build:css": "mkdir -p dist && tailwindcss -i ./src/styles.css -o ./dist/styles.css --minify",
+    "watch:css": "mkdir -p dist && tailwindcss -i ./src/styles.css -o ./dist/styles.css --watch"
   },
   "exports": {
     ".": "./src/ResumeRenderEngine.tsx",

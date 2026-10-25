@@ -47,7 +47,7 @@ export const ResumeGroupWrapper = ({
 
             {/* View Mode */}
             {mode === "preview" && showSeparator && (
-                <span className="px-[var(--group-gap)] text-[var(--separator-color)]">
+                <span className="px-(--group-gap) text-(--separator-color)">
                     {separatorMap[separator]}
                 </span>
             )}
@@ -55,10 +55,10 @@ export const ResumeGroupWrapper = ({
             {/* Live Mode */}
             {mode === "editor" && showSeparator && (
                 <div
-                    className="w-[var(--group-gap] rounded-md hover:bg-destructive/12 transition-color duration-200"
+                    className="rounded-md hover:bg-destructive/12 transition-color duration-200"
                 >
                     <TooltipScrubber
-                        trigger={<span className="px-[var(--group-gap)] text-[var(--separator-color)]">{separatorMap[separator]}</span>}
+                        trigger={<span className="px-(--group-gap) text-(--separator-color)">{separatorMap[separator]}</span>}
                         scrollDirection="horizontal"
                         value={groupGap ?? 0}
                         onChange={handleGapChange}

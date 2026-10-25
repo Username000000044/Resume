@@ -59,7 +59,7 @@ export const ResumeText = ({ config, defaultConfig, mode, value, properties }: T
                     >
                         <properties.FieldElement
                             className={cn(
-                                "font-[var(--field-weight)] text-[var(--field-color)] leading-[var(--leading)] text-(length:--field-size)",
+                                "font-(--field-weight) text-(--field-color) leading-(--leading) text-(length:--field-size)",
                                 {
                                     "cursor-pointer hover:underline": mode === "editor",
                                 },

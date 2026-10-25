@@ -101,42 +101,10 @@ export const LivePagePreview = ({ templateData, pageSectionsId }: LivePreviewPro
   const font_scale_curve =
     PRESET_MAP[config.templateConfig.theme.typography.preset].scale_curve;
 
-  const dynamicPreviewStyles = {
-    // Typography
-    "--font-size-base": `${font_size_base}pt`,
-    "--section-title-size": `${font_size_base * font_scale_curve.h2}pt`,
-
-    // Spacing
-    "--page-margin": `${page_margin}in`,
-    "--section-gap": `${config.templateConfig.spacing.section_gap}pt`,
-    "--instance-gap": `${config.templateConfig.spacing.instance_gap}pt`,
-    "--divider-gap": `${config.templateConfig.spacing.divider_gap}pt`,
-    "--group-gap": `${config.templateConfig.spacing.group_gap}pt`,
-    "--bullet-indentation": `${config.templateConfig.spacing.bullet_indentation}pt`,
-
-    // Decorations
-    "--bullet-style": config.templateConfig.decorations.bullet_style,
-    "--sub-bullet-style": config.templateConfig.decorations.sub_bullet_style,
-
-    //Colors (Field colors are handled dynamically in the LiveFieldItem component)
-    "--divider-color": config.templateConfig.theme.colors.divider,
-    "--header-color": config.templateConfig.theme.colors.heading,
-    "--section-title_color": config.templateConfig.theme.colors.section_title,
-    "--bullet-color": config.templateConfig.theme.colors.body,
-    "--separator-color": config.templateConfig.theme.colors.body,
-
-    //Weight (Field weight are handled dynamically in the LiveFieldItem componet)
-    "--header-weight":
-      config.templateConfig.theme.typography.font_weight.heading,
-    "--section-title-weight":
-      config.templateConfig.theme.typography.font_weight.section_title,
-    "--bullet-weight": config.templateConfig.theme.typography.font_weight.body,
-  } as CSSProperties;
 
   return (
     <LivePaper
-      className="text-(length:--font-size-base) !p-[var(--page-margin)]"
-      style={dynamicPreviewStyles}
+      className="text-(length:--font-size-base) "
     >
       <ul className="flex flex-col gap-[var(--section-gap)]">
         {pageSectionsId

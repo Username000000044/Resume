@@ -20,7 +20,7 @@ export const ResumeHeader = ({ dbSection, section, defaultConfig, config, mode }
 
     return (
         <section>
-            <div className="flex flex-col gap-[var(--instance-gap)]">
+            <div className="flex flex-col gap-(--instance-gap)">
                 {section.subSections.map((subSection) => {
                     const matrix = constructLayoutMatrix(dbSection.fields);
 
