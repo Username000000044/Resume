@@ -338,12 +338,12 @@ function RouteComponent() {
   return (
 
     <div className="pt-12 overflow-x-hidden lg:py-24">
-      <div className="grid min-[93rem]:grid-cols-[auto_1fr] gap-12 2xl:gap-24 w-fit mx-auto">
+      <div className="grid min-[93rem]:grid-cols-[1fr_auto] gap-12 2xl:gap-24 w-fit mx-auto">
         {/* Headless Font Loader */}
         <GlobalFontLoader />
 
         {/* Editor Column */}
-        <div className=" flex flex-col w-full lg:px-0">
+        <div className="flex flex-col w-full lg:px-0">
           <input
             type="text"
             name="templateName"
@@ -359,7 +359,7 @@ function RouteComponent() {
               }
             }}
             maxLength={24}
-            className="text-center min-[93rem]:text-start text-4xl mb-8 text-primary font-bold tracking-wide border-none outline-none"
+            className="text-4xl mb-8 text-primary text-left font-bold tracking-wide border-none outline-none"
           />
           {mode === "preview" ? (
             <EditorTabs templateData={template} />

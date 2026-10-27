@@ -13,7 +13,7 @@ export const ResumePage = ({ hasContent, className, children, style, ...props }:
 
     return (
         <div
-            className={`${className} w-(--page-width) h-(--page-height) text-(length:--font-size-base) p-(--page-margin) bg-white`}
+            className={`${className} w-(--page-width) h-(--page-height) text-(length:--font-size-base) p-(--page-margin) bg-white wrap-anywhere`}
             style={{ ...style }}
             {...props}
         >

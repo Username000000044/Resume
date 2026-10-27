@@ -5,6 +5,7 @@ import { FieldType } from "@resume/frontend/src/types/trpc";
 import { Separator, separatorMap } from "../constants";
 import { ConfigChangeContext } from "../context/ConfigChangeContext";
 import { TooltipScrubber } from "./ui/tooltip-scrubber";
+import { GROUP_GAP_SCRUBBER } from "@/limits";
 
 interface LiveGroupProps {
     field: FieldType;
@@ -63,9 +64,9 @@ export const ResumeGroupWrapper = ({
                         value={groupGap ?? 0}
                         onChange={handleGapChange}
                         onDoubleClick={handleGapReset}
-                        step={1}
-                        min={0}
-                        max={15}
+                        step={GROUP_GAP_SCRUBBER.STEP}
+                        min={GROUP_GAP_SCRUBBER.MIN}
+                        max={GROUP_GAP_SCRUBBER.MAX}
                     />
                 </div>
 

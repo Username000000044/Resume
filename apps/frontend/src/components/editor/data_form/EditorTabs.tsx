@@ -33,7 +33,7 @@ export const EditorTabs = ({ templateData }: EditorTabsProps) => {
           {/* Tabs */}
           {templateData.sections.map((section) => (
             <TabsTrigger
-              className="cursor-pointer px-2 rounded-b-none font-normal data-active:bg-primary data-active:text-primary-foreground data-active:hover:text-primary-foreground"
+              className="cursor-pointer px-2 rounded-b-none! font-normal data-active:bg-primary data-active:text-primary-foreground data-active:hover:text-primary-foreground"
               value={section.title}
               key={section.id}
             >
@@ -41,7 +41,7 @@ export const EditorTabs = ({ templateData }: EditorTabsProps) => {
             </TabsTrigger>
           ))}
         </TabsList>
-        <ScrollBar orientation="horizontal" className="px-4 !h-[6px] [&>div]:bg-input/50" />
+        <ScrollBar orientation="horizontal" className="px-4 h-1.5! [&>div]:bg-input/50" />
       </ScrollArea>
       {templateData.sections.map((section, sectionIndex) => (
         <TabsContent
