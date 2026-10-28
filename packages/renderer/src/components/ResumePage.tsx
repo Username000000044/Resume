@@ -2,6 +2,7 @@
 import { CSSProperties, ReactNode } from "react";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "./ui/empty";
 import { Shredder } from "lucide-react";
+import { TooltipProvider } from "./ui/tooltip";
 
 interface PageProps {
     hasContent: boolean;
@@ -12,16 +13,18 @@ interface PageProps {
 export const ResumePage = ({ hasContent, className, children, style, ...props }: PageProps) => {
 
     return (
-        <div
-            className={`${className} w-(--page-width) h-(--page-height) text-(length:--font-size-base) p-(--page-margin) bg-white wrap-anywhere`}
-            style={{ ...style }}
-            {...props}
-        >
+        <TooltipProvider>
+            <div
+                className={`${className} w-(--page-width) h-(--page-height) text-(length:--font-size-base) p-(--page-margin) bg-white wrap-anywhere`}
+                style={{ ...style }}
+                {...props}
+            >
 
-            {!hasContent && <EmptyTemplate />}
-            {hasContent && children}
+                {!hasContent && <EmptyTemplate />}
+                {hasContent && children}
 
-        </div>
+            </div>
+        </TooltipProvider>
     );
 };
 

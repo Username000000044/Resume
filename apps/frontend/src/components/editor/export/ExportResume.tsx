@@ -1,12 +1,14 @@
 import { Badge } from "#/components/ui/badge";
-import type { Format } from "#/types/resume-download";
+import type { TemplateType } from "#/types/trpc";
 import { icons } from "lucide-react";
-import type { TemplateType } from "#/types/template";
 
 interface DownloadResumeProps {
     pagesMatrix: string[][];
     templateData: TemplateType;
 }
+
+const formats = ["jpg", "png", "pdf", "docx", "json"] as const;
+type Format = typeof formats[number];
 
 interface DownloadOption {
     name: string;
@@ -42,11 +44,17 @@ const downloadOptions: DownloadOption[] = [
     //     format: "pdf-p",
     //     icon: "FileText",
     // },
+    // {
+    //     name: "DOCX",
+    //     description: "Best for enterprise sharing",
+    //     format: "docx",
+    //     icon: "FileText",
+    // },
     {
-        name: "DOCX",
-        description: "Best for enterprise sharing",
-        format: "docx",
-        icon: "FileText",
+        name: "JSON",
+        description: "Best for raw sharing",
+        format: "json",
+        icon: "CodeXml",
     },
 ];
 

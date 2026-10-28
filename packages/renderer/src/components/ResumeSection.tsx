@@ -6,7 +6,7 @@ import { ResumeText } from "./ResumeText";
 import { getElementProperties } from "@/utils/getElementProperties";
 import { ResumeDivider } from "./ResumeDivider";
 import { BarScrubber } from "./ui/bar-scrubber";
-import { SECTION_GAP_SCRUBBER } from "@/limits";
+import { INSTANCE_GAP_SCRUBBER, SECTION_GAP_SCRUBBER } from "@/limits";
 import { useContext } from "react";
 import { ConfigChangeContext } from "@/context/ConfigChangeContext";
 import { constructLayoutMatrix } from "@/utils/constructLayoutMatrix";
@@ -25,21 +25,28 @@ export const ResumeSection = ({ dbSection, section, defaultConfig, config, mode 
     const hasSectionDivier = config.template.decorations.section_divider;
 
     const defaultDividerGap = defaultConfig.template.spacing.divider_gap;
-    const defaultSectionGap = defaultConfig.template.spacing.section_gap
+    const defaultSectionGap = defaultConfig.template.spacing.section_gap;
+    const defaultInstanceGap = defaultConfig.template.spacing.instance_gap;
 
     const dividerGap = config.template.spacing.divider_gap;
     const sectionGap = config.template.spacing.section_gap;
+    const instanceGap = config.template.spacing.instance_gap;
 
     const dividerStyle = config.template.decorations.divider_style;
 
     const updateProperty = useContext(ConfigChangeContext);
 
-    const handleGapChange = (value: number) => {
+    const handleSectionGapChange = (value: number) => {
         updateProperty(["template", "spacing", "section_gap"], value);
     };
-
-    const handleGapReset = () => {
+    const handleSectionGapReset = () => {
         updateProperty(["template", "spacing", "section_gap"], defaultSectionGap);
+    };
+    const handleInstanceGapChange = (value: number) => {
+        updateProperty(["template", "spacing", "instance_gap"], value);
+    };
+    const handleInstanceGapReset = () => {
+        updateProperty(["template", "spacing", "instance_gap"], defaultInstanceGap);
     };
 
     return (
@@ -50,8 +57,8 @@ export const ResumeSection = ({ dbSection, section, defaultConfig, config, mode 
                     <BarScrubber
                         scrollDirection="vertical"
                         value={sectionGap ?? 0}
-                        onChange={handleGapChange}
-                        onDoubleClick={handleGapReset}
+                        onChange={handleSectionGapChange}
+                        onDoubleClick={handleSectionGapReset}
                         min={SECTION_GAP_SCRUBBER.MIN}
                         max={SECTION_GAP_SCRUBBER.MAX}
                         step={SECTION_GAP_SCRUBBER.STEP}
@@ -73,8 +80,10 @@ export const ResumeSection = ({ dbSection, section, defaultConfig, config, mode 
 
             {/* Section Content */}
             <div className="flex flex-col gap-(--instance-gap)">
-                {section.subSections.map((subSection) => {
+                {section.subSections.map((subSection, index) => {
                     const matrix = constructLayoutMatrix(dbSection.fields);
+
+                    const isNotFirstSubSection = subSection.order !== 0;
 
                     // Formats Input Field Value
                     const formatFieldValue = (field: FieldType) => {
@@ -167,7 +176,22 @@ export const ResumeSection = ({ dbSection, section, defaultConfig, config, mode 
                     }
 
                     return (
-                        <div key={subSection.id}>
+                        <div key={subSection.id} className="relative">
+                            {/* Instance Gap Bar */}
+                            {mode === "editor" && isNotFirstSubSection && (
+                                <div className="absolute -top-(--instance-gap) -translate-y-(--instance_gap) w-full">
+                                    <BarScrubber
+                                        scrollDirection="vertical"
+                                        value={instanceGap ?? 0}
+                                        onChange={handleInstanceGapChange}
+                                        onDoubleClick={handleInstanceGapReset}
+                                        min={INSTANCE_GAP_SCRUBBER.MIN}
+                                        max={INSTANCE_GAP_SCRUBBER.MAX}
+                                        step={INSTANCE_GAP_SCRUBBER.STEP}
+                                    />
+                                </div>
+                            )}
+
                             {/* Row Index */}
                             {matrix.map((_, rowIndex) => (
                                 <div
@@ -205,7 +229,7 @@ export const ResumeSection = ({ dbSection, section, defaultConfig, config, mode 
                                         />
 
                                         {/* Bullet's Sub Bullets */}
-                                        <ul className="flex flex-col list-(--sub-bullet-style) pl-(--bullet-indentation) list-inside">
+                                        <ul className="flex flex-col items-start list-(--sub-bullet-style) pl-(--bullet-indentation) list-inside">
                                             {bullet.subBullets.map((subBullet) => (
                                                 <ResumeText
                                                     key={subBullet.id}

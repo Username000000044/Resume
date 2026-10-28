@@ -177,6 +177,7 @@ export const BarScrubber = React.forwardRef<
             ? "hover:cursor-col-resize"
             : "hover:cursor-row-resize";
 
+    const dimensionsClass = scrollDirection === "horizontal" ? "w-(--bar-value) h-full" : "h-(--bar-value) w-full";
 
     const sharedClasses = cn(
         `
@@ -190,6 +191,7 @@ export const BarScrubber = React.forwardRef<
 
         w-full
         `,
+        dimensionsClass,
         cursorClass,
         className,
     );
@@ -197,10 +199,7 @@ export const BarScrubber = React.forwardRef<
     return (
 
         <div
-            className={cn("opacity-0 rounded-md bg-destructive/12 hover:opacity-100 transition-color duration-200 h-full", {
-                "w-(--bar-value) h-full": scrollDirection === "horizontal",
-                "h-(--bar-value) w-full": scrollDirection === "vertical"
-            })}
+            className={cn("opacity-0 rounded-md bg-destructive/12 hover:opacity-100 transition-color duration-200 h-full", dimensionsClass)}
             style={{
                 "--bar-value": `${value * multiplier}pt`,
             } as React.CSSProperties}

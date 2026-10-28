@@ -18,7 +18,7 @@ export interface ColorPickerProps {
 }
 
 export const SquareColorPicker = ({ className, inputColor, defaultColor, handleColorChange }: ColorPickerProps) => {
-  const colors = useResumeConfigStore((store) => store.config.template.theme.colors,);
+  const colors = useResumeConfigStore((store) => store.config.template.theme.colors);
 
   const uninqueColors = useMemo(() => {
     return [...new Set(Object.values(colors))];

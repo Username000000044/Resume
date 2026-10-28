@@ -8,6 +8,7 @@ import { PageSize, pageSizeMap, scalePresetMap } from "./constants";
 import { ResumeHeader } from "./components/ResumeHeader";
 import { ConfigChangeContext } from "./context/ConfigChangeContext";
 import { TooltipProvider } from "./components/ui/tooltip";
+import { ResumePageScaleWrapper } from "./components/ResumePageScaleWrapper";
 
 
 export interface ConfigData {
@@ -22,12 +23,13 @@ interface RenderEngineProps {
     mode: Mode;
     pageSize: PageSize;
     pages: string[][];
+    scale: number;
     sectionControls: boolean;
     onConfigChange: (path: string[], value: ValueType) => void;
 }
 
 export const ResumeRenderEngine = (props: RenderEngineProps) => {
-    const { dbSections, sections, config, defaultConfig, pages, mode, pageSize, sectionControls, onConfigChange } = props;
+    const { dbSections, sections, config, defaultConfig, pages, mode, pageSize, scale, sectionControls, onConfigChange } = props;
 
     const templateConfig = config.template;
 
@@ -76,11 +78,15 @@ export const ResumeRenderEngine = (props: RenderEngineProps) => {
     ]
     */
     return (
-        <TooltipProvider>
-            <ConfigChangeContext value={onConfigChange}>
-                {pages.length === 0 && <ResumePage style={pageStyles} hasContent={false} />}
+        <ConfigChangeContext value={onConfigChange}>
+            {pages.length === 0 && (
+                <ResumePageScaleWrapper pageSize={pageSize} scale={scale}>
+                    <ResumePage style={pageStyles} hasContent={false} />
+                </ResumePageScaleWrapper>
+            )}
 
-                {pages.map(sectionIds => (
+            {pages.map(sectionIds => (
+                <ResumePageScaleWrapper pageSize={pageSize} scale={scale}>
                     <ResumePage key={sectionIds.join("-")} style={pageStyles} hasContent={true}>
                         {sectionIds.map(sectionId => {
                             const dbSectionIdx = dbSections.findIndex(s => s.id === sectionId);
@@ -107,9 +113,8 @@ export const ResumeRenderEngine = (props: RenderEngineProps) => {
                             />
                         })}
                     </ResumePage>
-
-                ))}
-            </ConfigChangeContext >
-        </TooltipProvider>
+                </ResumePageScaleWrapper>
+            ))}
+        </ConfigChangeContext >
     )
 }

@@ -249,24 +249,6 @@ function RouteComponent() {
     });
   };
 
-  const templateIsEmpty = template.sections.every((dbSection) => {
-    const liveMainSection = sections[dbSection.id];
-    if (!liveMainSection?.subSections) return true;
-
-    return liveMainSection.subSections.every((subSection) => {
-      const fieldsEmpty = Object.values(subSection.fields || {}).every(
-        (value) => value === "",
-      );
-
-      const bulletsEmpty = (subSection.bullets || []).every(
-        (bullet) =>
-          bullet.text === "" &&
-          (bullet.subBullets || []).every((subBullet) => subBullet.text === ""),
-      );
-
-      return fieldsEmpty && bulletsEmpty;
-    });
-  });
 
   const pageSize: PageSize = "letter";
 
@@ -334,9 +316,7 @@ function RouteComponent() {
     )
   }
 
-
   return (
-
     <div className="pt-12 overflow-x-hidden lg:py-24">
       <div className="grid min-[93rem]:grid-cols-[1fr_auto] gap-12 2xl:gap-24 w-fit mx-auto">
         {/* Headless Font Loader */}
@@ -369,9 +349,9 @@ function RouteComponent() {
         </div>
 
         {/* Live Resume Column */}
-        <div className="flex flex-col mx-12 lg:m-0 w-max min-w-max">
+        <div className="flex flex-col mx-12 lg:m-0">
           <PreviewHeader pagesMatrix={pagesMatrix} templateData={template} />
-          <div className="bg-linear-to-b from-primary/8 to-primary/12 p-4 rounded-4xl">
+          <div className="bg-linear-to-b from-primary/8 to-primary/12 p-4 rounded-4xlp">
             <ResumeRenderEngine
               config={{
                 template: { ...config.template },
@@ -386,6 +366,7 @@ function RouteComponent() {
               pageSize="letter"
               mode={mode}
               pages={pagesMatrix}
+              scale={1}
               sectionControls
               onConfigChange={(path, value) => {
                 updateProperty(path, value);
