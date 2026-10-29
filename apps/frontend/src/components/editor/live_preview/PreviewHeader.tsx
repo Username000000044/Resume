@@ -10,7 +10,7 @@ import { useSaveStatusStore } from "#/store/uesSaveStatusStore";
 import { useResumeConfigStore } from "#/store/useResumeConfigStore";
 import { Download, Folder, FolderX, RefreshCcw } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
-import { DownloadResume } from "../export/ExportResume";
+import { DownloadResume } from "./ExportResume";
 import type { TemplateType } from "#/types/trpc";
 
 interface PreviewHeaderProps {

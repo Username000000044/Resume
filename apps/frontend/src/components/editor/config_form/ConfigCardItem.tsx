@@ -25,7 +25,7 @@ export const ConfigCardItem = ({
   return (
     <Card className={className} {...props}>
       {header && <CardHeader>{header}</CardHeader>}
-      <CardContent className="grid grid-cols-2 gap-3 w-full">
+      <CardContent className="grid grid-cols-6 gap-3 w-full">
         {content}
       </CardContent>
     </Card>

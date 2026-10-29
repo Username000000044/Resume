@@ -8,11 +8,11 @@ import {
   SelectValue,
 } from "#/components/ui/select";
 import { useResumeConfigStore } from "#/store/useResumeConfigStore";
-import { FONT_VARIANTS } from "@resume/backend/src/db/schema.js";
 import { useState, type Dispatch, type SetStateAction } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { NumberScrubberInputItem } from "./NumberScrubberInputItem";
 import type { FieldType } from "#/types/trpc";
+import { FONT_VARIANTS } from "@resume/backend/src/db/constants.js";
 
 interface Item {
   label: string;
@@ -57,7 +57,7 @@ export const FieldConfig = ({ fieldRole }: FieldConfigProps) => {
             setSelectedFontVariant(value);
             updateProperty(
               [
-                "templateConfig",
+                "template",
                 "theme",
                 "typography",
                 "font_family",
@@ -87,7 +87,7 @@ export const FieldConfig = ({ fieldRole }: FieldConfigProps) => {
           hasIcon={true}
           iconOrientation="horizontal"
           path={[
-            "templateConfig",
+            "template",
             "theme",
             "typography",
             "font_weight",

@@ -1,9 +1,8 @@
 import type { ComponentType } from "react";
-import { SpacingConfig } from "./SpacingConfig";
 import { ConfigCardItem } from "./ConfigCardItem";
 import { TypographyConfig } from "./TypographyConfig";
 import { DecorationsConfig } from "./DecorationsConfig";
-import { RefreshCcw, RotateCcw, Trash } from "lucide-react";
+import { RefreshCcw } from "lucide-react";
 import { Button } from "#/components/ui/button";
 import {
   Dialog,
@@ -15,10 +14,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "#/components/ui/dialog";
-import { Label } from "#/components/ui/label";
-import { Input } from "#/components/ui/input";
 import { useResumeConfigStore } from "#/store/useResumeConfigStore";
-import { useShallow } from "zustand/react/shallow";
+import { PageConfig } from "./PageConfig";
 
 interface ConfigItem {
   id: string;
@@ -29,9 +26,9 @@ interface ConfigItem {
 
 const configItems: ConfigItem[] = [
   {
-    id: "global_spacing",
-    name: "Global Spacing",
-    component: SpacingConfig,
+    id: "page_config",
+    name: "Page Config",
+    component: PageConfig,
     order: 1,
   },
   {

@@ -9,6 +9,8 @@ import {
 	integer,
 	boolean,
 } from "drizzle-orm/pg-core";
+import { BulletStyle, DividerStyle, Font, FontVariant, FontWeight, GroupSeparator } from "./constants";
+import { PageSize } from "@resume/renderer/constants";
 
 // ENUMS
 export const templateTypeEnum = pgEnum("template_type", ["ats", "standard"]);
@@ -49,33 +51,6 @@ export const fieldRenderRoleEnum = pgEnum("render_role", [
 ]);
 
 
-export const FONT_WEIGHTS = [
-	100, 200, 300, 400, 500, 600, 700, 800, 900,
-] as const;
-export const FONT_VARIANTS = ["primary", "secondary"];
-export const FONTS_LIST = [
-	"inter",
-	"roboto",
-	"open-sans",
-	"montserrat",
-	"arimo",
-	"noto-sans",
-	"libre-franklin",
-	"source-sans-3",
-	"rubik",
-	"plus-jakarta-sans",
-] as const;
-export const DIVIDER_STYLE = ["solid", "dashed", "thick"] as const;
-export const BULLET_STYLE = ["disc", "circle", "square", "none"] as const;
-export const GROUP_SEPARATOR = ["dot", "bullet", "pipe", "comma", "slash", "none"] as const;
-
-type GroupSeparator = (typeof GROUP_SEPARATOR)[number];
-type DividerStyle = (typeof DIVIDER_STYLE)[number];
-type BulletStyle = (typeof BULLET_STYLE)[number];
-type Font = (typeof FONTS_LIST)[number];
-type FontWeight = (typeof FONT_WEIGHTS)[number];
-type FontVariant = (typeof FONT_VARIANTS)[number];
-
 // TEMPLATE
 interface SpacingConfig {
 	page_margin: number; // (in)
@@ -103,6 +78,7 @@ interface TypographyConfig {
 
 export interface TemplateConfig {
 	// decorations, typography/fontsizes, colors
+	pageSize: PageSize;
 	decorations: {
 		header_divider: boolean;
 		section_divider: boolean;

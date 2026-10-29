@@ -1,11 +1,4 @@
 import { FieldElement } from "@resume/frontend/src/types/trpc";
-
-export const pageSizeMap = {
-    // All measurements in IN
-    "A4": { w: 8.27, h: 11.69 },
-    "letter": { w: 8.5, h: 11.0 }
-} as const;
-
 export const scalePresetMap = {
     editorial: {
         scale_curve: {
@@ -89,6 +82,13 @@ export const elementNameMap: Record<FieldElement, string> = {
 } as const;
 
 // Type Exports
+
+export const pageSizeMap = {
+    // All measurements in IN
+    "A4": { w: 8.27, h: 11.69 },
+    "letter": { w: 8.5, h: 11.0 }
+} as const;
+
 export type PageSize = keyof typeof pageSizeMap;
 export type Separator = keyof typeof separatorMap;
 export type ElementName = keyof typeof elementNameMap;

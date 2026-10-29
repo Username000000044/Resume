@@ -7,34 +7,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from "#/components/ui/select";
-import { Switch } from "#/components/ui/switch";
 import { useResumeConfigStore } from "#/store/useResumeConfigStore";
-import {
-  BULLET_STYLE,
-  DIVIDER_STYLE,
-  GROUP_SEPARATOR,
-} from "@resume/backend/src/db/schema.js";
 import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
-import { Label } from "#/components/ui/label";
 import { NumberScrubberInputItem } from "./NumberScrubberInputItem";
 import { Separator } from "#/components/ui/separator";
 import { cn } from "#/lib/utils";
 import { ColorPickerField } from "./ColorPickerField";
 import { Toggle } from "#/components/ui/toggle";
-import { BookmarkIcon, Heading, Minus, Plus, Section } from "lucide-react";
+import { Heading, Section } from "lucide-react";
+import { BULLET_STYLES, DIVIDER_STYLES, GROUP_SEPARATOR } from "@resume/backend/src/db/constants.js";
 
 interface Item {
   label: string;
   value: string;
 }
 
-const dividerItems: Item[] = DIVIDER_STYLE.map((style) => ({
+const dividerItems: Item[] = DIVIDER_STYLES.map((style) => ({
   label: style.replace(/\b\w/g, (char) => char.toUpperCase()),
   value: style,
 }));
 
-const bulletItems: Item[] = BULLET_STYLE.map((style) => ({
+const bulletItems: Item[] = BULLET_STYLES.map((style) => ({
   label: style.replace(/\b\w/g, (char) => char.toUpperCase()),
   value: style,
 }));
@@ -64,7 +58,7 @@ export const DecorationsConfig = () => {
 
   // Color Picker Field
   const handleColorChange = (newColor: string) => {
-    updateProperty(["templateConfig", "theme", "colors", "divider"], newColor);
+    updateProperty(["template", "theme", "colors", "divider"], newColor);
   }
 
   return (
@@ -83,7 +77,7 @@ export const DecorationsConfig = () => {
 
             setSelectedSeparator(value);
             updateProperty(
-              ["templateConfig", "decorations", "group_separator"],
+              ["template", "decorations", "group_separator"],
               value,
             );
           }}
@@ -106,7 +100,7 @@ export const DecorationsConfig = () => {
       <LocalSeparator value="Bullets" />
 
       {/* Bullet Config */}
-      <Field className="gap-0">
+      <Field className="col-span-2 gap-0">
         <FieldLabel className="font-normal">Bullet Style</FieldLabel>
         <Select
           items={bulletItems}
@@ -116,7 +110,7 @@ export const DecorationsConfig = () => {
 
             setSlectedBulletStyle(value);
             updateProperty(
-              ["templateConfig", "decorations", "bullet_style"],
+              ["template", "decorations", "bullet_style"],
               value,
             );
           }}
@@ -136,7 +130,7 @@ export const DecorationsConfig = () => {
         </Select>
       </Field>
 
-      <Field className="gap-0">
+      <Field className="col-span-2 gap-0">
         <FieldLabel className="font-normal">Sub Bullet Style</FieldLabel>
         <Select
           items={bulletItems}
@@ -146,7 +140,7 @@ export const DecorationsConfig = () => {
 
             setSubSlectedBulletStyle(value);
             updateProperty(
-              ["templateConfig", "decorations", "sub_bullet_style"],
+              ["template", "decorations", "sub_bullet_style"],
               value,
             );
           }}
@@ -166,12 +160,12 @@ export const DecorationsConfig = () => {
         </Select>
       </Field>
 
-      <Field className="col-span-full gap-0">
+      <Field className="col-span-2 gap-0">
         <FieldLabel className="font-normal">Indentation</FieldLabel>
         <NumberScrubberInputItem
           hasIcon={true}
           iconOrientation="horizontal"
-          path={["templateConfig", "spacing", "bullet_indentation"]}
+          path={["template", "spacing", "bullet_indentation"]}
           config={{ step: 1, min: 0, max: 50 }}
           defaultValue={defaultSpacingConfig.bullet_indentation}
         />
@@ -186,46 +180,9 @@ export const DecorationsConfig = () => {
         inputColor={colorConfig.divider}
         defaultColor={defaultColorConfig.divider}
         handleColorChange={handleColorChange}
-        className="absolute right-1 top-1/2 -translate-y-1/2 size-6 ring-0 rounded-lg " />
+        className=" absolute right-1 top-1/2 -translate-y-1/2 size-6 ring-0 rounded-lg " />
 
-      <div className="flex items-end justify-end gap-1">
-        {/* Header Toggle */}
-        <Toggle
-          className="aria-pressed:bg-input/50 font-normal cursor-pointer"
-          aria-label="Toggle Header Divider"
-          pressed={isHeaderDividerVisible}
-          onPressedChange={(pressed) => {
-            updateProperty(
-              ["templateConfig", "decorations", "header_divider"],
-              pressed,
-            );
-            setIsHeaderDividerVisible(pressed);
-          }}
-
-        >
-          <Heading />
-        </Toggle>
-
-
-        {/* Sections Toggle */}
-        <Toggle
-          className="aria-pressed:bg-input/50 font-normal cursor-pointer"
-          aria-label="Toggle Section Divider"
-          pressed={isSectionDividerVisible}
-          onPressedChange={(pressed) => {
-            updateProperty(
-              ["templateConfig", "decorations", "section_divider"],
-              pressed,
-            );
-            setIsSectionDividerVisible(pressed);
-          }}
-
-        >
-          <Section />
-        </Toggle>
-      </div >
-
-      <Field className="gap-0 col-span-full">
+      <Field className="gap-0 col-span-2">
         <FieldLabel className="font-normal">Divider Style</FieldLabel>
         <Select
           items={dividerItems}
@@ -235,7 +192,7 @@ export const DecorationsConfig = () => {
 
             setSlectedDividerStyle(value);
             updateProperty(
-              ["templateConfig", "decorations", "divider_style"],
+              ["template", "decorations", "divider_style"],
               value,
             );
           }}
@@ -254,6 +211,43 @@ export const DecorationsConfig = () => {
           </SelectContent>
         </Select>
       </Field>
+
+      <div className="col-span-2 flex items-end justify-end gap-1">
+        {/* Header Toggle */}
+        <Toggle
+          className="aria-pressed:bg-input/50 font-normal cursor-pointer"
+          aria-label="Toggle Header Divider"
+          pressed={isHeaderDividerVisible}
+          onPressedChange={(pressed) => {
+            updateProperty(
+              ["template", "decorations", "header_divider"],
+              pressed,
+            );
+            setIsHeaderDividerVisible(pressed);
+          }}
+
+        >
+          <Heading />
+        </Toggle>
+
+
+        {/* Sections Toggle */}
+        <Toggle
+          className="aria-pressed:bg-input/50 font-normal cursor-pointer"
+          aria-label="Toggle Section Divider"
+          pressed={isSectionDividerVisible}
+          onPressedChange={(pressed) => {
+            updateProperty(
+              ["template", "decorations", "section_divider"],
+              pressed,
+            );
+            setIsSectionDividerVisible(pressed);
+          }}
+
+        >
+          <Section />
+        </Toggle>
+      </div >
     </>
   );
 };

@@ -8,7 +8,7 @@ interface ColorPickerFieldProps extends ColorPickerProps {
 
 export const ColorPickerField = ({ className, fieldLabel, inputColor, defaultColor, handleColorChange }: ColorPickerFieldProps) => {
 
-    return <Field className="gap-0">
+    return <Field className="col-span-2 gap-0">
         <FieldLabel className="font-normal">{fieldLabel}</FieldLabel>
         <div className="relative flex items-center">
             <HexColorInput

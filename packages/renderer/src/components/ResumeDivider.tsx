@@ -14,7 +14,6 @@ interface DividerProps {
 }
 
 export const ResumeDivider = ({ mode, dividerGap, dividerStyle, defaultDividerGap }: DividerProps) => {
-
     const updateProperty = useContext(ConfigChangeContext);
 
     const handleGapChange = (value: number) => {
@@ -25,25 +24,26 @@ export const ResumeDivider = ({ mode, dividerGap, dividerStyle, defaultDividerGa
         updateProperty(["template", "spacing", "divider_gap"], defaultDividerGap);
     };
 
-
     return (
-        <div className="relative">
+        <div className="relative py-(--divider-gap) block w-full">
             {mode === "editor" && (
-                <div className="absolute -top-(--divider-gap/2) -translate-y-(--divider-gap) w-full h-full">
-                    <BarScrubber
-                        scrollDirection="vertical"
-                        value={dividerGap ?? 0}
-                        onChange={handleGapChange}
-                        onDoubleClick={handleGapReset}
-                        min={DIVIDER_GAP_SCRUBBER.MIN}
-                        max={DIVIDER_GAP_SCRUBBER.MAX}
-                        step={DIVIDER_GAP_SCRUBBER.STEP}
-                        multiplier={2}
-                    />
+                <div className="absolute top-1/2 left-0 right-0 -translate-y-1/2 flex items-center justify-center pointer-events-none z-10">
+                    <div className="w-full pointer-events-auto">
+                        <BarScrubber
+                            scrollDirection="vertical"
+                            value={dividerGap ?? 0}
+                            onChange={handleGapChange}
+                            onDoubleClick={handleGapReset}
+                            min={DIVIDER_GAP_SCRUBBER.MIN}
+                            max={DIVIDER_GAP_SCRUBBER.MAX}
+                            step={DIVIDER_GAP_SCRUBBER.STEP}
+                            multiplier={2}
+                        />
+                    </div>
                 </div>
             )}
             <hr
-                className={cn("border-(--divider-color) my-(--divider-gap)", {
+                className={cn("w-full border-(--divider-color) m-0 block", {
                     "border-solid": dividerStyle === "solid",
                     "border-dashed": dividerStyle === "dashed",
                     "border-solid border-[1.2pt]": dividerStyle === "thick",

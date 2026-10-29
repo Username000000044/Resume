@@ -1,7 +1,6 @@
-import { PRESET_MAP } from "#/components/editor/live_preview/LivePagePreview";
-import type { Dimensions } from "#/store/useResumeDimensionsStore";
 import type { FieldType } from "#/types/trpc";
 import type { fieldRenderRoleEnum, TemplateConfig } from "@resume/backend/src/db/schema.js";
+import { scalePresetMap } from "@resume/renderer/constants";
 
 type FieldRole = (typeof fieldRenderRoleEnum.enumValues)[number];
 export const getElementProperties = (
@@ -18,7 +17,7 @@ export const getElementProperties = (
 		fieldRole = "section_title";
 	}
 
-	const preset = PRESET_MAP[config.theme.typography.preset];
+	const preset = scalePresetMap[config.theme.typography.preset];
 
 	// const fieldRole = field.renderRole;
 	const fieldWeight = config.theme.typography.font_weight[fieldRole];
@@ -71,40 +70,3 @@ export const constructLayoutMatrix = (fields: FieldType[]) => {
 			),
 		);
 };
-
-export const constructPagesMatrix = (
-	maxPageHeight: number,
-	sectionDimensions: Record<string, Dimensions>,
-	sectionIds: string[],
-	sectionGap: number = 0
-) => {
-	const matrix: string[][] = [];
-	let currentPage: string[] = [];
-	let currentPageHeight = 0;
-
-	const missingDimensions = sectionIds.some(id => !sectionDimensions[id] || sectionDimensions[id].height === 0);
-	if (missingDimensions) {
-		return [sectionIds]; // Return everything on a single provisional page while dimensions load
-	}
-
-	for (const sectionId of sectionIds) {
-		const sectionHeight = sectionDimensions[sectionId].height;
-
-		const sectionGaps = sectionGap * (Object.values(sectionDimensions).length - 1);
-
-		if ((sectionHeight + currentPageHeight) > maxPageHeight && currentPage.length > 0) {
-			matrix.push(currentPage);
-			currentPage = [];
-			currentPageHeight = 0;
-		}
-
-		currentPage.push(sectionId);
-		currentPageHeight += sectionHeight;
-	}
-
-	if (currentPage.length > 0) {
-		matrix.push(currentPage);
-	}
-
-	return matrix;
-}

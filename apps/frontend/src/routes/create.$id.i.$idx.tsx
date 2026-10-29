@@ -3,7 +3,7 @@ import {
   DEFAULT_RESUME_STORE_PERSIST_NAME,
   useResumeSectionsStore,
 } from "#/store/useResumeSectionsStore";
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { EditorTabs } from "#/components/editor/data_form/EditorTabs";
 import {
   DEFAULT_RESUME_CONFIG_STORE_PERSIST_NAME,
@@ -12,17 +12,16 @@ import {
 import { useShallow } from "zustand/react/shallow";
 import { firstAvaibleStorageIndex, storageTargetName } from "#/utils/templateStorage";
 import { useResumeDimensionsStore } from "#/store/useResumeDimensionsStore";
-import { useResizeObserver } from "#/hooks/useResizeObserver";
 import { GlobalFontLoader } from "#/components/GlobalFontLoader";
 import { PreviewHeader } from "#/components/editor/live_preview/PreviewHeader";
 import { ConfigItems } from "#/components/editor/config_form/ConfigItems";
-import { constructPagesMatrix } from "#/utils/livePreview";
 import { queryClient, trpc } from "#/utils/trpc";
 import { ResumeRenderEngine } from "@resume/renderer";
-import { pageSizeMap, type PageSize } from "@resume/renderer/constants";
 
 
 import type { SectionType } from "#/types/trpc";
+import { constructPagesMatrix } from "#/utils/pagination";
+import { pageSizeMap, type PageSize } from "@resume/renderer/constants";
 
 export const Route = createFileRoute("/create/$id/i/$idx")({
   beforeLoad: async ({ params }) => {
@@ -210,9 +209,6 @@ function RouteComponent() {
     initializeSections,
   ]);
 
-  const [containerWidth, setContainerWidth] = useState(0);
-  const { targetRef } = useResizeObserver((width) => setContainerWidth(width));
-
   const sectionIsEmpty = (dbSection: SectionType) => {
     const liveMainSection = sections[dbSection.id];
 
@@ -248,9 +244,9 @@ function RouteComponent() {
     });
   };
 
-
-  const pageSize: PageSize = "letter";
-  const pagination = true;
+  const pageSize = config.template.pageSize ?? "letter";
+  const pagination = config.template.pagination;
+  const scale = 1;
 
   // Completed metrics calculation engine
   const layoutMetrics = useMemo(() => {
@@ -259,26 +255,22 @@ function RouteComponent() {
     const spacingConfig = config?.template?.spacing;
 
     const pageMarginIn = spacingConfig?.page_margin ?? 0.75;
-    const sectionGapPt = spacingConfig?.section_gap ?? 0;
 
     const pageWidthPx = pageWidthIn * 96;
     const pageHeightPx = pageHeightIn * 96;
     const pageMarginPx = pageMarginIn * 96;
-    const sectionGapPx = sectionGapPt * (96 / 72);
 
-    const maxPageContentHeight = pageHeightPx - (pageMarginPx * 2);
 
     return {
       pageWidthPx,
       pageHeightPx,
-      maxPageContentHeight,
-      sectionGapPx
+      pageMarginPx,
     }
   }, [pageSize, config]);
 
   // Generate page-segmented data grids dynamically
   const pagesMatrix = useMemo(() => {
-    if (!sections || Object.keys(sections).length === 0) return [];
+    if (!sections || Object.keys(sections).length === 0) return { matrix: [], totalHeight: 0 };
 
     const orderedSectionIds = Object.keys(sections).sort((a, b) => {
       return (sections[a].order || 0) - (sections[b].order || 0);
@@ -294,20 +286,23 @@ function RouteComponent() {
     const dimensionsLoading = visibleOrderedSectionIds.some((id) => sectionDimensions[id]?.height === undefined);
 
     if (dimensionsLoading) {
-      return [visibleOrderedSectionIds];
+      return {
+        matrix: [visibleOrderedSectionIds],
+        totalHeight: 0,
+      }
     }
 
     return constructPagesMatrix(
-      layoutMetrics.maxPageContentHeight,
+      pagination,
+      layoutMetrics.pageHeightPx,
+      layoutMetrics.pageMarginPx,
       sectionDimensions,
       visibleOrderedSectionIds,
-      layoutMetrics.sectionGapPx
     );
-  }, [sections, layoutMetrics.maxPageContentHeight, sectionDimensions, template.sections]);
+  }, [sections, layoutMetrics.pageMarginPx, layoutMetrics.pageHeightPx, sectionDimensions, template.sections, pageSize, pagination]);
 
-  const scale = Math.min(1,
-    containerWidth > 0 ? containerWidth / layoutMetrics.pageWidthPx : 1
-  );
+
+  // console.log(pagesMatrix.matrix);
 
   // Status Display
   if (!isSectionsPayloadReady || !isConfigPayloadReady) {
@@ -321,7 +316,7 @@ function RouteComponent() {
 
 
   return (
-    <div className="pt-12 lg:py-24 h-full" ref={targetRef}>
+    <div className="pt-12 lg:py-24 h-full">
       <div className="grid lg:grid-cols-[1fr_auto] gap-12 2xl:gap-24 w-fit mx-auto">
         {/* Headless Font Loader */}
         <GlobalFontLoader />
@@ -354,14 +349,14 @@ function RouteComponent() {
 
         {/* Live Resume Column */}
         <div className="flex flex-col mx-12  min-w-0 lg:m-0">
-          <PreviewHeader pagesMatrix={pagesMatrix} templateData={template} />
+          <PreviewHeader pagesMatrix={pagesMatrix.matrix} templateData={template} />
           {/* Resume Container */}
           <div
             className="bg-linear-to-b from-primary/8 to-primary/12 rounded p-(--resume-border) w-[calc(var(--resume-width)+var(--resume-border)*2)] min-h-[calc(var(--resume-height)+var(--resume-border)*2)]"
             style={
               {
-                "--resume-width": `${pageSizeMap[pageSize].w * scale}in`,
-                "--resume-height": `${((pageSizeMap[pageSize].h * scale) * pagesMatrix.length || 1)}in`,
+                "--resume-width": `${layoutMetrics.pageWidthPx * scale}px`,
+                "--resume-height": `${pagesMatrix.totalHeight * scale}px`,
                 "--resume-border": `${16 * scale}px`,
               } as React.CSSProperties
             }
@@ -378,21 +373,21 @@ function RouteComponent() {
               dbSections={template.sections}
               sections={sections}
               mode={mode}
-              pages={pagesMatrix}
+              pages={pagesMatrix.matrix}
               settings={{
-                pageSize: "letter",
-                scale: scale,
+                scale,
+                pageSize,
+                pagination,
                 pageGapPx: 16,
                 sectionControls: true,
-                pagination
               }}
               onConfigChange={(path, value) => updateProperty(path, value)}
               onSectionDimensionsChange={(sectionId, dimensions) => setSectionDimensions(sectionId, dimensions)}
             />
           </div>
         </div>
-
       </div>
+
     </div>
   );
 }

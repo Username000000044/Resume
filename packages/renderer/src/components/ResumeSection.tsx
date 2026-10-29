@@ -57,7 +57,7 @@ export const ResumeSection = ({ dbSection, section, defaultConfig, config, mode 
     };
 
     return (
-        <section className="relative pt-(--section-gap)" ref={targetRef}>
+        <section className="relative pt-(--section-gap) border-box" ref={targetRef}>
             {/* Section Gap Bar */}
             {mode === "editor" && (
                 <div className="absolute top-0 translate-y-0 w-full">

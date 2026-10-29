@@ -3,7 +3,7 @@ import type { SectionData } from "@resume/frontend/src/store/useResumeSectionsSt
 import type { Mode, ValueType } from "@resume/frontend/src/store/useResumeConfigStore";
 import { ResumeSection } from "./components/ResumeSection";
 import { ResumePage } from "./components/ResumePage";
-import { createContext, CSSProperties } from "react";
+import { createContext, CSSProperties, Ref } from "react";
 import { PageSize, pageSizeMap, scalePresetMap } from "./constants";
 import { ResumeHeader } from "./components/ResumeHeader";
 import { ConfigChangeContext } from "./context/ConfigChangeContext";
@@ -37,9 +37,9 @@ interface RenderEngineProps {
     onSectionDimensionsChange: (sectionId: string, dimensions: Dimensions) => void;
 }
 
-export const ResumeRenderEngine = (props: RenderEngineProps) => {
-    const { dbSections, sections, config, defaultConfig, pages, mode, onConfigChange, onSectionDimensionsChange } = props;
-    const { scale = 1, pageGapPx = 0, sectionControls = false, pagination = true, pageSize } = props.settings;
+export const ResumeRenderEngine = (engineProps: RenderEngineProps) => {
+    const { dbSections, sections, config, defaultConfig, pages, mode, onConfigChange, onSectionDimensionsChange } = engineProps;
+    const { scale = 1, pageGapPx = 0, sectionControls = false, pagination = true, pageSize } = engineProps.settings;
 
     const templateConfig = config.template;
 
@@ -89,9 +89,6 @@ export const ResumeRenderEngine = (props: RenderEngineProps) => {
         ["sectionId"]
     ]
     */
-
-    console.log(pages)
-
     return (
         <ConfigChangeContext value={onConfigChange}>
             <DimensionsChangeContext value={onSectionDimensionsChange}>
@@ -102,41 +99,10 @@ export const ResumeRenderEngine = (props: RenderEngineProps) => {
                         </ResumePageScaleWrapper>
                     )}
 
-                    {pagination ? (
-                        pages.map((page, pageNum) => (
-                            <ResumePageScaleWrapper pageSize={pageSize} scale={scale} key={`page-${pageNum}`}>
-                                <ResumePage hasContent={true} pagination={pagination}>
-                                    {page.map(sectionId => {
-                                        const dbSectionIdx = dbSections.findIndex(s => s.id === sectionId);
-                                        const dbSection = dbSections[dbSectionIdx];
-
-                                        if (!dbSection) return null;
-
-                                        if (dbSection.isHeader) return <ResumeHeader
-                                            section={sections[dbSection.id]}
-                                            dbSection={dbSection}
-                                            defaultConfig={defaultConfig}
-                                            config={config}
-                                            mode={mode}
-                                            key={sectionId}
-                                        />
-
-                                        return <ResumeSection
-                                            key={sectionId}
-                                            section={sections[dbSection.id]}
-                                            dbSection={dbSection}
-                                            defaultConfig={defaultConfig}
-                                            config={config}
-                                            mode={mode}
-                                        />
-                                    })}
-                                </ResumePage>
-                            </ResumePageScaleWrapper>
-                        ))
-                    ) : (
-                        <ResumePageScaleWrapper pageSize={pageSize} scale={scale}>
-                            <ResumePage hasContent={true} pagination={pagination}>
-                                {pages.flat().map((sectionId) => {
+                    {pages.map((page, pageNum) => (
+                        <ResumePageScaleWrapper pageSize={pageSize} scale={scale} key={`page-${pageNum}`} >
+                            <ResumePage hasContent={true} pagination={pagination} >
+                                {page.map(sectionId => {
                                     const dbSectionIdx = dbSections.findIndex(s => s.id === sectionId);
                                     const dbSection = dbSections[dbSectionIdx];
 
@@ -162,7 +128,7 @@ export const ResumeRenderEngine = (props: RenderEngineProps) => {
                                 })}
                             </ResumePage>
                         </ResumePageScaleWrapper>
-                    )}
+                    ))}
                 </div>
             </DimensionsChangeContext>
         </ConfigChangeContext>

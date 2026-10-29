@@ -9,9 +9,9 @@ import { ConfigData } from "@/ResumeRenderEngine";
 import { ResumeColorPicker } from "./ResumeColorPicker";
 import { Field, FieldLabel } from "./ui/field";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-import { FONT_VARIANTS } from "@resume/backend/src/db/schema.js";
 import { NumericScrubber } from "./ui/number-scrubber";
 import { FONT_WEIGHT_SCRUBBER } from "@/limits";
+import { FONT_VARIANTS } from "@resume/backend/src/db/constants.js";
 
 
 interface Item {

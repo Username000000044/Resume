@@ -8,11 +8,11 @@ import {
   SelectValue,
 } from "#/components/ui/select";
 import { useResumeConfigStore } from "#/store/useResumeConfigStore";
-import { FONTS_LIST } from "@resume/backend/src/db/schema.ts";
 import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
-import type { PRESET_MAP } from "../live_preview/LivePagePreview";
 import { cn } from "cn";
+import type { scalePresetMap } from "@resume/renderer/constants";
+import { FONTS_LIST } from "@resume/backend/src/db/constants.js";
 
 interface Item {
   label: string;
@@ -39,7 +39,7 @@ export const TypographyConfig = () => {
     config.template.theme.typography.secondary_font_family,
   );
 
-  type Preset = keyof typeof PRESET_MAP;
+  type Preset = keyof typeof scalePresetMap;
   const SpacingPresetElement = ({
     preset,
     gap,
@@ -57,7 +57,7 @@ export const TypographyConfig = () => {
       )}
       onClick={() =>
         updateProperty(
-          ["templateConfig", "theme", "typography", "preset"],
+          ["template", "theme", "typography", "preset"],
           preset,
         )
       }
@@ -68,18 +68,18 @@ export const TypographyConfig = () => {
   const SpacedBarsIcon = ({ gap }: { gap: number }) => (
     <ul
       aria-hidden="true"
-      className="space-y-[var(--bar-gap)]"
+      className="space-y-(--bar-gap)"
       style={{ "--bar-gap": `${gap}px` } as React.CSSProperties}
     >
-      <li className="w-[30px] h-[3px] bg-primary/50" />
-      <li className="w-[20px] h-[3px] bg-primary/50" />
-      <li className="w-[40px] h-[3px] bg-primary/50" />
+      <li className="w-7.5 h-0.75 bg-primary/50" />
+      <li className="w-5 h-0.75 bg-primary/50" />
+      <li className="w-10 h-0.75 bg-primary/50" />
     </ul>
   );
 
   return (
     <>
-      <Field className="gap-0">
+      <Field className="col-span-3 gap-0">
         <FieldLabel className="font-normal">Primary Font</FieldLabel>
         <Select
           items={items}
@@ -89,7 +89,7 @@ export const TypographyConfig = () => {
 
             setSelectedPrimaryFont(value);
             updateProperty(
-              ["templateConfig", "theme", "typography", "primary_font_family"],
+              ["template", "theme", "typography", "primary_font_family"],
               value,
             );
           }}
@@ -109,7 +109,7 @@ export const TypographyConfig = () => {
         </Select>
       </Field>
 
-      <Field className="gap-0">
+      <Field className="col-span-3 gap-0">
         <FieldLabel className="font-normal">Secondary Font</FieldLabel>
         <Select
           items={items}
@@ -120,7 +120,7 @@ export const TypographyConfig = () => {
             setSelectedSecondaryFont(value);
             updateProperty(
               [
-                "templateConfig",
+                "template",
                 "theme",
                 "typography",
                 "secondary_font_family",

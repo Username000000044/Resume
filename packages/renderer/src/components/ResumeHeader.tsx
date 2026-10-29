@@ -36,7 +36,7 @@ export const ResumeHeader = ({ dbSection, section, defaultConfig, config, mode }
     return (
         <section ref={targetRef}>
             {/* Header Content */}
-            <div className="flex flex-col gap-(--instance-gap)">
+            <div className="flex flex-col gap-(--instance-gap) border-box">
                 {section.subSections.map((subSection) => {
                     const matrix = constructLayoutMatrix(dbSection.fields);
 

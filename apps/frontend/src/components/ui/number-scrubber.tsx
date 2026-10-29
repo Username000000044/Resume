@@ -212,15 +212,15 @@ export const NumericScrubber = React.forwardRef<
   return (
     <div className="relative group w-full">
       <InputComponent
-          ref={ref}
-          type="number"
-          className={sharedClasses}
-          step={step}
-          value={value}
-          onChange={handleInputChange}
-          onPointerDown={handlePointerDown}
-          {...rest}
-        />
+        ref={ref}
+        type="number"
+        className={sharedClasses}
+        step={step}
+        value={value}
+        onChange={handleInputChange}
+        onPointerDown={handlePointerDown}
+        {...rest}
+      />
 
       {hasIcon && (
         <div

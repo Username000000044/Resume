@@ -187,8 +187,6 @@ export const BarScrubber = React.forwardRef<
         active:cursor-none 
         focus:outline-none
         text-center
-        focus:outline-none"
-
         w-full
         `,
         dimensionsClass,
