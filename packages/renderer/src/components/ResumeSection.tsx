@@ -11,6 +11,8 @@ import { useContext } from "react";
 import { ConfigChangeContext } from "@/context/ConfigChangeContext";
 import { constructLayoutMatrix } from "@/utils/constructLayoutMatrix";
 import { ResumeGroupWrapper } from "./ResumeGroupWrapper";
+import { DimensionsChangeContext } from "@/context/DimensionsChangeContext";
+import { useResizeObserver } from "@/hooks/useResizeObserver";
 
 interface SectionProps {
     dbSection: SectionType;
@@ -21,6 +23,11 @@ interface SectionProps {
 }
 
 export const ResumeSection = ({ dbSection, section, defaultConfig, config, mode }: SectionProps) => {
+    const setSectionDimensions = useContext(DimensionsChangeContext);
+
+    const { targetRef } = useResizeObserver((width, height) => {
+        setSectionDimensions(dbSection.id, { width, height })
+    })
 
     const hasSectionDivier = config.template.decorations.section_divider;
 
@@ -50,7 +57,7 @@ export const ResumeSection = ({ dbSection, section, defaultConfig, config, mode 
     };
 
     return (
-        <section className="relative pt-(--section-gap)">
+        <section className="relative pt-(--section-gap)" ref={targetRef}>
             {/* Section Gap Bar */}
             {mode === "editor" && (
                 <div className="absolute top-0 translate-y-0 w-full">
@@ -80,7 +87,7 @@ export const ResumeSection = ({ dbSection, section, defaultConfig, config, mode 
 
             {/* Section Content */}
             <div className="flex flex-col gap-(--instance-gap)">
-                {section.subSections.map((subSection, index) => {
+                {section.subSections.map((subSection) => {
                     const matrix = constructLayoutMatrix(dbSection.fields);
 
                     const isNotFirstSubSection = subSection.order !== 0;

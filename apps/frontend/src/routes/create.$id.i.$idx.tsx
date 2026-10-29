@@ -3,7 +3,7 @@ import {
   DEFAULT_RESUME_STORE_PERSIST_NAME,
   useResumeSectionsStore,
 } from "#/store/useResumeSectionsStore";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { EditorTabs } from "#/components/editor/data_form/EditorTabs";
 import {
   DEFAULT_RESUME_CONFIG_STORE_PERSIST_NAME,
@@ -61,7 +61,10 @@ function RouteComponent() {
   const { template, templateIdx } = Route.useLoaderData();
 
   // Stores
-  const sectionDimensions = useResumeDimensionsStore((store) => store.sectionDimensions);
+  const { sectionDimensions, setSectionDimensions } = useResumeDimensionsStore(useShallow((store) => ({
+    sectionDimensions: store.sectionDimensions,
+    setSectionDimensions: store.setSectionDimensions
+  })));
   const { sections, initializeSections, reorderSections } = useResumeSectionsStore(
     useShallow((store) => ({
       initializeSections: store.initializeSections,
@@ -208,11 +211,7 @@ function RouteComponent() {
   ]);
 
   const [containerWidth, setContainerWidth] = useState(0);
-
-  // Monitor ONLY the overall scrollbox layout column width to stay immune to page splitting variations
-  const { targetRef } = useResizeObserver((width) => {
-    setContainerWidth(width);
-  });
+  const { targetRef } = useResizeObserver((width) => setContainerWidth(width));
 
   const sectionIsEmpty = (dbSection: SectionType) => {
     const liveMainSection = sections[dbSection.id];
@@ -251,6 +250,7 @@ function RouteComponent() {
 
 
   const pageSize: PageSize = "letter";
+  const pagination = true;
 
   // Completed metrics calculation engine
   const layoutMetrics = useMemo(() => {
@@ -305,6 +305,9 @@ function RouteComponent() {
     );
   }, [sections, layoutMetrics.maxPageContentHeight, sectionDimensions, template.sections]);
 
+  const scale = Math.min(1,
+    containerWidth > 0 ? containerWidth / layoutMetrics.pageWidthPx : 1
+  );
 
   // Status Display
   if (!isSectionsPayloadReady || !isConfigPayloadReady) {
@@ -316,14 +319,15 @@ function RouteComponent() {
     )
   }
 
+
   return (
-    <div className="pt-12 overflow-x-hidden lg:py-24">
-      <div className="grid min-[93rem]:grid-cols-[1fr_auto] gap-12 2xl:gap-24 w-fit mx-auto">
+    <div className="pt-12 lg:py-24 h-full" ref={targetRef}>
+      <div className="grid lg:grid-cols-[1fr_auto] gap-12 2xl:gap-24 w-fit mx-auto">
         {/* Headless Font Loader */}
         <GlobalFontLoader />
 
         {/* Editor Column */}
-        <div className="flex flex-col w-full lg:px-0">
+        <div className="flex flex-col lg:px-0">
           <input
             type="text"
             name="templateName"
@@ -349,9 +353,19 @@ function RouteComponent() {
         </div>
 
         {/* Live Resume Column */}
-        <div className="flex flex-col mx-12 lg:m-0">
+        <div className="flex flex-col mx-12  min-w-0 lg:m-0">
           <PreviewHeader pagesMatrix={pagesMatrix} templateData={template} />
-          <div className="bg-linear-to-b from-primary/8 to-primary/12 p-4 rounded-4xlp">
+          {/* Resume Container */}
+          <div
+            className="bg-linear-to-b from-primary/8 to-primary/12 rounded p-(--resume-border) w-[calc(var(--resume-width)+var(--resume-border)*2)] min-h-[calc(var(--resume-height)+var(--resume-border)*2)]"
+            style={
+              {
+                "--resume-width": `${pageSizeMap[pageSize].w * scale}in`,
+                "--resume-height": `${((pageSizeMap[pageSize].h * scale) * pagesMatrix.length || 1)}in`,
+                "--resume-border": `${16 * scale}px`,
+              } as React.CSSProperties
+            }
+          >
             <ResumeRenderEngine
               config={{
                 template: { ...config.template },
@@ -363,14 +377,17 @@ function RouteComponent() {
               }}
               dbSections={template.sections}
               sections={sections}
-              pageSize="letter"
               mode={mode}
               pages={pagesMatrix}
-              scale={1}
-              sectionControls
-              onConfigChange={(path, value) => {
-                updateProperty(path, value);
+              settings={{
+                pageSize: "letter",
+                scale: scale,
+                pageGapPx: 16,
+                sectionControls: true,
+                pagination
               }}
+              onConfigChange={(path, value) => updateProperty(path, value)}
+              onSectionDimensionsChange={(sectionId, dimensions) => setSectionDimensions(sectionId, dimensions)}
             />
           </div>
         </div>

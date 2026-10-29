@@ -7,6 +7,10 @@ import { ResumeGroupWrapper } from "./ResumeGroupWrapper";
 import { Mode } from "@resume/frontend/src/store/useResumeConfigStore";
 import { getElementProperties } from "@/utils/getElementProperties";
 import { ResumeText } from "./ResumeText";
+import { useContext } from "react";
+import { DimensionsChangeContext } from "@/context/DimensionsChangeContext";
+import { useResizeObserver } from "@/hooks/useResizeObserver";
+import { ResumeDivider } from "./ResumeDivider";
 
 interface HeaderProps {
     dbSection: SectionType;
@@ -17,9 +21,21 @@ interface HeaderProps {
 }
 
 export const ResumeHeader = ({ dbSection, section, defaultConfig, config, mode }: HeaderProps) => {
+    const setSectionDimensions = useContext(DimensionsChangeContext);
+
+    const { targetRef } = useResizeObserver((width, height) => {
+        setSectionDimensions(dbSection.id, { width, height });
+    })
+
+    const hasHeaderDivider = config.template.decorations.header_divider;
+
+    const defaultDividerGap = defaultConfig.template.spacing.divider_gap;
+    const dividerGap = config.template.spacing.divider_gap;
+    const dividerStyle = config.template.decorations.divider_style;
 
     return (
-        <section>
+        <section ref={targetRef}>
+            {/* Header Content */}
             <div className="flex flex-col gap-(--instance-gap)">
                 {section.subSections.map((subSection) => {
                     const matrix = constructLayoutMatrix(dbSection.fields);
@@ -147,6 +163,9 @@ export const ResumeHeader = ({ dbSection, section, defaultConfig, config, mode }
                     );
                 })}
             </div>
+
+            {/* Section Divider */}
+            {hasHeaderDivider && <ResumeDivider dividerGap={dividerGap} defaultDividerGap={defaultDividerGap} dividerStyle={dividerStyle} mode={mode} />}
         </section>
     )
 }

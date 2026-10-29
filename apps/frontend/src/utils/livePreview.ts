@@ -92,7 +92,7 @@ export const constructPagesMatrix = (
 
 		const sectionGaps = sectionGap * (Object.values(sectionDimensions).length - 1);
 
-		if ((sectionHeight + sectionGaps + currentPageHeight) > maxPageHeight && currentPage.length > 0) {
+		if ((sectionHeight + currentPageHeight) > maxPageHeight && currentPage.length > 0) {
 			matrix.push(currentPage);
 			currentPage = [];
 			currentPageHeight = 0;

@@ -13,14 +13,14 @@ export const ResumePageScaleWrapper = ({ scale, pageSize, children }: WrapperPro
 
     return (
         <div style={{
-            width: pageWidth * scale,
-            height: pageHeight * scale,
+            width: `${pageWidth * scale}in`,
+            height: `${pageHeight * scale}in`,
             position: "relative",
             flexShrink: 0,
         }}>
             <div style={{
-                width: pageWidth,
-                height: pageHeight,
+                width: `${pageWidth}in`,
+                height: `${pageHeight}in`,
                 transform: `scale(${scale})`,
                 transformOrigin: "top left",
             }}>
