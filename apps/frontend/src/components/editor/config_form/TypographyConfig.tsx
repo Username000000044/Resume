@@ -79,7 +79,7 @@ export const TypographyConfig = () => {
 
   return (
     <>
-      <Field className="col-span-3 gap-0">
+      <Field className="gap-0">
         <FieldLabel className="font-normal">Primary Font</FieldLabel>
         <Select
           items={items}
@@ -109,7 +109,7 @@ export const TypographyConfig = () => {
         </Select>
       </Field>
 
-      <Field className="col-span-3 gap-0">
+      <Field className="gap-0">
         <FieldLabel className="font-normal">Secondary Font</FieldLabel>
         <Select
           items={items}

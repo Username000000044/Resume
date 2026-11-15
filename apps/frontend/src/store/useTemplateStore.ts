@@ -1,5 +1,5 @@
+import type { TemplateType } from "#/types/trpc";
 import { create } from "zustand";
-import type { TemplateType } from "#/types/template";
 
 interface TemplateState {
 	selectedTemplate?: TemplateType;

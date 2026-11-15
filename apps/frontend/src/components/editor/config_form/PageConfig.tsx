@@ -8,6 +8,7 @@ import { useShallow } from "zustand/react/shallow";
 import { useState } from "react";
 import { Toggle } from "#/components/ui/toggle";
 import { ChevronsLeftRightEllipsis } from "lucide-react";
+import { useResumePreferencesStore } from "#/store/useResumePreferencesStore";
 
 interface Item {
   label: string;
@@ -20,13 +21,18 @@ const pageSizes: Item[] = Object.keys(pageSizeMap).map((size) => ({
 }));
 
 export const PageConfig = () => {
-  const { pagination, pageSize, defaultPageMargin, updateProperty } = useResumeConfigStore(
+  const { pageSize, defaultPageMargin, updateProperty } = useResumeConfigStore(
     useShallow((store) => ({
       pageSize: store.config.template.pageSize,
-      pagination: store.config.template.pagination,
       defaultPageMargin: store.defaultConfig.template.spacing.page_margin,
       updateProperty: store.updateProperty,
     })),
+  );
+  const { pagination, updatePreference } = useResumePreferencesStore(
+    useShallow(state => ({
+      pagination: state.preferences.pagination,
+      updatePreference: state.updatePreference,
+    }))
   );
 
   const [selectedPageSize, setSelectedPageSize] = useState(pageSize);
@@ -34,7 +40,7 @@ export const PageConfig = () => {
 
   return (
     <>
-      <Field className="col-span-2 gap-0">
+      <Field className="gap-0">
         <FieldLabel className="font-normal">Page Margin</FieldLabel>
         <NumberScrubberInputItem
           hasIcon={true}
@@ -43,7 +49,7 @@ export const PageConfig = () => {
           config={{ step: PAGE_MARGIN_SCRUBBER.STEP, min: PAGE_MARGIN_SCRUBBER.MIN, max: PAGE_MARGIN_SCRUBBER.MAX }}
           defaultValue={defaultPageMargin} />
       </Field>
-      <Field className="col-span-2 gap-0">
+      <Field className="gap-0">
         <FieldLabel className="font-normal">Page Size</FieldLabel>
         <Select
           items={pageSizes}
@@ -69,25 +75,6 @@ export const PageConfig = () => {
           </SelectContent>
         </Select>
       </Field>
-      <div className="col-span-2 flex items-end justify-end">
-        {/* Header Toggle */}
-        <Toggle
-          className="aria-pressed:bg-input/50 font-normal cursor-pointer"
-          aria-label="Toggle Header Divider"
-          pressed={pagePagination}
-          onPressedChange={(pressed) => {
-            updateProperty(
-              ["template", "pagination"],
-              pressed,
-            );
-            setPagePagination(pressed);
-          }}
-
-        >
-          <ChevronsLeftRightEllipsis className="rotate-90" />
-        </Toggle>
-
-      </div >
     </>
   );
 };

@@ -10,6 +10,7 @@ import { ConfigChangeContext } from "./context/ConfigChangeContext";
 import { Dimensions } from "@resume/frontend/src/store/useResumeDimensionsStore";
 import { ResumePageScaleWrapper } from "./components/ResumePageScaleWrapper";
 import { DimensionsChangeContext } from "./context/DimensionsChangeContext";
+import { type Preferences } from "@resume/frontend/src/store/useResumePreferencesStore";
 
 
 export interface ConfigData {
@@ -35,6 +36,7 @@ interface RenderEngineProps {
     settings: Settings;
     onConfigChange: (path: string[], value: ValueType) => void;
     onSectionDimensionsChange: (sectionId: string, dimensions: Dimensions) => void;
+    onPreferenceChange: <K extends keyof Preferences>(preference: K, value: Preferences[K]) => void;
 }
 
 export const ResumeRenderEngine = (engineProps: RenderEngineProps) => {
@@ -89,11 +91,13 @@ export const ResumeRenderEngine = (engineProps: RenderEngineProps) => {
         ["sectionId"]
     ]
     */
+
+    console.log(pages);
     return (
         <ConfigChangeContext value={onConfigChange}>
             <DimensionsChangeContext value={onSectionDimensionsChange}>
                 <div style={pageStyles} className="flex flex-col gap-(--page-gap)">
-                    {pages.length === 0 && (
+                    {pages.flat().length === 0 && (
                         <ResumePageScaleWrapper pageSize={pageSize} scale={scale}>
                             <ResumePage hasContent={false} pagination={pagination} />
                         </ResumePageScaleWrapper>

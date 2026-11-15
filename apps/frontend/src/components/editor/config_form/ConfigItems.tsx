@@ -1,4 +1,4 @@
-import type { ComponentType } from "react";
+import { type ComponentType } from "react";
 import { ConfigCardItem } from "./ConfigCardItem";
 import { TypographyConfig } from "./TypographyConfig";
 import { DecorationsConfig } from "./DecorationsConfig";
@@ -16,6 +16,7 @@ import {
 } from "#/components/ui/dialog";
 import { useResumeConfigStore } from "#/store/useResumeConfigStore";
 import { PageConfig } from "./PageConfig";
+
 
 interface ConfigItem {
   id: string;
@@ -56,6 +57,7 @@ export const ConfigItems = () => {
 
   return (
     <div className="flex flex-col gap-4 min-w-full lg:w-120">
+      {/* Resuem Config */}
       {configItems
         .sort((a, b) => a.order - b.order)
         .map((configItem) => (

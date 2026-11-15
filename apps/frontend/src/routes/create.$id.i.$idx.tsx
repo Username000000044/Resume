@@ -17,11 +17,10 @@ import { PreviewHeader } from "#/components/editor/live_preview/PreviewHeader";
 import { ConfigItems } from "#/components/editor/config_form/ConfigItems";
 import { queryClient, trpc } from "#/utils/trpc";
 import { ResumeRenderEngine } from "@resume/renderer";
-
-
 import type { SectionType } from "#/types/trpc";
 import { constructPagesMatrix } from "#/utils/pagination";
-import { pageSizeMap, type PageSize } from "@resume/renderer/constants";
+import { pageSizeMap } from "@resume/renderer/constants";
+import { useResumePreferencesStore } from "#/store/useResumePreferencesStore";
 
 export const Route = createFileRoute("/create/$id/i/$idx")({
   beforeLoad: async ({ params }) => {
@@ -82,6 +81,12 @@ function RouteComponent() {
         updateProperty: store.updateProperty
       })),
     );
+  const { preferences, updatePreference } = useResumePreferencesStore(
+    useShallow((store) => ({
+      preferences: store.preferences,
+      updatePreference: store.updatePreference
+    }))
+  );
 
   const [isSectionsPayloadReady, setIsSectionsPayloadReady] = useState(false);
   const [isConfigPayloadReady, setIsConfigPayloadReady] = useState(false);
@@ -155,7 +160,6 @@ function RouteComponent() {
       await useResumeSectionsStore.persist.rehydrate();
     };
 
-    // Copied logic from handleSectionsInitialization
     const handleConfigInitialization = async () => {
       const persistName = useResumeConfigStore.persist.getOptions().name;
       const targetName = storageTargetName(template.id, templateIdx, "config");
@@ -245,7 +249,6 @@ function RouteComponent() {
   };
 
   const pageSize = config.template.pageSize ?? "letter";
-  const pagination = config.template.pagination;
   const scale = 1;
 
   // Completed metrics calculation engine
@@ -293,13 +296,13 @@ function RouteComponent() {
     }
 
     return constructPagesMatrix(
-      pagination,
+      preferences.pagination,
       layoutMetrics.pageHeightPx,
       layoutMetrics.pageMarginPx,
       sectionDimensions,
       visibleOrderedSectionIds,
     );
-  }, [sections, layoutMetrics.pageMarginPx, layoutMetrics.pageHeightPx, sectionDimensions, template.sections, pageSize, pagination]);
+  }, [sections, layoutMetrics.pageMarginPx, layoutMetrics.pageHeightPx, sectionDimensions, template.sections, pageSize, preferences.pagination]);
 
 
   // console.log(pagesMatrix.matrix);
@@ -348,7 +351,7 @@ function RouteComponent() {
         </div>
 
         {/* Live Resume Column */}
-        <div className="flex flex-col mx-12  min-w-0 lg:m-0">
+        <div className="flex flex-col mx-12 min-w-0 lg:m-0">
           <PreviewHeader pagesMatrix={pagesMatrix.matrix} templateData={template} />
           {/* Resume Container */}
           <div
@@ -377,11 +380,12 @@ function RouteComponent() {
               settings={{
                 scale,
                 pageSize,
-                pagination,
+                pagination: preferences.pagination,
                 pageGapPx: 16,
                 sectionControls: true,
               }}
               onConfigChange={(path, value) => updateProperty(path, value)}
+              onPreferenceChange={(preference, value) => updatePreference(preference, value)}
               onSectionDimensionsChange={(sectionId, dimensions) => setSectionDimensions(sectionId, dimensions)}
             />
           </div>

@@ -100,7 +100,7 @@ export const DecorationsConfig = () => {
       <LocalSeparator value="Bullets" />
 
       {/* Bullet Config */}
-      <Field className="col-span-2 gap-0">
+      <Field className="gap-0">
         <FieldLabel className="font-normal">Bullet Style</FieldLabel>
         <Select
           items={bulletItems}
@@ -130,7 +130,7 @@ export const DecorationsConfig = () => {
         </Select>
       </Field>
 
-      <Field className="col-span-2 gap-0">
+      <Field className="gap-0">
         <FieldLabel className="font-normal">Sub Bullet Style</FieldLabel>
         <Select
           items={bulletItems}
@@ -160,7 +160,7 @@ export const DecorationsConfig = () => {
         </Select>
       </Field>
 
-      <Field className="col-span-2 gap-0">
+      <Field className="col-span-full gap-0">
         <FieldLabel className="font-normal">Indentation</FieldLabel>
         <NumberScrubberInputItem
           hasIcon={true}
@@ -182,7 +182,7 @@ export const DecorationsConfig = () => {
         handleColorChange={handleColorChange}
         className=" absolute right-1 top-1/2 -translate-y-1/2 size-6 ring-0 rounded-lg " />
 
-      <Field className="gap-0 col-span-2">
+      <Field className="gap-0 col-span">
         <FieldLabel className="font-normal">Divider Style</FieldLabel>
         <Select
           items={dividerItems}
@@ -212,7 +212,7 @@ export const DecorationsConfig = () => {
         </Select>
       </Field>
 
-      <div className="col-span-2 flex items-end justify-end gap-1">
+      <div className="flex items-end justify-end gap-1">
         {/* Header Toggle */}
         <Toggle
           className="aria-pressed:bg-input/50 font-normal cursor-pointer"

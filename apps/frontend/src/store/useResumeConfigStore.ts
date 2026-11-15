@@ -11,9 +11,7 @@ interface DefaultConfig {
 
 export interface ConfigData {
 	templateName: string;
-	template: TemplateConfig & {
-		pagination: boolean;
-	}
+	template: TemplateConfig;
 	sections: Record<string, SectionConfig>; // uuid : config
 }
 
@@ -75,10 +73,7 @@ export const useResumeConfigStore = create<ResumeConfigStoreState>()(
 						if (!state.config.templateName) {
 							state.config = {
 								templateName,
-								template: {
-									...defaultConfig,
-									pagination: true,
-								},
+								template: defaultConfig,
 								sections: Object.fromEntries(
 									incomingSectionsConfig.map(({ id, config }) => [id, config])
 								),
@@ -99,7 +94,7 @@ export const useResumeConfigStore = create<ResumeConfigStoreState>()(
 
 				resetConfig: () =>
 					set((state) => {
-						state.config.template = { ...state.defaultConfig.template, pagination: true };
+						state.config.template = state.defaultConfig.template;
 						state.config.sections = state.defaultConfig.sections;
 					}),
 			})),

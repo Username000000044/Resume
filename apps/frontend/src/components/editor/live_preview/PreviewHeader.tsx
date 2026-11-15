@@ -3,15 +3,24 @@ import { Label } from "#/components/ui/label";
 import {
   Popover,
   PopoverContent,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
   PopoverTrigger,
 } from "#/components/ui/popover";
 import { Switch } from "#/components/ui/switch";
 import { useSaveStatusStore } from "#/store/uesSaveStatusStore";
 import { useResumeConfigStore } from "#/store/useResumeConfigStore";
-import { Download, Folder, FolderX, RefreshCcw } from "lucide-react";
+import { Box, ChevronsLeftRightEllipsis, Download, Folder, FolderX, LayersArrowDown, RefreshCcw, Settings, Settings2, SquareChevronDown } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
 import { DownloadResume } from "./ExportResume";
 import type { TemplateType } from "#/types/trpc";
+import { Field, FieldGroup, FieldLabel } from "#/components/ui/field";
+import { Checkbox } from "#/components/ui/checkbox";
+import { cn } from "#/lib/utils";
+import { Separator } from "#/components/ui/separator";
+import { useResumePreferencesStore } from "#/store/useResumePreferencesStore";
+import { useState } from "react";
 
 interface PreviewHeaderProps {
   pagesMatrix: string[][],
@@ -20,12 +29,20 @@ interface PreviewHeaderProps {
 
 export const PreviewHeader = ({ pagesMatrix, templateData }: PreviewHeaderProps) => {
   const status = useSaveStatusStore((store) => store.status);
+  const { pagination, updatePreference } = useResumePreferencesStore(
+    useShallow((store) => ({
+      pagination: store.preferences.pagination,
+      updatePreference: store.updatePreference
+    }))
+  )
   const { mode, setMode } = useResumeConfigStore(
     useShallow((state) => ({
       mode: state.mode,
       setMode: state.setMode,
     })),
   );
+
+  const [paginationState, setPaginationState] = useState(pagination);
 
 
   return (
@@ -94,6 +111,47 @@ export const PreviewHeader = ({ pagesMatrix, templateData }: PreviewHeaderProps)
             mode === "preview" ? setMode("editor") : setMode("preview")
           }
         />
+
+        <Popover>
+          <PopoverTrigger
+            render={
+              <Button
+                variant="ghost"
+                className="font-normal p-0 h-min hover:cursor-pointer hover:bg-transparent aria-expanded:bg-transparent"
+              >
+                <Settings2 size={16} aria-hidden="true" />
+              </Button>
+            }
+          >
+          </PopoverTrigger>
+          <PopoverContent className="gap-0" align="center">
+            <PopoverHeader className="mb-3">
+              <PopoverTitle>Preferences</PopoverTitle>
+            </PopoverHeader>
+
+            <div className="flex flex-col rounded-2xl overflow-clip gap-2">
+              <button
+                key={crypto.randomUUID()}
+                className={cn("flex items-center gap-4 h-full p-2 cursor-pointer w-full hover:bg-muted", {
+                  "bg-input/50 hover:bg-input/50": pagination,
+                })}
+                onClick={() => {
+                  updatePreference("pagination", paginationState);
+                  setPaginationState(!paginationState);
+                }}
+              >
+                <LayersArrowDown strokeWidth={1.5} />
+                <div className="text-left">
+                  <div className="flex items-center gap-2">
+                    <h2 className="font-medium">Pagination</h2>
+                  </div>
+                </div>
+              </button>
+
+            </div>
+
+          </PopoverContent>
+        </Popover>
       </div>
     </div>
   );
