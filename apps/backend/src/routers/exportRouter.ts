@@ -1,57 +1,89 @@
+import puppeteer from "@cloudflare/puppeteer";
 import { Hono } from "hono";
-import { renderToString } from "hono/jsx/dom/server";
-import path from "path";
+import { Env } from "../middleware/session";
+import z from "zod";
+import { PageSize, pageSizeMap } from "@resume/renderer/constants";
+import { zValidator } from "@hono/zod-validator";
 
-export const exportRouter = new Hono();
+const exportSchema = z.object({
+    config: z.any(),
+    defaultConfig: z.any(),
+    dbSections: z.any(),
+    sections: z.any(),
+    pagesMatrix: z.any(),
+    pageSize: z.enum(Object.keys(pageSizeMap) as [PageSize, ...PageSize[]]).default("letter"),
+});
 
-// async function generatePurgedTailwindCSS(htmlContent: string): Promise<string> {
+export const exportRouter = new Hono<Env>();
 
-//     const 
+exportRouter.post("/pdf", zValidator("json", exportSchema), async (c) => {
+    const sessionId = c.get("sessionId");
+    if (!sessionId) return c.json({ error: "Unauthorized: No Session" }, 401);
 
-//     const result = await postcss([
-//         tailwindcss({
-//             base,
-//             optimize,
-//             transformAssetUrls
-//         })
-//     ]).process(baseCSSInput, { from: undefined })
+    const payload = c.req.valid("json");
+    const frontendOrgin = new URL(c.env.FRONTEND_URL).origin;
 
+    // Domains Puppeteer is allowed t ofetch assets/fonts from
+    const ALLOWED_ORGINS = new Set([
+        frontendOrgin,
+    ]);
 
+    // Launch Cloudflare Browser
+    const browser = await puppeteer.launch(c.env.BROWSER);
 
-//     return null;
-// }
-
-exportRouter.get("/pdf", async (context) => {
     try {
-        const token = context.req.query("token");
-        if (!token) return context.text("Missing export transaction token",)
+        const page = await browser.newPage();
 
-        const decodedPayload = Buffer.from(token, "base64url").toString("utf-8");
-        const payloadData = JSON.parse(decodedPayload);
+        await page.setRequestInterception(true);
+        page.on("request", (req) => {
+            const url = req.url();
 
-        const cssPath = path.resolve(__dirname, "../../")
-        // Template
-        const componentHTML = renderToString("");
+            // Always allow data: and blob: (inline SVGs or base64 profile photos)
+            if (url.startsWith("data:") || url.startsWith("blob:")) {
+                return req.continue();
+            }
 
-        const fullHTMLDocument = `
-            <!DOCTYPE html>
-            <html lang="en">
-                <head>
-                    <meta charset="utf-8" />
-                    <style>
-                        body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-                        @page { size: letter; margin: 0; }
-                    </style>
-                </head>
-                <body>
-                    <div id="resume-document-root">${componentHTML}</div>
-                    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4" />
-                </body>
-            </html>
-        `
+            try {
+                const reqOrigin = new URL(url).origin;
+                if (ALLOWED_ORGINS.has(reqOrigin)) {
+                    req.continue();
+                }
+            } catch {
+                // Invalid URL --> abort
+            }
 
+            // Abort analytics, chat widgets, or any unauthorized domain immediately
+            return req.abort();
+        });
 
-    } catch {
+        // Inject resume JSON before page scripts run
+        await page.evaluateOnNewDocument((data) => {
+            (globalThis as Record<string, unknown>).__RESUME_PAYLOAD__ = data;
+        }, payload);
 
+        // Navigate & wait for fonts + JS bundle
+        await page.goto(`${c.env.FRONTEND_URL}/create/raw`, {
+            waitUntil: "networkidle0",
+            timeout: 15000,
+        });
+
+        // Ensure custom web fonts are fully painted before snapshotting
+        await page.evaluate(() => document.fonts.ready);
+
+        const pdf = await page.pdf({
+            format: payload.pageSize || "letter",
+            printBackground: true,
+            margin: { top: 0, right: 0, bottom: 0, left: 0 },
+        });
+
+        return new Response(new Uint8Array(pdf), {
+            headers: {
+                "Content-Type": "application/pdf",
+                "Content-Disposition": 'attachment; filename="resume.pdf"'
+            }
+        });
+    } finally {
+        // Always close the browser
+        await browser.close();
     }
-})
+});

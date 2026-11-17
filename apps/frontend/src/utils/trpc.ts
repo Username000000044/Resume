@@ -9,6 +9,9 @@ const trpcClient = createTRPCClient<AppRouter>({
 	links: [
 		httpBatchLink({
 			url: import.meta.env.VITE_TRPC_API_URL,
+			fetch(url, options) {
+				return fetch(url, { ...options, credentials: "include" })
+			}
 		}),
 	],
 });

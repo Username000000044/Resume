@@ -1,6 +1,11 @@
 import { Badge } from "#/components/ui/badge";
 import type { TemplateType } from "#/types/trpc";
 import { icons } from "lucide-react";
+import { useRef } from "react";
+import { ResumeRenderEngine } from "@resume/renderer";
+import { useResumeConfigStore } from "#/store/useResumeConfigStore";
+import { useResumeSectionsStore } from "#/store/useResumeSectionsStore";
+import { useResumePreferencesStore } from "#/store/useResumePreferencesStore";
 
 interface DownloadResumeProps {
     pagesMatrix: string[][];
@@ -14,8 +19,9 @@ interface DownloadOption {
     name: string;
     format: Format;
     description: string;
-    advised?: boolean;
     icon: keyof typeof icons;
+    advised?: boolean;
+    disabled?: boolean;
 }
 
 const downloadOptions: DownloadOption[] = [
@@ -24,12 +30,15 @@ const downloadOptions: DownloadOption[] = [
         description: "Best for sharing",
         format: "jpg",
         icon: "Image",
+        disabled: true,
+
     },
     {
         name: "PNG",
         description: "Best for sharing",
         format: "png",
         icon: "Image",
+        disabled: true,
     },
     {
         name: "PDF",
@@ -55,15 +64,49 @@ const downloadOptions: DownloadOption[] = [
         description: "Best for raw sharing",
         format: "json",
         icon: "CodeXml",
+        disabled: true,
     },
 ];
 
 export const DownloadResume = ({ pagesMatrix, templateData }: DownloadResumeProps) => {
-    templateData
-    // const config = useResumeConfigStore((store) => store.config);
-    // const sections = useResumeSectionsStore((store) => store.sections);
+    const config = useResumeConfigStore((store) => store.config);
+    const defaultConfig = useResumeConfigStore((store) => store.defaultConfig);
+    const sections = useResumeSectionsStore((store) => store.sections);
+    // const preferences = useResumePreferencesStore((store) => store.preferences);
 
-    // // const { mutateAsync, isPending } = useMutation(trpc.downloadResume.mutationOptions());
+
+    const exportResume = async (format: DownloadOption["format"]) => {
+        const BASE_URL = import.meta.env.BASE_URL;
+
+        if (format === "pdf") {
+            const res = await fetch(`/api/export/pdf`, {
+                method: "POST",
+                credentials: "include", // Sends the HttpOnly anon session cookie
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    config,
+                    defaultConfig,
+                    dbSections: templateData.sections,
+                    sections,
+                    pagesMatrix,
+                    pageSize: config.template.pageSize,
+                })
+            })
+
+            if (!res.ok) throw new Error("Failed to generate PDF");
+
+            // Download Resume
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "resume.pdf";
+            a.click();
+            URL.revokeObjectURL(url);
+
+            console.log("Downloaded Resume");
+        }
+    }
 
     // const formatFormat = (format: Format) => {
     //     switch (format) {
@@ -73,6 +116,7 @@ export const DownloadResume = ({ pagesMatrix, templateData }: DownloadResumeProp
     //         case "pdf": return "PDF Standard";
     //     }
     // }
+
 
     // const handleDownload = async (format: Format) => {
     //     const promise = mutateAsync({ sections, config, format });
@@ -87,13 +131,6 @@ export const DownloadResume = ({ pagesMatrix, templateData }: DownloadResumeProp
     //             case "jpg":
     //                 break;
     //             case "pdf":
-    //                 const pdfInstace = pdf(<ResumePDFTemplate sections={data.sections} config={data.config} pagesMatrix={pagesMatrix} templateData={templateData} />);
-    //                 const blob = await pdfInstace.toBlob();
-
-    //                 const formattedTemplateName = data.config.templateName.toLowerCase().replaceAll(" ", "_");
-    //                 const cleanFilename = `${formattedTemplateName}_standard.pdf`
-
-    //                 triggerFileDownload(blob, cleanFilename);
 
     //                 break;
     //             case "docx":
@@ -135,9 +172,9 @@ export const DownloadResume = ({ pagesMatrix, templateData }: DownloadResumeProp
         return (
             <button
                 key={crypto.randomUUID()}
-                className="flex items-center gap-4 h-full p-4 cursor-pointer hover:bg-muted"
-                onClick={() => null}
-                disabled={false}
+                className="flex items-center gap-4 h-full p-4 cursor-pointer hover:bg-muted disabled:cursor-not-allowed"
+                onClick={() => exportResume(downloadOption.format)}
+                disabled={downloadOption.disabled}
             >
                 <Icon strokeWidth={1.5} />
                 <div className="text-left">
@@ -153,5 +190,6 @@ export const DownloadResume = ({ pagesMatrix, templateData }: DownloadResumeProp
                 </div>
             </button>
         );
-    })
+    });
 }
+

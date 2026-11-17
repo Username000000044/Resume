@@ -34,19 +34,21 @@ interface RenderEngineProps {
     mode: Mode;
     pages: string[][];
     settings: Settings;
-    onConfigChange: (path: string[], value: ValueType) => void;
-    onSectionDimensionsChange: (sectionId: string, dimensions: Dimensions) => void;
-    onPreferenceChange: <K extends keyof Preferences>(preference: K, value: Preferences[K]) => void;
+    onConfigChange?: (path: string[], value: ValueType) => void;
+    onSectionDimensionsChange?: (sectionId: string, dimensions: Dimensions) => void;
+    onPreferenceChange?: <K extends keyof Preferences>(preference: K, value: Preferences[K]) => void;
 }
 
 export const ResumeRenderEngine = (engineProps: RenderEngineProps) => {
-    const { dbSections, sections, config, defaultConfig, pages, mode, onConfigChange, onSectionDimensionsChange } = engineProps;
+    const { dbSections, sections, config, defaultConfig, pages, mode, onConfigChange, onSectionDimensionsChange, onPreferenceChange } = engineProps;
     const { scale = 1, pageGapPx = 0, sectionControls = false, pagination = true, pageSize } = engineProps.settings;
 
     const templateConfig = config.template;
 
     const font_size_base = templateConfig.theme.typography.font_size_base;
     const font_scale_curve = scalePresetMap[templateConfig.theme.typography.preset].scale_curve;
+
+    if (!onConfigChange || !onSectionDimensionsChange) return;
 
     const pageStyles = {
         // Page
@@ -91,8 +93,6 @@ export const ResumeRenderEngine = (engineProps: RenderEngineProps) => {
         ["sectionId"]
     ]
     */
-
-    console.log(pages);
     return (
         <ConfigChangeContext value={onConfigChange}>
             <DimensionsChangeContext value={onSectionDimensionsChange}>

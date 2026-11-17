@@ -117,9 +117,9 @@ export const PreviewHeader = ({ pagesMatrix, templateData }: PreviewHeaderProps)
             render={
               <Button
                 variant="ghost"
-                className="font-normal p-0 h-min hover:cursor-pointer hover:bg-transparent aria-expanded:bg-transparent"
+                className="font-normal p-0 h-min hover:cursor-pointer aria-expanded:bg-transparent"
               >
-                <Settings2 size={16} aria-hidden="true" />
+                <Settings2 size={16} className="text-input" aria-hidden="true" />
               </Button>
             }
           >

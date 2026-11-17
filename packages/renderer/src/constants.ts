@@ -83,6 +83,7 @@ export const elementNameMap: Record<FieldElement, string> = {
 
 // Type Exports
 
+// Make sure page sizes match puppeteer (https://pptr.dev/api/puppeteer.paperformat)
 export const pageSizeMap = {
     // All measurements in IN
     "A4": { w: 8.27, h: 11.69 },

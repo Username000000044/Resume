@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CreateIdRouteImport } from './routes/create.$id'
+import { Route as CreateRawRouteImport } from './routes/create.raw'
 import { Route as CreateIdIIdxRouteImport } from './routes/create.$id.i.$idx'
 
 const IndexRoute = IndexRouteImport.update({
@@ -23,6 +24,11 @@ const CreateIdRoute = CreateIdRouteImport.update({
   path: '/create/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CreateRawRoute = CreateRawRouteImport.update({
+  id: '/create/raw',
+  path: '/create/raw',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CreateIdIIdxRoute = CreateIdIIdxRouteImport.update({
   id: '/i/$idx',
   path: '/i/$idx',
@@ -32,30 +38,34 @@ const CreateIdIIdxRoute = CreateIdIIdxRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/create/$id': typeof CreateIdRouteWithChildren
+  '/create/raw': typeof CreateRawRoute
   '/create/$id/i/$idx': typeof CreateIdIIdxRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/create/$id': typeof CreateIdRouteWithChildren
+  '/create/raw': typeof CreateRawRoute
   '/create/$id/i/$idx': typeof CreateIdIIdxRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/create/$id': typeof CreateIdRouteWithChildren
+  '/create/raw': typeof CreateRawRoute
   '/create/$id/i/$idx': typeof CreateIdIIdxRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/create/$id' | '/create/$id/i/$idx'
+  fullPaths: '/' | '/create/$id' | '/create/raw' | '/create/$id/i/$idx'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/create/$id' | '/create/$id/i/$idx'
-  id: '__root__' | '/' | '/create/$id' | '/create/$id/i/$idx'
+  to: '/' | '/create/$id' | '/create/raw' | '/create/$id/i/$idx'
+  id: '__root__' | '/' | '/create/$id' | '/create/raw' | '/create/$id/i/$idx'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CreateIdRoute: typeof CreateIdRouteWithChildren
+  CreateRawRoute: typeof CreateRawRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -72,6 +82,13 @@ declare module '@tanstack/react-router' {
       path: '/create/$id'
       fullPath: '/create/$id'
       preLoaderRoute: typeof CreateIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/create/raw': {
+      id: '/create/raw'
+      path: '/create/raw'
+      fullPath: '/create/raw'
+      preLoaderRoute: typeof CreateRawRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/create/$id/i/$idx': {
@@ -99,6 +116,7 @@ const CreateIdRouteWithChildren = CreateIdRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CreateIdRoute: CreateIdRouteWithChildren,
+  CreateRawRoute: CreateRawRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
