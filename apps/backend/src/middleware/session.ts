@@ -13,8 +13,7 @@ export type Env = {
 }
 
 export const anonymousSession = createMiddleware<Env>(async (c, next) => {
-    console.log("In middleware")
-    const COOKIE_NAME = "anonymous_resume_session";
+    const COOKIE_NAME = "anonymous_session";
     const secret = c.env.COOKIE_SECRET;
 
     // Try to read the existing signed cookie
@@ -31,7 +30,8 @@ export const anonymousSession = createMiddleware<Env>(async (c, next) => {
         await setSignedCookie(c, COOKIE_NAME, sessionId, secret, {
             httpOnly: true,
             secure: true,
-            sameSite: "Lax",
+            sameSite: "none",
+            // sameSite: "Lax",
             path: "/",
             maxAge: 60 * 60 * 24 * 30, // 30 days
         })

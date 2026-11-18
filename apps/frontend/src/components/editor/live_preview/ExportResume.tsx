@@ -79,11 +79,12 @@ export const DownloadResume = ({ pagesMatrix, templateData }: DownloadResumeProp
         const BASE_URL = import.meta.env.BASE_URL;
 
         if (format === "pdf") {
-            const res = await fetch(`/api/export/pdf`, {
+            const res = await fetch(`http://localhost:8787/api/export/pdf`, {
                 method: "POST",
                 credentials: "include", // Sends the HttpOnly anon session cookie
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
+                    templateName: config.templateName,
                     config,
                     defaultConfig,
                     dbSections: templateData.sections,

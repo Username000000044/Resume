@@ -6,6 +6,7 @@ import { PageSize, pageSizeMap } from "@resume/renderer/constants";
 import { zValidator } from "@hono/zod-validator";
 
 const exportSchema = z.object({
+    templateName: z.string(),
     config: z.any(),
     defaultConfig: z.any(),
     dbSections: z.any(),
@@ -46,7 +47,7 @@ exportRouter.post("/pdf", zValidator("json", exportSchema), async (c) => {
             try {
                 const reqOrigin = new URL(url).origin;
                 if (ALLOWED_ORGINS.has(reqOrigin)) {
-                    req.continue();
+                    return req.continue();
                 }
             } catch {
                 // Invalid URL --> abort
@@ -61,10 +62,15 @@ exportRouter.post("/pdf", zValidator("json", exportSchema), async (c) => {
             (globalThis as Record<string, unknown>).__RESUME_PAYLOAD__ = data;
         }, payload);
 
+
         // Navigate & wait for fonts + JS bundle
-        await page.goto(`${c.env.FRONTEND_URL}/create/raw`, {
-            waitUntil: "networkidle0",
-            timeout: 15000,
+        await page.goto(`http://localhost:3000/create/raw`, {
+            waitUntil: "networkidle2",
+            timeout: 30000,
+        });
+
+        await page.waitForSelector("[data-testid='resume-render-ready']", {
+            timeout: 10000,
         });
 
         // Ensure custom web fonts are fully painted before snapshotting
@@ -79,7 +85,7 @@ exportRouter.post("/pdf", zValidator("json", exportSchema), async (c) => {
         return new Response(new Uint8Array(pdf), {
             headers: {
                 "Content-Type": "application/pdf",
-                "Content-Disposition": 'attachment; filename="resume.pdf"'
+                "Content-Disposition": `attachment; filename=${payload.templateName}.pdf`
             }
         });
     } finally {

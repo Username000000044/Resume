@@ -11,6 +11,8 @@ import "@resume/renderer/styles.css";
 
 export const Route = createRootRoute({
   loader: async () => {
+    if (location.pathname === '/create/raw') return;
+
     const templateList = await queryClient.query(
       trpc.templatesList.queryOptions(),
     );

@@ -1,6 +1,8 @@
 import { ResumeRenderEngine } from '@resume/renderer';
 import { createFileRoute } from '@tanstack/react-router'
 
+import "@resume/renderer/styles.css";
+
 export const Route = createFileRoute('/create/raw')({
     component: RouteComponent,
 })
@@ -11,6 +13,8 @@ function RouteComponent() {
     if (!data) {
         return <div>No resume payload found.</div>
     }
+
+    // Payload info reached here
 
     return (
         <div className='m-0 p-0'>

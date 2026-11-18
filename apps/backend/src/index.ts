@@ -18,11 +18,13 @@ const corsMiddlewawre = cors({
 });
 
 // Enforce CORS rules across:
-app.use("*", anonymousSession);
 app.use("/trpc/*", corsMiddlewawre);
 app.use("/api/*", corsMiddlewawre);
 
-// Routers
+// Middleware
+app.use("*", anonymousSession);
+
+// tRPC Routers
 app.use("/trpc/*", trpcServer({
 	router: appRouter,
 	createContext: (_opts, c) => ({
@@ -31,6 +33,6 @@ app.use("/trpc/*", trpcServer({
 }));
 
 // Regular REST routes for Cloudflare Browser
-app.route("/api/export/", exportRouter);
+app.route("/api/export", exportRouter);
 
 export default app;
