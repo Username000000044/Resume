@@ -7,6 +7,8 @@ import { zValidator } from "@hono/zod-validator";
 
 const exportSchema = z.object({
     templateName: z.string(),
+    pagination: z.boolean(),
+
     config: z.any(),
     defaultConfig: z.any(),
     dbSections: z.any(),
@@ -69,23 +71,21 @@ exportRouter.post("/pdf", zValidator("json", exportSchema), async (c) => {
             timeout: 30000,
         });
 
-        await page.waitForSelector("[data-testid='resume-render-ready']", {
-            timeout: 10000,
-        });
-
         // Ensure custom web fonts are fully painted before snapshotting
         await page.evaluate(() => document.fonts.ready);
 
-        const pdf = await page.pdf({
+        let pdf = await page.pdf({
             format: payload.pageSize || "letter",
             printBackground: true,
             margin: { top: 0, right: 0, bottom: 0, left: 0 },
         });
 
+        const safeFileName = payload.templateName.replace(/[^a-zA-Z0-9-_ ]/g, "");
+
         return new Response(new Uint8Array(pdf), {
             headers: {
                 "Content-Type": "application/pdf",
-                "Content-Disposition": `attachment; filename=${payload.templateName}.pdf`
+                "Content-Disposition": `attachment; filename=${safeFileName || "resume"}.pdf`
             }
         });
     } finally {

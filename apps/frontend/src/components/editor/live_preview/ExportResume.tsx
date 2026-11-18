@@ -72,6 +72,7 @@ export const DownloadResume = ({ pagesMatrix, templateData }: DownloadResumeProp
     const config = useResumeConfigStore((store) => store.config);
     const defaultConfig = useResumeConfigStore((store) => store.defaultConfig);
     const sections = useResumeSectionsStore((store) => store.sections);
+    const pagination = useResumePreferencesStore((store) => store.preferences.pagination);
     // const preferences = useResumePreferencesStore((store) => store.preferences);
 
 
@@ -85,6 +86,8 @@ export const DownloadResume = ({ pagesMatrix, templateData }: DownloadResumeProp
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     templateName: config.templateName,
+                    pagination,
+
                     config,
                     defaultConfig,
                     dbSections: templateData.sections,

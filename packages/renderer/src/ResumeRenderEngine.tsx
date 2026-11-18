@@ -48,7 +48,7 @@ export const ResumeRenderEngine = (engineProps: RenderEngineProps) => {
     const font_size_base = templateConfig.theme.typography.font_size_base;
     const font_scale_curve = scalePresetMap[templateConfig.theme.typography.preset].scale_curve;
 
-    if (!onConfigChange || !onSectionDimensionsChange) return;
+    const noop = () => { };
 
     const pageStyles = {
         // Page
@@ -94,8 +94,8 @@ export const ResumeRenderEngine = (engineProps: RenderEngineProps) => {
     ]
     */
     return (
-        <ConfigChangeContext value={onConfigChange}>
-            <DimensionsChangeContext value={onSectionDimensionsChange}>
+        <ConfigChangeContext value={onConfigChange || noop}>
+            <DimensionsChangeContext value={onSectionDimensionsChange || noop}>
                 <div style={pageStyles} className="flex flex-col gap-(--page-gap)">
                     {pages.flat().length === 0 && (
                         <ResumePageScaleWrapper pageSize={pageSize} scale={scale}>
