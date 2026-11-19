@@ -32,7 +32,10 @@ interface RenderEngineProps {
     defaultConfig: ConfigData;
     config: ConfigData;
     mode: Mode;
-    pages: string[][];
+    pageMatrix: {
+        pages: string[][];
+        totalHeight: number;
+    }
     settings: Settings;
     onConfigChange?: (path: string[], value: ValueType) => void;
     onSectionDimensionsChange?: (sectionId: string, dimensions: Dimensions) => void;
@@ -40,7 +43,7 @@ interface RenderEngineProps {
 }
 
 export const ResumeRenderEngine = (engineProps: RenderEngineProps) => {
-    const { dbSections, sections, config, defaultConfig, pages, mode, onConfigChange, onSectionDimensionsChange, onPreferenceChange } = engineProps;
+    const { dbSections, sections, config, defaultConfig, pageMatrix, mode, onConfigChange, onSectionDimensionsChange, onPreferenceChange } = engineProps;
     const { scale = 1, pageGapPx = 0, sectionControls = false, pagination = true, pageSize } = engineProps.settings;
 
     const templateConfig = config.template;
@@ -97,13 +100,13 @@ export const ResumeRenderEngine = (engineProps: RenderEngineProps) => {
         <ConfigChangeContext value={onConfigChange || noop}>
             <DimensionsChangeContext value={onSectionDimensionsChange || noop}>
                 <div style={pageStyles} className="flex flex-col gap-(--page-gap)">
-                    {pages.flat().length === 0 && (
+                    {pageMatrix.pages.flat().length === 0 && (
                         <ResumePageScaleWrapper pageSize={pageSize} scale={scale}>
                             <ResumePage hasContent={false} pagination={pagination} />
                         </ResumePageScaleWrapper>
                     )}
 
-                    {pages.map((page, pageNum) => (
+                    {pageMatrix.pages.map((page, pageNum) => (
                         <ResumePageScaleWrapper pageSize={pageSize} scale={scale} key={`page-${pageNum}`} >
                             <ResumePage hasContent={true} pagination={pagination} >
                                 {page.map(sectionId => {

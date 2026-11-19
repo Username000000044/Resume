@@ -1,95 +1,112 @@
-import puppeteer from "@cloudflare/puppeteer";
 import { Hono } from "hono";
 import { Env } from "../middleware/session";
 import z from "zod";
 import { PageSize, pageSizeMap } from "@resume/renderer/constants";
 import { zValidator } from "@hono/zod-validator";
+import { createDownloadResponse, withRenderedPage } from "../helpers/export";
+import { requireSession } from "../middleware/requireSession";
 
-const exportSchema = z.object({
+export const exportRouter = new Hono<Env>();
+exportRouter.use("/api/export/*", requireSession);
+
+export type ExportExtentions = "pdf" | "png" | "jpeg";
+export const exportSchema = z.object({
     templateName: z.string(),
     pagination: z.boolean(),
+    pagesMatrix: z.any(),
 
     config: z.any(),
     defaultConfig: z.any(),
     dbSections: z.any(),
     sections: z.any(),
-    pagesMatrix: z.any(),
     pageSize: z.enum(Object.keys(pageSizeMap) as [PageSize, ...PageSize[]]).default("letter"),
 });
 
-export const exportRouter = new Hono<Env>();
-
 exportRouter.post("/pdf", zValidator("json", exportSchema), async (c) => {
-    const sessionId = c.get("sessionId");
-    if (!sessionId) return c.json({ error: "Unauthorized: No Session" }, 401);
-
     const payload = c.req.valid("json");
-    const frontendOrgin = new URL(c.env.FRONTEND_URL).origin;
 
-    // Domains Puppeteer is allowed t ofetch assets/fonts from
-    const ALLOWED_ORGINS = new Set([
-        frontendOrgin,
-    ]);
-
-    // Launch Cloudflare Browser
-    const browser = await puppeteer.launch(c.env.BROWSER);
-
-    try {
-        const page = await browser.newPage();
-
-        await page.setRequestInterception(true);
-        page.on("request", (req) => {
-            const url = req.url();
-
-            // Always allow data: and blob: (inline SVGs or base64 profile photos)
-            if (url.startsWith("data:") || url.startsWith("blob:")) {
-                return req.continue();
+    const pdf = await withRenderedPage({
+        browserBinding: c.env.BROWSER,
+        frontendURL: c.env.FRONTEND_URL,
+        payload,
+    },
+        async (page) => {
+            if (payload.pagination) {
+                return await page.pdf({
+                    format: payload.pageSize || "letter",
+                    printBackground: true,
+                    margin: { top: 0, right: 0, bottom: 0, left: 0 },
+                });
             }
 
-            try {
-                const reqOrigin = new URL(url).origin;
-                if (ALLOWED_ORGINS.has(reqOrigin)) {
-                    return req.continue();
-                }
-            } catch {
-                // Invalid URL --> abort
-            }
+            return await page.pdf({
+                pageRanges: "1",
+                width: `${pageSizeMap[payload.pageSize].w}in`,
+                height: `${Math.ceil(Number(payload.pagesMatrix.totalHeight))}px`,
+                printBackground: true,
+                margin: { top: 0, right: 0, bottom: 0, left: 0 },
+            });
+        }
+    );
 
-            // Abort analytics, chat widgets, or any unauthorized domain immediately
-            return req.abort();
-        });
-
-        // Inject resume JSON before page scripts run
-        await page.evaluateOnNewDocument((data) => {
-            (globalThis as Record<string, unknown>).__RESUME_PAYLOAD__ = data;
-        }, payload);
-
-
-        // Navigate & wait for fonts + JS bundle
-        await page.goto(`http://localhost:3000/create/raw`, {
-            waitUntil: "networkidle2",
-            timeout: 30000,
-        });
-
-        // Ensure custom web fonts are fully painted before snapshotting
-        await page.evaluate(() => document.fonts.ready);
-
-        let pdf = await page.pdf({
-            format: payload.pageSize || "letter",
-            printBackground: true,
-            margin: { top: 0, right: 0, bottom: 0, left: 0 },
-        });
-
-        const safeFileName = payload.templateName.replace(/[^a-zA-Z0-9-_ ]/g, "");
-
-        return new Response(new Uint8Array(pdf), {
-            headers: {
-                "Content-Type": "application/pdf",
-                "Content-Disposition": `attachment; filename=${safeFileName || "resume"}.pdf`
-            }
-        });
-    } finally {
-        // Always close the browser
-        await browser.close();
-    }
+    return createDownloadResponse(
+        new Uint8Array(pdf),
+        payload.templateName,
+        "pdf",
+        "application/pdf"
+    );
 });
+
+exportRouter.post("/png", zValidator("json", exportSchema), async (c) => {
+    const payload = c.req.valid("json");
+
+    const png = await withRenderedPage({
+        browserBinding: c.env.BROWSER,
+        frontendURL: c.env.FRONTEND_URL,
+        payload,
+    },
+        async (page) => {
+            await page.setViewport({
+                width: Math.round(pageSizeMap[payload.pageSize].w * 96),
+                height: Math.ceil(Number(payload.pagesMatrix.totalHeight)),
+                deviceScaleFactor: 2,
+            });
+            return page.screenshot({ type: "png", fullPage: true })
+        }
+    );
+
+    return createDownloadResponse(
+        new Uint8Array(png),
+        payload.templateName,
+        "png",
+        "image/png"
+    );
+});
+
+exportRouter.post("/jpeg", zValidator("json", exportSchema), async (c) => {
+    const payload = c.req.valid("json");
+
+    const jpeg = await withRenderedPage({
+        browserBinding: c.env.BROWSER,
+        frontendURL: c.env.FRONTEND_URL,
+        payload,
+    },
+        async (page) => {
+            await page.setViewport({
+                width: Math.round(pageSizeMap[payload.pageSize].w * 96),
+                height: Math.ceil(Number(payload.pagesMatrix.totalHeight)),
+                deviceScaleFactor: 2,
+            });
+            return page.screenshot({ type: "jpeg", quality: 90, fullPage: true })
+        }
+    );
+
+    return createDownloadResponse(
+        new Uint8Array(jpeg),
+        payload.templateName,
+        "jpeg",
+        "image/jpeg"
+    );
+});
+
+

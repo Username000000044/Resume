@@ -23,7 +23,10 @@ import { useResumePreferencesStore } from "#/store/useResumePreferencesStore";
 import { useState } from "react";
 
 interface PreviewHeaderProps {
-  pagesMatrix: string[][],
+  pagesMatrix: {
+    matrix: string[][];
+    totalHeight: number;
+  },
   templateData: TemplateType,
 }
 
@@ -142,8 +145,9 @@ export const PreviewHeader = ({ pagesMatrix, templateData }: PreviewHeaderProps)
               >
                 <LayersArrowDown strokeWidth={1.5} />
                 <div className="text-left">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col justify-center gap-x-2">
                     <h2 className="font-medium">Pagination</h2>
+                    <p className="text-sm text-muted-foreground">Page content wrapping</p>
                   </div>
                 </div>
               </button>

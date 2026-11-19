@@ -352,7 +352,7 @@ function RouteComponent() {
 
         {/* Live Resume Column */}
         <div className="flex flex-col mx-12 min-w-0 lg:m-0">
-          <PreviewHeader pagesMatrix={pagesMatrix.matrix} templateData={template} />
+          <PreviewHeader pagesMatrix={pagesMatrix} templateData={template} />
           {/* Resume Container */}
           <div
             className="bg-linear-to-b from-primary/8 to-primary/12 rounded p-(--resume-border) w-[calc(var(--resume-width)+var(--resume-border)*2)] min-h-[calc(var(--resume-height)+var(--resume-border)*2)]"
@@ -376,7 +376,10 @@ function RouteComponent() {
               dbSections={template.sections}
               sections={sections}
               mode={mode}
-              pages={pagesMatrix.matrix}
+              pageMatrix={{
+                pages: pagesMatrix.matrix,
+                totalHeight: pagesMatrix.totalHeight
+              }}
               settings={{
                 scale,
                 pageSize,

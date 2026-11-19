@@ -8,11 +8,14 @@ import { useResumeSectionsStore } from "#/store/useResumeSectionsStore";
 import { useResumePreferencesStore } from "#/store/useResumePreferencesStore";
 
 interface DownloadResumeProps {
-    pagesMatrix: string[][];
+    pagesMatrix: {
+        matrix: string[][];
+        totalHeight: number;
+    },
     templateData: TemplateType;
 }
 
-const formats = ["jpg", "png", "pdf", "docx", "json"] as const;
+const formats = ["jpeg", "png", "pdf", "docx", "json"] as const;
 type Format = typeof formats[number];
 
 interface DownloadOption {
@@ -26,11 +29,10 @@ interface DownloadOption {
 
 const downloadOptions: DownloadOption[] = [
     {
-        name: "JPG",
+        name: "JPEG",
         description: "Best for sharing",
-        format: "jpg",
+        format: "jpeg",
         icon: "Image",
-        disabled: true,
 
     },
     {
@@ -38,7 +40,6 @@ const downloadOptions: DownloadOption[] = [
         description: "Best for sharing",
         format: "png",
         icon: "Image",
-        disabled: true,
     },
     {
         name: "PDF",
@@ -47,12 +48,6 @@ const downloadOptions: DownloadOption[] = [
         format: "pdf",
         advised: true,
     },
-    // {
-    //     name: "PDF Print",
-    //     description: "Best for printing",
-    //     format: "pdf-p",
-    //     icon: "FileText",
-    // },
     // {
     //     name: "DOCX",
     //     description: "Best for enterprise sharing",
@@ -79,37 +74,37 @@ export const DownloadResume = ({ pagesMatrix, templateData }: DownloadResumeProp
     const exportResume = async (format: DownloadOption["format"]) => {
         const BASE_URL = import.meta.env.BASE_URL;
 
-        if (format === "pdf") {
-            const res = await fetch(`http://localhost:8787/api/export/pdf`, {
-                method: "POST",
-                credentials: "include", // Sends the HttpOnly anon session cookie
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    templateName: config.templateName,
-                    pagination,
+        const safeTemplateName = config.templateName.replace(/[^a-zA-Z0-9-_ ]/g, "").trim() || "resume";
+        const res = await fetch(`http://localhost:8787/api/export/${format}`, {
+            method: "POST",
+            credentials: "include", // Sends the HttpOnly anon session cookie
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                templateName: safeTemplateName,
+                pagination,
 
-                    config,
-                    defaultConfig,
-                    dbSections: templateData.sections,
-                    sections,
-                    pagesMatrix,
-                    pageSize: config.template.pageSize,
-                })
+                config,
+                defaultConfig,
+                dbSections: templateData.sections,
+                sections,
+                pagesMatrix,
+                pageSize: config.template.pageSize,
             })
+        })
 
-            if (!res.ok) throw new Error("Failed to generate PDF");
+        if (!res.ok) throw new Error("Failed to generate PDF");
 
-            // Download Resume
-            const blob = await res.blob();
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "resume.pdf";
-            a.click();
-            URL.revokeObjectURL(url);
+        // Download Resume
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
 
-            console.log("Downloaded Resume");
-        }
+        const safeFileName = a.download = `${safeTemplateName}.${format}`;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        console.log("Downloaded Resume");
     }
 
     // const formatFormat = (format: Format) => {

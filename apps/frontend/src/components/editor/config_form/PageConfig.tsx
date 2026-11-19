@@ -28,15 +28,8 @@ export const PageConfig = () => {
       updateProperty: store.updateProperty,
     })),
   );
-  const { pagination, updatePreference } = useResumePreferencesStore(
-    useShallow(state => ({
-      pagination: state.preferences.pagination,
-      updatePreference: state.updatePreference,
-    }))
-  );
 
   const [selectedPageSize, setSelectedPageSize] = useState(pageSize);
-  const [pagePagination, setPagePagination] = useState(pagination);
 
   return (
     <>

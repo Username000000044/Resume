@@ -21,7 +21,10 @@ function RouteComponent() {
             dbSections={data.dbSections}
             sections={data.sections}
             mode="preview"
-            pages={data.pagesMatrix}
+            pageMatrix={{
+                pages: data.pagesMatrix.matrix,
+                totalHeight: data.pagesMatrix.totalHeight
+            }}
             settings={{
                 scale: 1,
                 pageSize: data.pageSize,

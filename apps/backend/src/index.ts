@@ -5,6 +5,7 @@ import { cors } from "hono/cors";
 import { exportRouter } from "./routers/exportRouter";
 import { anonymousSession } from "./middleware/session";
 import { deleteCookie } from "hono/cookie";
+import { requireSession } from "./middleware/requireSession";
 
 const app = new Hono();
 
