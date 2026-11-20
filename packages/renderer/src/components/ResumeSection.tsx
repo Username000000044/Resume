@@ -223,7 +223,7 @@ export const ResumeSection = ({ dbSection, section, defaultConfig, config, mode 
                             ))}
 
                             {/* Section Bullets */}
-                            <ul className="list-(--bullet-style) text-(--bullet-color) font-(--bullet-weight) pl-(--bullet-indentation) list-inside">
+                            <ul className="list-(--bullet-style) text-(--bullet-color) font-(--bullet-weight) pl-[calc(var(--bullet-indentation)+1rem)] list-outside">
                                 {subSection.bullets.map((bullet) => (
                                     <span key={bullet.id}>
                                         <ResumeText
@@ -236,7 +236,7 @@ export const ResumeSection = ({ dbSection, section, defaultConfig, config, mode 
                                         />
 
                                         {/* Bullet's Sub Bullets */}
-                                        <ul className="flex flex-col items-start list-(--sub-bullet-style) pl-(--bullet-indentation) list-inside">
+                                        <ul className="list-(--sub-bullet-style) pl-(--bullet-indentation) list-outside">
                                             {bullet.subBullets.map((subBullet) => (
                                                 <ResumeText
                                                     key={subBullet.id}

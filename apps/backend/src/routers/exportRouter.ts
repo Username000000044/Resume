@@ -9,17 +9,20 @@ import { requireSession } from "../middleware/requireSession";
 export const exportRouter = new Hono<Env>();
 exportRouter.use("/api/export/*", requireSession);
 
-export type ExportExtentions = "pdf" | "png" | "jpeg";
+export type ExportExtentions = "pdf" | "png" | "jpeg" | "json";
 export const exportSchema = z.object({
+    templateId: z.string(),
     templateName: z.string(),
+
     pagination: z.boolean(),
+    pageSize: z.enum(Object.keys(pageSizeMap) as [PageSize, ...PageSize[]]).default("letter"),
     pagesMatrix: z.any(),
 
     config: z.any(),
     defaultConfig: z.any(),
     dbSections: z.any(),
     sections: z.any(),
-    pageSize: z.enum(Object.keys(pageSizeMap) as [PageSize, ...PageSize[]]).default("letter"),
+    preferences: z.any(),
 });
 
 exportRouter.post("/pdf", zValidator("json", exportSchema), async (c) => {
@@ -109,4 +112,25 @@ exportRouter.post("/jpeg", zValidator("json", exportSchema), async (c) => {
     );
 });
 
+exportRouter.post("/json", zValidator("json", exportSchema), async (c) => {
+    const payload = c.req.valid("json");
+
+    const data = {
+        templateId: payload.templateId,
+        sections: payload.sections,
+        config: payload.config,
+        preferences: payload.preferences,
+    }
+
+    const jsonString = JSON.stringify(data);
+    const body = new TextEncoder().encode(jsonString);
+
+
+    return createDownloadResponse(
+        body,
+        payload.templateName,
+        "json",
+        "application/json"
+    );
+});
 

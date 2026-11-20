@@ -304,9 +304,6 @@ function RouteComponent() {
     );
   }, [sections, layoutMetrics.pageMarginPx, layoutMetrics.pageHeightPx, sectionDimensions, template.sections, pageSize, preferences.pagination]);
 
-
-  // console.log(pagesMatrix.matrix);
-
   // Status Display
   if (!isSectionsPayloadReady || !isConfigPayloadReady) {
     return (

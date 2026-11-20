@@ -17,8 +17,8 @@ export const ResumePage = ({ hasContent, pagination, className, children, ...pro
         <TooltipProvider>
             <div
                 className={cn("w-(--page-width) text-(length:--font-size-base) p-(--page-margin) bg-white wrap-anywhere", {
-                    "min-h-(--page-height)": !pagination,
                     "h-(--page-height)": pagination,
+                    "h-(--total-height)": !pagination
                 }, className)}
                 {...props}
             >

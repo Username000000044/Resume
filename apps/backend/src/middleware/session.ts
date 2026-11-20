@@ -19,12 +19,8 @@ export const anonymousSession = createMiddleware<Env>(async (c, next) => {
     // Try to read the existing signed cookie
     let sessionId = await getSignedCookie(c, secret, COOKIE_NAME);
 
-    console.log(sessionId);
-
     // If no cookie or tampered with, generate a new one
     if (!sessionId) {
-        console.log("No cookie")
-
         sessionId = crypto.randomUUID();
 
         await setSignedCookie(c, COOKIE_NAME, sessionId, secret, {

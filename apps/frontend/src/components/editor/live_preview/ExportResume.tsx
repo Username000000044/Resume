@@ -1,11 +1,10 @@
 import { Badge } from "#/components/ui/badge";
 import type { TemplateType } from "#/types/trpc";
 import { icons } from "lucide-react";
-import { useRef } from "react";
-import { ResumeRenderEngine } from "@resume/renderer";
 import { useResumeConfigStore } from "#/store/useResumeConfigStore";
 import { useResumeSectionsStore } from "#/store/useResumeSectionsStore";
 import { useResumePreferencesStore } from "#/store/useResumePreferencesStore";
+import { toast } from "#/components/ui/toast";
 
 interface DownloadResumeProps {
     pagesMatrix: {
@@ -15,7 +14,7 @@ interface DownloadResumeProps {
     templateData: TemplateType;
 }
 
-const formats = ["jpeg", "png", "pdf", "docx", "json"] as const;
+const formats = ["jpeg", "png", "pdf", "json"] as const;
 type Format = typeof formats[number];
 
 interface DownloadOption {
@@ -59,7 +58,6 @@ const downloadOptions: DownloadOption[] = [
         description: "Best for raw sharing",
         format: "json",
         icon: "CodeXml",
-        disabled: true,
     },
 ];
 
@@ -68,53 +66,81 @@ export const DownloadResume = ({ pagesMatrix, templateData }: DownloadResumeProp
     const defaultConfig = useResumeConfigStore((store) => store.defaultConfig);
     const sections = useResumeSectionsStore((store) => store.sections);
     const pagination = useResumePreferencesStore((store) => store.preferences.pagination);
-    // const preferences = useResumePreferencesStore((store) => store.preferences);
+    const preferences = useResumePreferencesStore((store) => store.preferences);
 
 
     const exportResume = async (format: DownloadOption["format"]) => {
-        const BASE_URL = import.meta.env.BASE_URL;
+        const formatFormat = (format: Format) => {
+            switch (format) {
+                case "jpeg": return "JPEG";
+                case "png": return "PNG";
+                case "json": return "JSON";
+                case "pdf": return "PDF Standard";
+            }
+        }
 
         const safeTemplateName = config.templateName.replace(/[^a-zA-Z0-9-_ ]/g, "").trim() || "resume";
+
+        const toastId = toast.add({
+            type: "info",
+            title: (<span><span className="font-bold">{formatFormat(format)}</span> - {safeTemplateName}</span>),
+            description: (
+                <span>If your download hasn't started, {" "}
+                    <a
+                        className="underline text-primary cursor-pointer"
+                        onClick={() => exportResume(format)}>
+                        click here
+                    </a>
+                </span>),
+        });
+
         const res = await fetch(`http://localhost:8787/api/export/${format}`, {
             method: "POST",
             credentials: "include", // Sends the HttpOnly anon session cookie
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
+                templateId: templateData.id,
                 templateName: safeTemplateName,
+
                 pagination,
+                pageSize: config.template.pageSize,
+                pagesMatrix,
 
                 config,
                 defaultConfig,
                 dbSections: templateData.sections,
                 sections,
-                pagesMatrix,
-                pageSize: config.template.pageSize,
+                preferences,
             })
-        })
+        });
 
-        if (!res.ok) throw new Error("Failed to generate PDF");
+        if (!res.ok) {
+            toast.update(toastId, (prevToast) => ({
+                type: "error",
+                title: (<span className="font-bold"><span className="font-bold">{formatFormat(format)}</span> - {safeTemplateName}</span>),
+                description: (
+                    <span>Download failed, try again in a few seconds. </span>
+                ),
+            }));
+
+            throw new Error("Failed to generate PDF");
+        }
+
+
+        toast.update(toastId, (prevToast) => ({
+            type: "success"
+        }));
 
         // Download Resume
         const blob = await res.blob();
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-
-        const safeFileName = a.download = `${safeTemplateName}.${format}`;
+        a.download = `${safeTemplateName}.${format}`;
         a.click();
         URL.revokeObjectURL(url);
-
-        console.log("Downloaded Resume");
     }
 
-    // const formatFormat = (format: Format) => {
-    //     switch (format) {
-    //         case "jpg": return "JPG";
-    //         case "png": return "PNG";
-    //         case "docx": return "DOCX";
-    //         case "pdf": return "PDF Standard";
-    //     }
-    // }
 
 
     // const handleDownload = async (format: Format) => {
@@ -140,25 +166,7 @@ export const DownloadResume = ({ pagesMatrix, templateData }: DownloadResumeProp
     //         }
 
     //         // Toast Promise
-    //         toast.promise(promise,
-    //             {
-    //                 loading: "Preparing download...",
-    //                 success: (data) => ({
-    //                     type: undefined,
-    //                     title: (<span><span className="font-bold">{formatFormat(data.format)}</span> - {data.config.templateName}</span>),
-    //                     description: (
-    //                         <span>If your download hasn't started, {" "}
-    //                             <a
-    //                                 className="underline text-primary cursor-pointer"
-    //                                 onClick={() => handleDownload(format)}>
-    //                                 click here
-    //                             </a>
-    //                         </span>),
-
-    //                 }),
-    //                 error: "Could not download resume.",
-    //             }
-    //         )
+    //         
     //     } catch (error) {
     //         console.error("Resume download error: ", error);
     //     }
