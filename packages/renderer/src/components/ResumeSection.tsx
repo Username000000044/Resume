@@ -236,7 +236,7 @@ export const ResumeSection = ({ dbSection, section, defaultConfig, config, mode 
                                         />
 
                                         {/* Bullet's Sub Bullets */}
-                                        <ul className="list-(--sub-bullet-style) pl-(--bullet-indentation) list-outside">
+                                        <ul className="list-(--sub-bullet-style) pl-[calc(var(--bullet-indentation)+1rem)] list-outside">
                                             {bullet.subBullets.map((subBullet) => (
                                                 <ResumeText
                                                     key={subBullet.id}
